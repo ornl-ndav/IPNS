@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.10  2000/03/09 19:30:30  hammonds
+ * Small change to fix the monitor times in older, focused runs.
+ *
  * Revision 5.9  2000/02/26 18:20:36  hammonds
  * Changed Get1DSpectum to not change byte order for Version >= 5
  *
@@ -258,7 +261,14 @@ public class Runfile implements Cloneable {
 	float data[];
 	data = runFile.Get1DSpectrum(1, 1);
 	float[]  energies = runFile.TimeChannelBoundaries( 100, 1);
-	
+
+	float[] time = runFile.TimeChannelBoundaries( 1, 1 );
+	System.out.println( "Mon 1: " + time[0]);
+	time = runFile.TimeChannelBoundaries( 2, 1 );
+	System.out.println( "Mon 2: " + time[0]);
+	time = runFile.TimeChannelBoundaries( 17, 1 );
+	System.out.println( "Det 17: " + time[0]);
+
 	for (i = runFile.MinSubgroupID(1); i <= runFile.MaxSubgroupID(runFile.NumOfHistograms())
 		 ; i++){
 	    System.out.print( i + " - ");
@@ -1726,7 +1736,9 @@ public class Runfile implements Cloneable {
 	    if ( timeField[tfType].timeFocusBit == 0 ) {  //Det not focused
 		if ( header.versionNumber < 5 ) {
 		    us_correction = - (float)(header.hardTimeDelay * 
-					      header.standardClock) + timeToSample;
+					      header.standardClock) + 
+			(float)(Math.floor(timeToSample/header.standardClock) *
+			header.standardClock);
 		}
 		else {
 		    us_correction = 0;
