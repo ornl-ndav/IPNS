@@ -9,6 +9,9 @@ import java.io.ByteArrayInputStream;
  *
  *
  * $Log$
+ * Revision 1.2  2003/04/14 20:15:43  hammonds
+ * Fixed problem when this is used to create Runfile.  If file size is 0 then an error occured when seeking version info.  Now this is assigned the lastest run number version.
+ *
  * Revision 1.1  2003/03/30 04:02:27  hammonds
  * New Class to handle the details of differences in ENDIAN and FLOATS in Runfiles.  This subclasses RandomAccessFile and uses the run version number to determine the structure of the data.
  *
@@ -49,24 +52,30 @@ public class RandomAccessRunfile extends RandomAccessFile {
   protected RandomAccessRunfile ( String filename, String mode) 
     throws IOException {
     super(filename, mode);
-    seek(68);
-    version = readInt();
-    if ( version > 16777215 ) {   // Version < 4 was little endian
-      int byte1 = version & 0xff;
-      int byte2 = (version & 0xff00)>>8;
-      int byte3 = (version & 0xff0000)>>16;
-      int byte4 = (version & 0xff000000)>>24;
-
-      int zero = 0;
-      int tfs = 256;
-      if (byte1 < zero) byte1 += tfs;
-      if (byte2 < zero) byte2 += tfs;
-      if (byte3 < zero) byte3 += tfs;
-      if (byte4 < zero) byte4 += tfs;
-      int newvers = byte4 + (byte3 << 8) + (byte2 <<16) + (byte1 <<24);
-      version = newvers;
-      seek(0);
+    if( this.length() > 0 ) {
+      seek(68);
+      version = readInt();
+      if ( version > 16777215 ) {   // Version < 4 was little endian
+	int byte1 = version & 0xff;
+	int byte2 = (version & 0xff00)>>8;
+	int byte3 = (version & 0xff0000)>>16;
+	int byte4 = (version & 0xff000000)>>24;
+	
+	int zero = 0;
+	int tfs = 256;
+	if (byte1 < zero) byte1 += tfs;
+	if (byte2 < zero) byte2 += tfs;
+	if (byte3 < zero) byte3 += tfs;
+	if (byte4 < zero) byte4 += tfs;
+	int newvers = byte4 + (byte3 << 8) + (byte2 <<16) + (byte1 <<24);
+	version = newvers;
+	seek(0);
+      }
     }
+    else {
+      version = Runfile.CURRENT_VERSION;
+    }
+   
   }
 
   /**
