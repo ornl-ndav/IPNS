@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.11  2003/08/24 00:40:11  hammonds
+ * Add SAD Brookhaven detector.
+ *
  * Revision 1.10  2003/03/11 22:12:06  hammonds
  * Fix length of GLAD detectors.
  *
@@ -85,28 +88,28 @@ public class DC5 {
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 60.96F,
 		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
-	          20.0F, 20.32F, 15.0F, 15.0F};
+	          20.0F, 20.32F, 15.0F, 15.0F, 50.0F };
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
 		 0.493F, 3.81F, 3.81F, 30.0F, 20.0F, 40.0F, 40.0F, 1.0F, 1.0F,
-		 2.377F, 15.0F, 1.0F};
+		 2.377F, 15.0F, 1.0F, 50.0F};
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
 		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F,
-		 2.377F, 0.02F, 0.02F};
+		 2.377F, 0.02F, 0.02F, 2.54F};
     public static final float[] 
 	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
 		      1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 
-		      1.0F, 1.0F, 1.0F, 1.0F, 1.0F};
+		      1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F};
     public static final int[]
 	PSD_DIMENSION = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 
-			  1, 2, 1 };
+			  1, 2, 1, 2 };
     public static final int[]
 	NUM_OF_SEGS_1 = { 1, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
-			  256, 256, 8, 150, 74 };
+			  256, 256, 8, 150, 74, 256 };
     public static final int[]
 	NUM_OF_SEGS_2 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128,
-			  1, 1, 1, 150, 1};
+			  1, 1, 1, 150, 1, 256};
     public static final int[] SEGMENT_SELECT = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256 };
     public static final String[] TYPE_DESCRIPTION ={"Not a detector",
@@ -128,7 +131,8 @@ public class DC5 {
 						    "Ordella 1210 POSY2 20cm",
 						    "1\" x 8\" LPSD",
 						    "New SCD Anger Camera",
-						    "New SCD Anger Diagnostic"
+						    "New SCD Anger Diagnostic",
+						    "SAD Brookhaven Detector"
     };
     public static final String[] DATA_SOURCE_TYPES = {"Detector",
 	                                              "Delay 1",
