@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.40  2002/01/02 16:39:05  hammonds
+ * Added new constructor that sets the versionNumber
+ *
  * Revision 5.39  2001/12/03 18:13:38  chatterjee
  * Changed name of method groupIdsByAngle to groupIdsSeparateByAngle
  *
@@ -188,6 +191,12 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     
     public RunfileBuilder( String infileName ) throws IOException {
 	super( infileName );
+    }
+
+    public RunfileBuilder( String infileName, int versionNumber ) 
+	throws IOException {
+	super( infileName );
+	header.versionNumber = versionNumber;
     }
 
     public void setFileName( String infileName ) {
@@ -859,7 +868,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		    runfile.writeInt( IDList[ii][jj] );
 		}
 	    }
-	    offsetToFree += header.numOfHistograms * header.nDet * 4;
+	    offsetToFree += header.numOfHistograms * header.numOfElements * 4;
 	}
 	//Write detector coordinate system
 	offsetToFree = writeShortTable( runfile, detCoordSys, offsetToFree, 
@@ -2209,5 +2218,172 @@ public class RunfileBuilder extends Runfile implements Cloneable{
       int rval = groupIdsSeparate(tf, hist, list);
 	return (rval);
     }
+
+ /** This method is not being used for the moment as the flightPath cannot be
+     determined without knowing something about the detectors. 
+     For future development.
+       Adds a new TimeField to a Runfile
+       @param min Minimum energy
+       @param max Maximum energy
+       @param TFNum Time Field Number
+       @param bin  Size for the energy bin
+       @param TFNum Time Field Number
+     */
+   /*
+    public int addNormalTimeFieldByEnergy(float min, float max, float bin, int TFNum) 
+   {			  
+	float flightPath = (float)this.flightPath[1];
+    	float Ein 	   = (float)header.energyIn;
+    	float tmin = (float)(flightPath / 
+				    Math.sqrt(( Ein - min ) / 5.227060E6));
+    	float tmax = (float)(flightPath / 
+				    Math.sqrt(( Ein - max ) / 5.227060E6));
+
+	int rval = addNormalTimeField(tmin, tmax, bin, TFNum);
+	return(rval);
+    }
+   */
+
+
+ /**
+       Makes a separate subgroup by segment map
+       @param tf The time Field to associate with all detectors.
+       @param hist The histogram that the ids will be binned in
+       @return an error code.
+     */
+    public int groupIdsBySegmentMap( int tf, int hist, int[] list , 
+				     int[] segList) 
+    {
+	int rval = 0;
+	int numBogusSegs = 0;
+	float focLen = 0.0f;
+
+	if ( !timeField[tf].isUsed() ) {
+	    System.out.println( "Error in groupAllSeparate: Time Field " + 
+				tf + " is not valid.");
+	}
+	
+	if ( timeField[tf].timeFocusBit != 0 ) {
+	    if ( header.pseudoTimeUnit == 'I') {
+		boolean hlen = false;
+		boolean llen = false;
+		boolean ulen = false;
+		for (int ii = 0; ii < list.length; ii++ ) {
+		    if ( detectorLength[list[ii]] > 3.0 ) hlen = true;
+		    else if ( detectorLength[list[ii]] < 3.0 ) llen = true;
+		    if ( (hlen == false && llen == false) ||
+			 (hlen == true && llen == true) ) ulen = true;
+		    
+		    
+		}
+		if ( hlen == true && llen == false ) { 
+		    focLen = 4.0f;
+		    
+		}
+		else if ( llen == true && hlen == false ) {
+		    focLen = 2.5f;
+		}
+		if (ulen != true ) {
+		    for (int ii = 0; ii < list.length; ii++ ) {
+			timeScale[list[ii]] = 
+			    (float)(focLen/
+				    Math.sqrt( Math.pow(flightPath[list[ii]], 
+							2.0) +
+					       Math.pow(detectorLength[list[ii]]
+							   /200, 2.0 ))
+				);
+		    }
+		}
+		else {
+		    System.out.println("length for groups undefined");
+		    System.out.println("Detectors: " );
+		    for ( int ii = 0; ii < list.length-1; ii++ ) {
+			System.out.print( list[ii] + ", ");
+		    }
+		    System.out.println( list[list.length -1] + ", ");
+		}
+		
+	    }
+	    else if ( header.pseudoTimeUnit == 'D') {
+	    }
+	}
+
+	for (int ij = 0; ij < list.length; ij++ )  { 
+	    if ( (numSegs1[ij]*numSegs2[ij]) != segList.length ){
+		System.out.println("ERROR: Total number of segments in "
+				   + "detector not equal to segList");
+		return (rval);
+	    }
+	} 
+	
+	
+	for (int ii = 0; ii < list.length; ii++ ) {
+	    if ( list[ii] != 0 ) {
+		for ( int jj = list[ii]; jj <= header.numOfElements; jj++){
+		    int index = (hist - 1) * (header.numOfElements + 1) + jj;
+		    if ( segments[index] != null ) {
+			int segID = segments[index].segID;
+			
+			if ( segments[index].detID == list[ii])  {
+			    int nsg = subgroupMap.length;
+			    for (int kk = 0; kk < segList.length; kk++){ 
+				if (segList[kk]!=0) {
+				    if( subgroupMap.length < 
+					(nsg + segList[kk]) ) {
+					int[][] tempMap = new int[subgroupMap.length + segList[kk]][0];
+					System.arraycopy( subgroupMap, 0, 
+							  tempMap, 0, 
+							  subgroupMap.length);
+					subgroupMap = tempMap;
+				    } 
+				    int[] tempList = 
+					new int[subgroupMap[nsg + segList[kk]].length + 1];
+				    System.arraycopy( subgroupMap[nsg + segList[kk]], 0, 
+						      tempList, 0, 
+						      tempList.length - 1);
+				    tempList[tempList.length - 1] = segID;
+				    subgroupMap[nsg + segList[kk]] = tempList;
+				    
+				    // Need to work on the address part. Not correct right now.
+
+
+
+				    int kindex = index + kk;
+				    if ( subgroupMap[ nsg + segList[kk]].length > 1 ) { 
+					detectorMap[kindex].address = 
+					    detectorMap[subgroupMap[nsg+segList[kk]][0]].address;
+					detectorMap[kindex].tfType = tf;
+
+				    }
+				    else {
+					detectorMap[kindex].tfType= tf;
+					detectorMap[kindex].address = 
+					    header.channels1D;
+					header.channels1D += 
+					    timeField[tf].numOfChannels *4 + 4;
+				    }
+				    
+				}  
+			    }// end of kk
+			    
+			    jj = header.numOfElements;	
+			    
+			    if (minSubgroupID[hist ] > (subgroupMap.length -1)
+				|| minSubgroupID[hist] == 0 ) 
+				minSubgroupID[hist] = subgroupMap.length -1;
+			    if (maxSubgroupID[hist] < (subgroupMap.length -1)) 
+				    maxSubgroupID[hist] = subgroupMap.length -1;
+			} 
+		    }
+		}	
+	    }
+	    else {
+		System.out.println( "ID " + list[ii] + " is not a detector " +
+				    "and will not be grouped." );
+	    }
+	}    
+	return (rval);
+    }
+    
 
 }
