@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.4  2000/02/22 06:13:35  hammonds
+ * Fix to change time scale problem.
+ *
  * Revision 5.3  2000/02/18 03:34:27  hammonds
  * Added Log header to track changes
  *
@@ -793,7 +796,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    runfile.writeInt( ( timeScale.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
 	    for( int ii = 1; ii < timeScale.length; ii++ ) {
-		runfile.writeFloat( detectorEfficiency[ii] );
+		runfile.writeFloat( timeScale[ii] );
 	    }
 	    offsetToFree = offsetToFree + 
 		( timeScale.length - 1 ) * 4;
