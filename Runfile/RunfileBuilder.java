@@ -7,6 +7,9 @@ import IPNS.Calib.*;
 /*
  *
  * $Log$
+ * Revision 5.18  2001/07/24 16:56:26  hammonds
+ * Updated addxxxxxTimeField methods.
+ *
  * Revision 5.17  2001/07/24 15:05:31  hammonds
  * Took RunfileBuilder argument out of many calls related to building a runfile from a script.
  * Added timesetting methods.
@@ -60,14 +63,22 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	String filename = args[0];
 	RunfileBuilder newRF = new RunfileBuilder();
         newRF.setFileName(filename);
-	newRF.headerSet( "versionNumber", 5);
+	newRF.headerSet( "userName", "hammonds");
+	newRF.headerSet( "runTitle", "RunfileBuilder test from main");
+	newRF.headerSet( "versionNumber", 6);
+	newRF.headerSet( "totalChannels", 70000);
 	newRF.headerSet( "energyIn", 5.0);
  	newRF.startDateAndTimeToCurrent();
 	newRF.headerSetFromParams( "/home/hammonds/inst/hrcs__V5.par");
 	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0116.dc5");
+	newRF.headerSet( "clockPeriod", 5.0);
 	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 1);
-	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 3);
-	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 3);
+	newRF.addFocusedTimeField( 1000.0f, 25000.0f, 7.0f, 3);
+	newRF.addPulseHeightTimeField( 1000.0f, 10000.0f, 10.0f, 3);
+	newRF.addPulseHeightTimeField( 1000.0f, 10000.0f, 255.0f, 2);
+	newRF.addEnergyTimeField( -100.0f, 100.0f, 5.0f, 4);
+	newRF.addWavelengthTimeField( 2.0f, 5.0f, 10.0f, 7);
+	newRF.addWavelengthTimeField( 1.0f, 6.0f, 10.0f, 5);
 
 	newRF.endDateAndTimeToCurrent();
 
@@ -1029,7 +1040,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( String element, double val ) {
-	int rval = this.header.set(element, val);
+	int rval = this.header.set(element,(double) val);
 	return rval;
     }
 
@@ -1040,7 +1051,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( String element, float val ) {
-	int rval = this.header.set(element, val);
+	int rval = this.header.set(element, (float)val);
 	return rval;
     }
 
@@ -1052,7 +1063,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( String element, int val ) {
-	int rval = this.header.set(element, val);
+	int rval = this.header.set(element, (int)val);
 	return rval;
     }
 
@@ -1063,7 +1074,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( String element, short val ) {
-	int rval = this.header.set(element, val);
+	int rval = this.header.set(element, (short)val);
 	return rval;
     }
 
@@ -1074,7 +1085,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( String element, String val ) {
-	int rval = this.header.set(element, val);
+	int rval = this.header.set(element, (String)val);
 	return rval;
     }
 
@@ -1236,7 +1247,13 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum) {
 				  
 	int rval = 0;
-	int maxfield;
+	if ( (min >= max) && (step >= (max-min)) ) {
+	    rval = -98;
+	    System.out.println( "Invalid parameters in addNormalTimeFields" +
+				"(min, max, step): (" + min + ", " + max +
+				", " + step + ")");
+	    return (rval);
+	}
 	TimeField[] tempFields = new TimeField[0]; 
 	if ( TFNum + 1 > timeField.length ) {
 	    tempFields = new TimeField[ TFNum + 1 ];
@@ -1253,7 +1270,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		return -99;
 	    }
 	    else {
-		maxfield = timeField.length - 1;
 		tempFields = timeField;
 	    }
 	}
@@ -1288,11 +1304,33 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum ) {
 				  
 	int rval = 0;
-	
-	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
-	System.arraycopy ( timeField, 0, tempFields, 0, 
-			   timeField.length );
-	int matchingTimeField = timeField.length;
+	if ( (min >= max) && (step >= (max-min)) ) {
+	    rval = -98;
+	    System.out.println( "Invalid parameters in addFocusedTimeFields" +
+				"(min, max, step): (" + min + ", " + max +
+				", " + step + ")");
+	    return (rval);
+	}
+	TimeField[] tempFields = new TimeField[0]; 
+	if ( TFNum + 1 > timeField.length ) {
+	    tempFields = new TimeField[ TFNum + 1 ];
+	    System.arraycopy ( timeField, 0, tempFields, 0, 
+			       timeField.length );
+	    for (int ii= timeField.length; ii <= TFNum; ii++){
+		tempFields[ii] = new TimeField();
+	    }
+	}
+	else {
+	    if ( timeField[TFNum].isUsed() ) {
+		System.out.println( "TimeField[" + TFNum 
+				    + "] is already used");
+		return -99;
+	    }
+	    else {
+		tempFields = timeField;
+	    }
+	}
+	int matchingTimeField = TFNum;
 	tempFields[matchingTimeField] = new TimeField();
 	tempFields[matchingTimeField].tMin = min;
 	tempFields[matchingTimeField].tMax = max;
@@ -1307,6 +1345,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].pulseHeightBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
+	header.numOfTimeFields = (short)(timeField.length - 1);
 
 	return(rval);
 
@@ -1323,17 +1362,40 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum ) {
 				  
 	int rval = 0;
-	
-	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
-	System.arraycopy ( timeField, 0, tempFields, 0, 
-			   timeField.length );
-	int matchingTimeField = timeField.length;
+	if ( (min >= max) && (step >= (max-min)) ) {
+	    rval = -98;
+	    System.out.println( "Invalid parameters in addPuseHeight" + 
+				"TimeFields" +
+				"(min, max, step): (" + min + ", " + max +
+				", " + step + ")");
+	    return (rval);
+	}
+	TimeField[] tempFields = new TimeField[0]; 
+	if ( TFNum + 1 > timeField.length ) {
+	    tempFields = new TimeField[ TFNum + 1 ];
+	    System.arraycopy ( timeField, 0, tempFields, 0, 
+			       timeField.length );
+	    for (int ii= timeField.length; ii <= TFNum; ii++){
+		tempFields[ii] = new TimeField();
+	    }
+	}
+	else {
+	    if ( timeField[TFNum].isUsed() ) {
+		System.out.println( "TimeField[" + TFNum 
+				    + "] is already used");
+		return -99;
+	    }
+	    else {
+		tempFields = timeField;
+	    }
+	}
+	int matchingTimeField = TFNum;
 	tempFields[matchingTimeField] = new TimeField();
 	tempFields[matchingTimeField].tMin = min;
 	tempFields[matchingTimeField].tMax = max;
-	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tStep = (max-min)/step;
 	tempFields[matchingTimeField].tDoubleLength = 32768;
-	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].numOfChannels = (short)step;
 	tempFields[matchingTimeField].timeFocusBit = 0;
 	tempFields[matchingTimeField].emissionDelayBit = 0;
 	tempFields[matchingTimeField].constantDelayBit = 0;
@@ -1342,6 +1404,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].pulseHeightBit = 1;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
+	header.numOfTimeFields = (short)(timeField.length - 1);
 
 	return(rval);
 
@@ -1358,11 +1421,33 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum ) {
 				  
 	int rval = 0;
-	
-	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
-	System.arraycopy ( timeField, 0, tempFields, 0, 
-			   timeField.length );
-	int matchingTimeField = timeField.length;
+	if ( (min >= max) && (step >= (max-min)) ) {
+	    rval = -98;
+	    System.out.println( "Invalid parameters in addEnergyTimeFields" +
+				"(min, max, step): (" + min + ", " + max +
+				", " + step + ")");
+	    return (rval);
+	}
+	TimeField[] tempFields = new TimeField[0]; 
+	if ( TFNum + 1 > timeField.length ) {
+	    tempFields = new TimeField[ TFNum + 1 ];
+	    System.arraycopy ( timeField, 0, tempFields, 0, 
+			       timeField.length );
+	    for (int ii= timeField.length; ii <= TFNum; ii++){
+		tempFields[ii] = new TimeField();
+	    }
+	}
+	else {
+	    if ( timeField[TFNum].isUsed() ) {
+		System.out.println( "TimeField[" + TFNum 
+				    + "] is already used");
+		return -99;
+	    }
+	    else {
+		tempFields = timeField;
+	    }
+	}
+	int matchingTimeField = TFNum;
 	tempFields[matchingTimeField] = new TimeField();
 	tempFields[matchingTimeField].tMin = min;
 	tempFields[matchingTimeField].tMax = max;
@@ -1377,6 +1462,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].pulseHeightBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
+	header.numOfTimeFields = (short)(timeField.length - 1);
 
 	return(rval);
 
@@ -1393,11 +1479,33 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum ) {
 				  
 	int rval = 0;
-	
-	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
-	System.arraycopy ( timeField, 0, tempFields, 0, 
-			   timeField.length );
-	int matchingTimeField = timeField.length;
+	if ( (min >= max) && (step >= (max-min)) ) {
+	    rval = -98;
+	    System.out.println( "Invalid parameters in addWavelengthTimeFields" +
+				"(min, max, step): (" + min + ", " + max +
+				", " + step + ")");
+	    return (rval);
+	}
+	TimeField[] tempFields = new TimeField[0]; 
+	if ( TFNum + 1 > timeField.length ) {
+	    tempFields = new TimeField[ TFNum + 1 ];
+	    System.arraycopy ( timeField, 0, tempFields, 0, 
+			       timeField.length );
+	    for (int ii= timeField.length; ii <= TFNum; ii++){
+		tempFields[ii] = new TimeField();
+	    }
+	}
+	else {
+	    if ( timeField[TFNum].isUsed() ) {
+		System.out.println( "TimeField[" + TFNum 
+				    + "] is already used");
+		return -99;
+	    }
+	    else {
+		tempFields = timeField;
+	    }
+	}
+	int matchingTimeField = TFNum;
 	tempFields[matchingTimeField] = new TimeField();
 	tempFields[matchingTimeField].tMin = min;
 	tempFields[matchingTimeField].tMax = max;
@@ -1412,6 +1520,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].pulseHeightBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
+	header.numOfTimeFields = (short)(timeField.length - 1);
 
 	return(rval);
 
