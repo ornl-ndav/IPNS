@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.46  2002/08/21 17:38:04  hammonds
+ * Changed code to use new logBinBit instead of wavelength bit for dt/t bin binning.
+ *
  * Revision 5.45  2002/08/20 20:36:28  hammonds
  * Changes to AddWavelengthTimeField for dt/t binning
  *
@@ -1519,6 +1522,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].energyBinBit = 0;
 	tempFields[matchingTimeField].wavelengthBinBit = 0;
 	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].logBinBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
 	header.numOfTimeFields = (short)(timeField.length - 1);
@@ -1597,6 +1601,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].energyBinBit = 0;
 	tempFields[matchingTimeField].wavelengthBinBit = 0;
 	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].logBinBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
 	header.numOfTimeFields = (short)(timeField.length - 1);
@@ -1656,6 +1661,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].energyBinBit = 0;
 	tempFields[matchingTimeField].wavelengthBinBit = 0;
 	tempFields[matchingTimeField].pulseHeightBit = 1;
+	tempFields[matchingTimeField].logBinBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
 	header.numOfTimeFields = (short)(timeField.length - 1);
@@ -1714,6 +1720,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].energyBinBit = 1;
 	tempFields[matchingTimeField].wavelengthBinBit = 0;
 	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].logBinBit = 0;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
 	header.numOfTimeFields = (short)(timeField.length - 1);
@@ -1765,14 +1772,74 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].tMax = max;
 	tempFields[matchingTimeField].tStep = step;
 	tempFields[matchingTimeField].tDoubleLength = 32768;
-	tempFields[matchingTimeField].numOfChannels = 
-	    (short) ((1/step) Math.log(max/min) + 2);
+	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
 	tempFields[matchingTimeField].timeFocusBit = 0;
 	tempFields[matchingTimeField].emissionDelayBit = 0;
 	tempFields[matchingTimeField].constantDelayBit = 0;
 	tempFields[matchingTimeField].energyBinBit = 0;
 	tempFields[matchingTimeField].wavelengthBinBit = 1;
 	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].logBinBit = 0;
+	tempFields[matchingTimeField].used = true;
+	timeField = tempFields;
+	header.numOfTimeFields = (short)(timeField.length - 1);
+
+	return(rval);
+
+    }
+
+    /**
+       Adds a new TimeField to a Runfile
+       @param min Minimum energy for the field
+       @param max Maximum energy for the field
+       @param step Step size for the field
+       @param TFNum Time Field Number
+     */
+    public int addLogTimeField(float min, float max, float step, 
+				  int TFNum ) {
+				  
+	int rval = 0;
+	if ( (min >= max) && (step >= (max-min)) ) {
+	    rval = -98;
+	    System.out.println( "Invalid parameters in addWavelengthTimeFields" +
+				"(min, max, step): (" + min + ", " + max +
+				", " + step + ")");
+	    return (rval);
+	}
+	TimeField[] tempFields = new TimeField[0]; 
+	if ( TFNum + 1 > timeField.length ) {
+	    tempFields = new TimeField[ TFNum + 1 ];
+	    System.arraycopy ( timeField, 0, tempFields, 0, 
+			       timeField.length );
+	    for (int ii= timeField.length; ii <= TFNum; ii++){
+		tempFields[ii] = new TimeField();
+	    }
+	}
+	else {
+	    if ( timeField[TFNum].isUsed() ) {
+		System.out.println( "TimeField[" + TFNum 
+				    + "] is already used");
+		return -99;
+	    }
+	    else {
+		tempFields = timeField;
+	    }
+	}
+	int matchingTimeField = TFNum;
+	tempFields[matchingTimeField] = new TimeField();
+	tempFields[matchingTimeField].tMin = min;
+	tempFields[matchingTimeField].tMax = max;
+	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tDoubleLength = 32768;
+	tempFields[matchingTimeField].numOfChannels = 
+	    (short)(Math.log(max/min)/step + 2);
+	tempFields[matchingTimeField].timeFocusBit = 0;
+	tempFields[matchingTimeField].emissionDelayBit = 0;
+	tempFields[matchingTimeField].constantDelayBit = 0;
+	tempFields[matchingTimeField].energyBinBit = 0;
+	tempFields[matchingTimeField].wavelengthBinBit = 0;
+	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].logBinBit = 1;
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
 	header.numOfTimeFields = (short)(timeField.length - 1);
