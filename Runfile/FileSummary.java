@@ -15,6 +15,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.3  2002/07/02 17:05:01  hammonds
+ * Changed how much space was alloted for User names
+ *
  * Revision 1.2  2002/07/02 16:57:35  hammonds
  * Changed Sort order
  *
@@ -50,7 +53,7 @@ public class FileSummary {
 		    while ( sb1.length() < 18 )
 			sb1.append(" ");
 		    sb1.append( rfile.UserName().trim() );
-		    while ( sb1.length() < 62 )
+		    while ( sb1.length() < 42 )
 		        sb1.append(" ");
 		    sb1.append( rfile.RunTitle() );
 		    sb1.append( "\n" );
