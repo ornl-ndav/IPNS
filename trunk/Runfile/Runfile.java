@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.35  2003/04/14 21:43:38  hammonds
+ * Fixed problem with #of segments for SCD.  There are 2 extra channels of y for diagnostic information.
+ *
  * Revision 6.34  2003/04/14 20:29:58  hammonds
  * Add new
  * Changed how GLAD <V3 files operate to coordinate better with ISAWs UniformDataGrid.  Since data is stored as individual segments, this is how data will be treated.  This causes some loss of info of actual SegmentInfo.
@@ -1040,17 +1043,17 @@ public class Runfile implements Cloneable {
 		    detectorHeight[ii] = (float)header.yDisplacement/100.0f;
 		    minID[ii] = ii;
 		    int index;
-		    for ( int segY = 0; segY < header.numOfY; segY++) {
-			for ( int segX = 0; segX < header.numOfX; segX++) {
-			    index = ii + segX + segY *( header.numOfX);
+		    for ( int segY = 0; segY < numSegs1[ii]; segY++) {
+			for ( int segX = 0; segX < numSegs2[ii]; segX++) {
+			    index = ii + segX + segY *( numSegs2[ii]);
 			    segments[index] = new Segment();
 			    segments[index].detID = ii; 
 			    segments[index].row = segY + 1; 
 			    segments[index].column = segX + 1; 
 			    segments[index].length = 
-				DC5.LENGTH[detectorType[ii]]/header.numOfY; 
+				detectorLength[ii]/numSegs1[ii]; 
 			    segments[index].width = 
-				DC5.WIDTH[detectorType[ii]]/header.numOfX; 
+				detectorWidth[ii]/numSegs2[ii]; 
 			    segments[index].depth = 
 				DC5.DEPTH[detectorType[ii]]; 
 			    segments[index].efficiency = 
@@ -2449,8 +2452,8 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double fromLeft = 
-		(seg.column * ( header.xLeft -header.xRight)/100.0f ) 
-		/ header.numOfX;
+		(seg.column * ( -detectorWidth[detID])/100.0f ) 
+		/ numSegs2[detID];
 	    double fromCenter = fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f;
 	    double offsetAngle = Math.asin(fromCenter / (header.dtd/100)) 
@@ -2587,8 +2590,8 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    float fromLeft = (float)
-		(seg.column * ( header.xLeft -header.xRight)/100.0f ) 
-		/ header.numOfX;
+		(seg.column * ( -detectorWidth[id])/100.0f ) 
+		/ numSegs2[id];
 	    float fromCenter = (float)(fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f);
 	    
@@ -2683,7 +2686,7 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double height = header.yDisplacement + header.yLower + 
-		(seg.row * (header.yUpper - header.yLower)) / header.numOfY;
+		(seg.row * (detectorLength[id])) / numSegs1[id];
 	    return height/100.0f;
 	}
     }
