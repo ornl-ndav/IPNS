@@ -38,7 +38,7 @@ class DetectorMap{
 	    .lastIndexOf( System.getProperty( "file.separator"));
 	String iName = args[0].substring( slashIndex+1, slashIndex + 5 );
 	Header header = new Header(runfile, iName );
-        numEntries = header.detectorMapTable.size / 4;
+        numEntries = header.detectorMapTable.size / DetectorMap.mapSize(header.versionNumber);
         System.out.println("Number of Time Field entries in the table: " +
 			   numEntries);
         DetectorMap[] detectorMap = new DetectorMap[numEntries+1];
