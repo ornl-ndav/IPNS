@@ -94,6 +94,11 @@ public void setUld( int[] uld ) {
   this.uld = uld;
   }
 
+  public void setDetDisc( int id, int lld, int uld) {
+    this.lld[id-1] = lld;
+    this.uld[id-1] = uld;
+  }
+
 public void setNDet(int nDet) {
   this.nDet =  nDet;
   }
