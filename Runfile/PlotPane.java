@@ -44,7 +44,7 @@ public PlotPane () {
           spectrum = new Data(x_scale, y_values, id);
 	data_set.addData_entry ( spectrum );
   }
-  ImageView image_view = new ImageView(data_set);
+  ViewManager image_view = new ViewManager(data_set, IViewManager.IMAGE);
   setViewportView( image_view );
 }
 
@@ -138,7 +138,7 @@ public void run(){
      }
      System.out.println( (new Date()).toString() );
      runFile.Close();
-     ImageView image_view = new ImageView(data_set);
+     ViewManager image_view = new ViewManager(data_set, IViewManager.IMAGE);
      plotPane.setViewportView( image_view );
    }
    catch (IOException e) {
