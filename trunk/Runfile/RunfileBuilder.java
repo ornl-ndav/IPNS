@@ -18,6 +18,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	flightPath = new float[1];
 	detectorHeight = new float[1];
 	detectorType = new short[1];
+	detCoordSys = new short[1];
+	detectorRot1 = new float[1];
+	detectorRot2 = new float[1];
+	detectorEfficiency = new float[1];
 	timeScale = new float[1];
 	timeShift = new float[1];
 	areaStartTime = new float[1];
@@ -165,6 +169,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	timeField = new TimeField[1];
 	timeField[0] = new TimeField();
+	subgroupMap = new int[header.numOfHistograms][header.nDet];
     }
 
     public void setNumOfTimeFields ( short numOfTimeFields ) {
@@ -379,6 +384,19 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.iName = iName;
     }
 
+    public void addDetectorCoordSys( int[] detCoordSys ) {
+	this.detCoordSys = new short[ detCoordSys.length +1 ];
+	for ( int ii = 1; ii <= detCoordSys.length; ii++ ) {
+	    this.detCoordSys[ii] = (short)detCoordSys[ii - 1];
+	}
+    }
+
+    public void addDetectorCoordSys( short[] detCoordSys ) {
+	this.detCoordSys = new short[ detCoordSys.length +1 ];
+	System.arraycopy(detCoordSys, 0, this.detCoordSys, 1, 
+			 detCoordSys.length);
+    }
+
     public void addDetectorAngle( double[] detectorAngle ){
 	this.detectorAngle = new float[detectorAngle.length + 1 ];
 	for ( int ii = 1; ii <= detectorAngle.length; ii++ ) {
@@ -416,6 +434,32 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	this.detectorHeight = new float[ detectorHeight.length + 1 ];
 	System.arraycopy(detectorHeight, 0, this.detectorHeight, 1, 
 			 detectorHeight.length);
+    }
+
+    public void addDetectorRot1( double[] detectorRot1 ){
+	this.detectorRot1 = new float[detectorRot1.length + 1 ];
+	for ( int ii = 1; ii <= detectorRot1.length; ii++ ) {
+	    this.detectorRot1[ii] = (float)detectorRot1[ii - 1];
+	}
+    }
+
+    public void addDetectorRot1( float[] detectorRot1 ){
+	this.detectorRot1 = new float[detectorRot1.length + 1 ];
+	System.arraycopy(detectorRot1, 0, this.detectorRot1, 1, 
+			 detectorRot1.length);
+    }
+
+    public void addDetectorRot2( double[] detectorRot2 ){
+	this.detectorRot2 = new float[detectorRot2.length + 1 ];
+	for ( int ii = 1; ii <= detectorRot2.length; ii++ ) {
+	    this.detectorRot2[ii] = (float)detectorRot2[ii - 1];
+	}
+    }
+
+    public void addDetectorRot2( float[] detectorRot2 ){
+	this.detectorRot2 = new float[detectorRot2.length + 1 ];
+	System.arraycopy(detectorRot2, 0, this.detectorRot2, 1, 
+			 detectorRot2.length);
     }
 
     public void addDetectorType( int[] detectorType ) {
@@ -470,6 +514,67 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			 detectorDepth.length);
     }
 
+    public void addDetectorEfficiency( double[] detectorEfficiency ) {
+	this.detectorEfficiency = new float[ detectorEfficiency.length + 1 ];
+	for ( int ii = 1; ii <= detectorEfficiency.length; ii++ ) {
+	    this.detectorEfficiency[ii] = (float)detectorEfficiency[ii - 1];
+	}
+    }
+
+    public void addDetectorEfficiency( float[] detectorEfficiency ) {
+	this.detectorEfficiency = new float[ detectorEfficiency.length + 1 ];
+	System.arraycopy(detectorEfficiency, 0, this.detectorEfficiency, 1, 
+			 detectorEfficiency.length);
+    }
+
+    public void addDetectorPsdOrder( int[] psdOrder ) {
+	this.psdOrder = new int[ psdOrder.length +1 ];
+	System.arraycopy(psdOrder, 0, this.psdOrder, 1, 
+			 psdOrder.length);
+    }
+
+    public void addDetectorPsdOrder( short[] psdOrder ) {
+	this.psdOrder = new int[ psdOrder.length +1 ];
+	for ( int ii = 1; ii <= psdOrder.length; ii++ ) {
+	    this.psdOrder[ii] = (int)psdOrder[ii - 1];
+	}
+    }
+
+    public void addDetectorNumSegs1( int[] numSegs1 ) {
+	this.numSegs1 = new int[ numSegs1.length +1 ];
+	System.arraycopy(numSegs1, 0, this.numSegs1, 1, 
+			 numSegs1.length);
+    }
+
+    public void addDetectorNumSegs1( short[] numSegs1 ) {
+	this.numSegs1 = new int[ numSegs1.length +1 ];
+	for ( int ii = 1; ii <= numSegs1.length; ii++ ) {
+	    this.numSegs1[ii] = (int)numSegs1[ii - 1];
+	}
+    }
+
+    public void addDetectorNumSegs2( int[] numSegs2 ) {
+	this.numSegs2 = new int[ numSegs2.length +1 ];
+	System.arraycopy(numSegs2, 0, this.numSegs2, 1, 
+			 numSegs2.length);
+    }
+
+    public void addDetectorNumSegs2( short[] numSegs2 ) {
+	this.numSegs2 = new int[ numSegs2.length +1 ];
+	for ( int ii = 1; ii <= numSegs2.length; ii++ ) {
+	    this.numSegs2[ii] = (int)numSegs2[ii - 1];
+	}
+    }
+
+    public void addDiscriminatorLevels( int[] lld, int[] uld ) {
+	this.discriminator = new DiscLevel[ lld.length + 1 ];
+	for (int ii = 1; ii <= lld.length; ii++ ) {
+	    discriminator[ii] = new DiscLevel();
+	    discriminator[ii].lowerLevel = lld[ii - 1];
+	    discriminator[ii].upperLevel = uld[ii - 1];
+	}
+    }
+ 
     public void Write () {
 	RandomAccessFile runfile;
 	 int offsetToFree = header.numOfHeadBlocks * 512;
@@ -579,6 +684,128 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    offsetToFree = offsetToFree + ( timeField.length - 1 ) * 16;
 	}
 
+	//  Write detector subgroup map
+	if( header.numOfHistograms * header.nDet > 0 ) {
+	    runfile.seek( 728 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( header.numOfHistograms * header.nDet * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 0; ii < header.numOfHistograms; ii++ ) {
+		for ( int jj = 0; jj < header.nDet; jj++ ) {
+		    runfile.writeInt( subgroupMap[ii][jj] );
+		}
+	    }
+	    offsetToFree += header.numOfHistograms * header.nDet * 4;
+	}
+	//Write detector coordinate system
+	if ( detCoordSys.length > 0 ) {
+	    runfile.seek( 736 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( detCoordSys.length - 1 )* 2 );
+	    runfile.seek( offsetToFree );
+	    for ( int ii = 1; ii < detCoordSys.length; ii++ ) {
+		runfile.writeShort( detCoordSys[ii] );
+	    }
+	    offsetToFree = offsetToFree + ( detCoordSys.length - 1 )* 2;
+	}
+	//  Write detector rotation angle 1
+	if( detectorRot1.length > 0 ) {
+	    runfile.seek( 744 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( detectorRot1.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < detectorRot1.length; ii++ ) {
+		runfile.writeFloat( detectorRot1[ii] );
+	    }
+	    offsetToFree = offsetToFree + ( detectorRot1.length - 1 ) * 4;
+	}
+	//  Write detector rotation angle 2
+	if( detectorRot2.length > 0 ) {
+	    runfile.seek( 752 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( detectorRot2.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < detectorRot2.length; ii++ ) {
+		runfile.writeFloat( detectorRot2[ii] );
+	    }
+	    offsetToFree = offsetToFree + ( detectorRot2.length - 1 ) * 4;
+	}
+	//  Write detector Efficiencies
+	if( detectorEfficiency.length > 0 ) {
+	    runfile.seek( 760 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( detectorEfficiency.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < detectorEfficiency.length; ii++ ) {
+		runfile.writeFloat( detectorEfficiency[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( detectorEfficiency.length - 1 ) * 4;
+	}
+	//  Write detector psd dimensionality 1 for lpsd, 2 for area
+	if( psdOrder.length > 0 ) {
+	    runfile.seek( 768 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( psdOrder.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < psdOrder.length; ii++ ) {
+		runfile.writeInt( psdOrder[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( psdOrder.length - 1 ) * 4;
+	}
+	//  Write # psd segments in 1st dimension
+	if( numSegs1.length > 0 ) {
+	    runfile.seek( 776 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( numSegs1.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < numSegs1.length; ii++ ) {
+		runfile.writeInt( numSegs1[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( numSegs1.length - 1 ) * 4;
+	}
+	//  Write # psd segments in 2nd dimension
+	if( numSegs2.length > 0 ) {
+	    runfile.seek( 784 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( numSegs2.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < numSegs2.length; ii++ ) {
+		runfile.writeInt( numSegs2[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( numSegs2.length - 1 ) * 4;
+	}
+	//  Write detector Time Scaling factors 
+	if( timeScale.length > 1 ) {
+	    runfile.seek( 24 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( timeScale.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < timeScale.length; ii++ ) {
+		runfile.writeFloat( detectorEfficiency[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( timeScale.length - 1 ) * 4;
+	}
+
+	//  Write detector discriminator levels 
+	if( discriminator.length > 1 ) {
+	    runfile.seek( 520 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( discriminator.length - 1 ) * 8 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < discriminator.length; ii++ ) {
+		runfile.writeInt( discriminator[ii].lowerLevel );
+		runfile.writeInt( discriminator[ii].upperLevel );
+	    }
+	    offsetToFree = offsetToFree + 
+		( discriminator.length - 1 ) * 8;
+	}
+
+
 	header.totalChannels = header.channels1D;
 	header.histStartAddress = offsetToFree;
 	header.offsetToFree = header.histStartAddress + 
@@ -614,7 +841,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			     short timeFocus, short emissionDelay, 
 			     short constDelay, short energyBin,
 			     short wavelengthBin, short pulseHeightBin,
-			     int hist ) {
+			     int hist, int sgNum ) {
 	float maxDiff = 0.0000001f;
 	int matchingTimeField;
 	matchingTimeField = 0;
@@ -655,6 +882,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    tempFields[matchingTimeField].wavelengthBinBit = wavelengthBin;
 	    tempFields[matchingTimeField].pulseHeightBit = pulseHeightBin;
 
+	    if ( timeFocus != 0 ) {
+		header.pseudoTimeUnit = 'I';
+	    }
 	    timeField = tempFields;
 				
 	}
@@ -665,8 +895,26 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    detectorMap[index].tfType = matchingTimeField;
 	    detectorMap[index].address = header.channels1D * 4;
 	    header.channels1D = header.channels1D + nChanns + 1;
+	    subgroupMap[ hist ][ids[jj] - 1] = sgNum;
+	    switch ( header.pseudoTimeUnit ) {
+
+	    case ('I'): {
+		if ( timeScale.length != (header.nDet + 1)  ) 
+		    timeScale = new float[header.nDet +1 ];
+		if ( header.iName.equalsIgnoreCase("hrcs")) {
+		    timeScale[ids[jj]] = 4.0f/flightPath[ids[jj]];
+		}
+		else if (header.iName.equals("lrcs")) {
+		    timeScale[ids[jj]] = 2.5f/flightPath[ids[jj]];
+		}
+		break;
+	    }
+	    default: {
+		break;
+	    }
+	    }
 	}
-    }
+     }
 
 
     public Object clone() {

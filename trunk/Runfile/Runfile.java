@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.1  2000/02/11 23:16:45  hammonds
+ * Added code to read/write discriminator levels in the new files.  Changed type for disc level methods to int.  Added many parameters to specify detector posistion in the runfile.
+ *
  * Revision 5.0  2000/01/10 22:39:48  hammonds
  * Made update to allow this package to be used with the new newrun package.
  * These updates were generally made to allow for better operation when creating
@@ -73,6 +76,46 @@ public class Runfile implements Cloneable {
     float[] detectorLength = new float[0];
     float[] detectorWidth = new float[0];
     float[] detectorDepth = new float[0];
+    short[] detCoordSys = new short[0];
+    float[] detectorRot1 = new float[0];
+    float[] detectorRot2 = new float[0];
+    float[] detectorEfficiency = new float[0];
+    int[] psdOrder = new int[0];
+    int[] numSegs1 = new int[0];
+    int[] numSegs2 = new int[0];
+    //-----------------------------------------------------------------
+    public static final float[] 
+	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
+		  12.7F, 3.81F, 12.7F};
+    public static final float[] 
+	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
+		 0.493F, 3.81F, 3.81F };
+    public static final float[] 
+	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
+		 0.493F, 2.54F, 2.54F};
+    public static final float[] 
+	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
+		 1.00F, 0.001F, 0.001F};
+    public static final int[]
+	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    public static final int[]
+	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1 };
+    public static final int[]
+	NUM_OF_SEGS_2 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    public static final int[] SEGMENT_SELECT = {
+	1, 2, 4, 8, 16, 32, 64, 128, 256 };
+    public static final String[] TYPE_DESCRIPTION ={"Not a detector",
+						    "3\" pancake monitor",
+						    "1\" x 18\"",
+		 				    "1\" x 9\"",
+						    "1\" x 4.5\"",
+						    "1\" x 36\" LPSD",
+						    "0.5\" x 15\"",
+						    "0.5\" x 15\" LPSD",
+						    "0.25\" x 5\"",
+						    "1.5\" pancake monitor",
+						    "Ordela Beam Monitor"
+    };
 
 
 // --------------------------- readUnsignedInteger -------------------
@@ -237,7 +280,7 @@ public class Runfile implements Cloneable {
 	int slashIndex = runfileName
 	    .lastIndexOf( System.getProperty( "file.separator"));
 	String iName = runfileName.substring( slashIndex+1, slashIndex + 5 );
-
+ 
 	header = new Header(runfile, iName  );
 	timeField[0] = new TimeField();
 	runfile.seek(68);  
@@ -252,7 +295,7 @@ public class Runfile implements Cloneable {
 	    LoadV4( runfile )
 ;
 	}
-
+	runfile.close();
     }
 
     void LoadV4( RandomAccessFile runfile ) throws IOException {
@@ -283,6 +326,109 @@ public class Runfile implements Cloneable {
 	    runfile.seek(this.header.detectorType.location);
 	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
 
+	    float[] detectorLength = new float[header.nDet + 1];
+	    float[] detectorWidth = new float[header.nDet + 1];
+	    float[] detectorDepth = new float[header.nDet + 1];
+	    float[] detectorEfficiency = new float[header.nDet + 1];
+	    int[] psdOrder = new int[header.nDet + 1];
+	    int[] numSegs1 = new int[header.nDet + 1];
+	    int[] numSegs2 = new int[header.nDet + 1];
+
+	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
+		if ( detectorAngle[ii] == 0.0F &&
+		     flightPath[ii] == 0.0F &&
+		     detectorType[ii] == 0 ) {
+		}
+		else if ( header.iName.equalsIgnoreCase( "hrcs" ) || 
+			  header.iName.equalsIgnoreCase( "lrcs" ) ) {
+		    switch (detectorType[ii]){
+		    case 0: {
+			if ( ii < 3 )
+			detectorType[ii] = 1;
+			break;
+		    }
+		    case 1: {
+			detectorType[ii] = 2;
+			break;
+		    }
+		    case 2: {
+			detectorType[ii] = 3;
+			break;
+		    }
+		    case 3: {
+			detectorType[ii] = 4;
+			break;
+		    }
+		    }
+		}
+		else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
+		    switch (detectorType[ii]){
+		    case 1: {
+ 			detectorType[ii] = 9;
+			break;
+		    }
+		    case 2: {
+			detectorType[ii] = 6;
+			break;
+		    }
+		    }
+		}
+		else if ( header.iName.equalsIgnoreCase( "sepd" ) ) {
+		    switch (detectorType[ii]){
+		    case 1: {
+			detectorType[ii] = 6;
+			break;
+		    }
+		    case 2: {
+			detectorType[ii] = 9;
+			break;
+		    }
+		    }
+		}
+		else if ( header.iName.equalsIgnoreCase( "qens" ) ) {
+		    switch (detectorType[ii]){
+		    case 0: {
+			detectorType[ii] = 8;
+			break;
+		    }
+		    case 1: {
+			detectorType[ii] = 10;
+			break;
+		    }
+		    }
+		}
+		else if ( header.iName.equalsIgnoreCase( "hipd" ) ) {
+		    switch (detectorType[ii]){
+		    case 0: {
+			detectorType[ii] = 9;
+			break;
+		    }
+		    case 1: {
+			detectorType[ii] = 6;
+			break;
+		    }
+		    }
+		}
+		else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
+		    switch (detectorType[ii]){
+		    case 0: {
+			detectorType[ii] = 6;
+			break;
+		    }
+		    case 1: {
+			detectorType[ii] = 10;
+			break;
+		    }
+		    }
+		}
+		detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		detectorEfficiency[ii] = Runfile.EFFICIENCY[detectorType[ii]];
+		psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+	    }
 	    if (header.versionNumber > 3) {
 		runfile.seek(this.header.discSettings.location);
 		int size = header.nDet*2;
@@ -326,7 +472,7 @@ public class Runfile implements Cloneable {
 				int[] tempList = new int[ idList.length + 1];
 				System.arraycopy(idList, 0, tempList, 0, 
 						 idList.length);
-				idList = tempList;
+ 				idList = tempList;
 				idList[idList.length - 1] = k;
 			    }
 			}
@@ -336,7 +482,7 @@ public class Runfile implements Cloneable {
 					 idList.length-1);
 		    }
 		}
-		maxSubgroupID[nHist] = group;
+ 		maxSubgroupID[nHist] = group;
 	    }
 	}
 	else {
@@ -407,121 +553,113 @@ public class Runfile implements Cloneable {
 		lastStart = ii + 2;
 	    }
 	}
-	runfile.close();
 
    }
 
     void LoadV5( RandomAccessFile runfile ) throws IOException {
 	int i;
-	if ( header.nDet > 0 ) {
-	    detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
-					 + 1];
-	    for (i=1; i <= this.header.detectorMapTable.size/4; i++){
-		detectorMap[i] = new DetectorMap(runfile, i, header);
-	    }
-
-	    timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
-	    for (i=1; i <= this.header.timeFieldTable.size/16; i++){
-		timeField[i] = new TimeField(runfile, i, header);
-	    }
-	    runfile.seek(this.header.detectorAngle.location);
-	    detectorAngle = new float[header.detectorAngle.size / 4 + 1];
-	    for ( i = 1; i <= header.detectorAngle.size / 4; i++ ) {
-		detectorAngle[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.flightPath.location);
-	    flightPath = new float[header.flightPath.size / 4 + 1];
-	    for ( i = 1; i <= header.flightPath.size / 4; i++ ) {
-		flightPath[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.detectorHeight.location);
-	    detectorHeight = new float[header.detectorHeight.size / 4 + 1];
-	    for ( i = 1; i <= header.detectorHeight.size / 4; i++ ) {
-		detectorHeight[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.detectorType.location);
-	    detectorType = new short[header.detectorType.size / 2 + 1];
-	    for ( i = 1; i <= header.detectorType.size / 2; i++ ) {
-		detectorType[i] = runfile.readShort();
-	    }
-	    runfile.seek(this.header.detectorHeight.location);
-	    detectorLength = new float[header.detectorLength.size / 4 + 1];
-	    for ( i = 1; i <= header.detectorLength.size / 4; i++ ) {
-		detectorLength[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.detectorWidth.location);
-	    detectorWidth = new float[header.detectorWidth.size / 4 + 1];
-	    for ( i = 1; i <= header.detectorWidth.size / 4; i++ ) {
-		detectorWidth[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.detectorDepth.location);
-	    detectorDepth = new float[header.detectorDepth.size / 4 + 1];
-	    for ( i = 1; i <= header.detectorDepth.size / 4; i++ ) {
-		detectorDepth[i] = runfile.readFloat();
-	    }
-
-	}
-	if ( header.numOfLpsds > 0 ) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-	    runfile.seek(this.header.lpsdAngle.location);
-	    lpsdAngle = new float[header.lpsdAngle.size / 4 + 1];
-	    for ( i = 1; i <= header.lpsdAngle.size / 4; i++ ) {
-		lpsdAngle[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.lpsdFlightPath.location);
-	    lpsdFlightPath = new float[header.lpsdFlightPath.size / 4 + 1];
-	    for ( i = 1; i <= header.lpsdFlightPath.size / 4; i++ ) {
-		lpsdFlightPath[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.lpsdHeight.location);
-	    lpsdHeight = new float[header.lpsdHeight.size / 4 + 1];
-	    for ( i = 1; i <= header.lpsdHeight.size / 4; i++ ) {
-		lpsdHeight[i] = runfile.readFloat();
-	    }
-
-	    runfile.seek(this.header.lpsdType.location);
-	    lpsdType = new short[header.lpsdType.size / 2 + 1];
-	    for ( i = 1; i <= header.lpsdType.size / 2; i++ ) {
-		lpsdType[i] = runfile.readShort();
-	    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
+				     + 1];
+	for (i=1; i <= this.header.detectorMapTable.size/4; i++){
+	    detectorMap[i] = new DetectorMap(runfile, i, header);
 	}
 
+	timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
+	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
+	    timeField[i] = new TimeField(runfile, i, header);
+	}
+	runfile.seek(this.header.detectorAngle.location);
+	detectorAngle = new float[header.detectorAngle.size / 4 + 1];
+	for ( i = 1; i <= header.detectorAngle.size / 4; i++ ) {
+	    detectorAngle[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.flightPath.location);
+	flightPath = new float[header.flightPath.size / 4 + 1];
+	for ( i = 1; i <= header.flightPath.size / 4; i++ ) {
+	    flightPath[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detectorHeight.location);
+	detectorHeight = new float[header.detectorHeight.size / 4 + 1];
+	for ( i = 1; i <= header.detectorHeight.size / 4; i++ ) {
+	    detectorHeight[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detectorType.location);
+	detectorType = new short[header.detectorType.size / 2 + 1];
+	for ( i = 1; i <= header.detectorType.size / 2; i++ ) {
+	    detectorType[i] = runfile.readShort();
+	}
+
+	runfile.seek(this.header.detectorHeight.location);
+	detectorLength = new float[header.detectorLength.size / 4 + 1];
+	for ( i = 1; i <= header.detectorLength.size / 4; i++ ) {
+	    detectorLength[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detectorWidth.location);
+	detectorWidth = new float[header.detectorWidth.size / 4 + 1];
+	for ( i = 1; i <= header.detectorWidth.size / 4; i++ ) {
+	    detectorWidth[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detectorDepth.location);
+	detectorDepth = new float[header.detectorDepth.size / 4 + 1];
+	for ( i = 1; i <= header.detectorDepth.size / 4; i++ ) {
+	    detectorDepth[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detCoordSys.location);
+	detCoordSys = new short[header.detCoordSys.size / 2 + 1];
+	for ( i = 1; i <= header.detCoordSys.size / 2; i++ ) {
+	    detCoordSys[i] = runfile.readShort();
+	}
+
+	runfile.seek(this.header.detectorRot1.location);
+	detectorRot1 = new float[header.detectorRot1.size / 4 + 1];
+	for ( i = 1; i <= header.detectorRot1.size / 4; i++ ) {
+	    detectorRot1[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detectorRot2.location);
+	detectorRot2 = new float[header.detectorRot2.size / 4 + 1];
+	for ( i = 1; i <= header.detectorRot2.size / 4; i++ ) {
+	    detectorRot2[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.detectorEfficiency.location);
+	detectorEfficiency = 
+	    new float[header.detectorEfficiency.size / 4 + 1];
+	for ( i = 1; i <= header.detectorEfficiency.size / 4; i++ ) {
+	    detectorEfficiency[i] = runfile.readFloat();
+	}
+
+	runfile.seek(this.header.psdOrder.location);
+	psdOrder = new int[header.psdOrder.size / 4 + 1];
+	for ( i = 1; i <= header.psdOrder.size / 4; i++ ) {
+	    psdOrder[i] = runfile.readInt();
+	}
+
+	runfile.seek(this.header.numSegs1.location);
+	numSegs1 = new int[header.numSegs1.size / 4 + 1];
+	for ( i = 1; i <= header.numSegs1.size / 4; i++ ) {
+	    numSegs1[i] = runfile.readInt();
+	}
+
+	runfile.seek(this.header.numSegs2.location);
+	numSegs2 = new int[header.numSegs2.size / 4 + 1];
+	for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
+	    numSegs2[i] = runfile.readInt();
+	}
+
+	runfile.seek(this.header.discSettings.location);
+	discriminator = new DiscLevel[this.header.discSettings.size/8 + 1];
+	for (i = 1; i <= this.header.nDet; i++) {
+	    discriminator[i] = new DiscLevel();
+	    discriminator[i].lowerLevel = runfile.readInt();
+	    discriminator[i].upperLevel = runfile.readInt();
+	    }
     }
 
     /**
@@ -1518,6 +1656,7 @@ public class Runfile implements Cloneable {
 	    }
 	    min = min + us_correction;
 	    max = max + us_correction;
+	    break;
 	}
 	default: {
 	    min = min;
@@ -1580,7 +1719,7 @@ public class Runfile implements Cloneable {
 	@param id - id of the detector
 	@return Value of the lower level discriminator.
     */
-    public short LowerLevelDisc(int id) {
+    public int LowerLevelDisc(int id) {
 	if (id < 1 || id > header.nDet ) return -1;
 	if (header.versionNumber < 4 ) return (short)0;
 	return discriminator[id].lowerLevel;
@@ -1591,7 +1730,7 @@ public class Runfile implements Cloneable {
 	@param id - id of the detector
 	@return Value of the upper level discriminator.
     */
-    public short UpperLevelDisc(int id) {
+    public int UpperLevelDisc(int id) {
 	if (id < 1 || id > header.nDet ) return -1;
 	if (header.versionNumber < 4 ) return (short)0;
 	return discriminator[id].upperLevel;

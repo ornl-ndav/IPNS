@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.1  2000/02/11 23:16:37  hammonds
+ * Added code to read/write discriminator levels in the new files.  Changed type for disc level methods to int.  Added many parameters to specify detector posistion in the runfile.
+ *
  * Revision 5.0  2000/01/10 22:39:48  hammonds
  * Made update to allow this package to be used with the new newrun package.
  * These updates were generally made to allow for better operation when creating
@@ -24,174 +27,182 @@ a logical separation for information in the two block run file header.
  */
 
 public class Header implements Cloneable {
-protected TableType controlParameter = new TableType();
-protected TableType detectorMapTable = new TableType();
-protected TableType timeFieldTable = new TableType();
-protected TableType timeScaleTable = new TableType();
-protected TableType timeShiftTable = new TableType();
-protected TableType areaStartTable = new TableType();
-protected TableType timeDelayTable = new TableType();
-protected int histStartAddress;
-protected int numOfBlocks;
-protected int offsetToFree;
-protected int versionNumber;
-protected TableType detectorAngle = new TableType();
-protected TableType flightPath = new TableType();
-protected TableType detectorHeight = new TableType();
-protected TableType detectorType = new TableType();
-protected TableType controlTable = new TableType();
-protected TableType seqHistWidth = new TableType();
-protected short nDet;
-protected String userName = new String("");
-protected String runTitle = new String("");
-protected int runNum;
-protected int nextRun;
-protected String startDate = new String("01-JAN-80");
-protected String startTime = new String("00:00:00");
-protected String endDate = new String("01-JAN-80");;
-protected String endTime = new String("00:00:00");
-protected char protStatus = '\0';
-protected char varToMonitor = '\0';
-protected int presetMonitorCounts;
-protected int elapsedMonitorCounts;
-protected short numOfCyclesPreset;
-protected short numOfCyclesCompleted;
-protected int runAfterFinished;
-protected int totalMonitorCounts;
-protected int detCalibFile;
-protected char detLocUnit;
-protected char pseudoTimeUnit;
-protected double sourceToSample;
-protected double sourceToChopper;
-protected int moderatorCalibFile;
-protected short groupToMonitor;
-protected short channelToMonitor;
-protected short numOfHistograms;
-protected short numOfTimeFields;
-protected short numOfControl;
-protected short controlFlag;
-protected short clockShift;
-protected int totalChannels;
-protected int numOfPulses;
-protected int sizeOfDataArea;
-protected int hardwareTMin;
-protected int hardwareTMax;
-protected int hardTimeDelay;
-protected short numOfX;
-protected short numOfY;
-protected short numOfWavelengths;
-protected int maxWavelength;
-protected int minWavelength;
-protected double dta;
-protected double dtd;
-protected double omega;
-protected double chi;
-protected double phi;
-protected double xLeft;
-protected double xRight;
-protected double yLower;
-protected double yUpper;
-protected double xDisplacement;
-protected double yDisplacement;
-protected double xLength;
-protected short areaChannelWidth;
-protected short areaDoubleInterval;
-protected int addressOf1DData;
-protected int addressOf2DData;
-protected int endOfOverflow;
-protected int channels1D;
-protected short numOfOverflows;
-protected double clockPeriod;
-protected double energyIn;
-protected double energyOut;
-protected short numOfSeqHist;
-protected double protonCurrent;
-protected short areaBinning;
-protected short microprocessor;
-protected short numOfLockouts;
-protected int firstOverflow;
-protected int expNum;
-protected int firstRun;
-protected int lastRun;
-protected int defaultRun;
-protected short samplePos;
-protected short numOfHeadBlocks;
-protected short overflowSort;
-protected double standardClock;
-protected double lpsdClock;
-protected int numOfLpsds;
-protected String iName;
-protected TableType messageRegion = new TableType();
-protected TableType discSettings = new TableType();
-protected TableType PSD_IDMap = new TableType();
-protected TableType lpsdStartTable = new TableType();
-protected TableType detectorStartTable = new TableType();
-protected TableType lpsdMapTable = new TableType();
-protected TableType lpsdTimeFieldTable = new TableType();
-protected TableType lpsdAngle = new TableType();
-protected TableType lpsdFlightPath = new TableType();
-protected TableType lpsdHeight = new TableType();
-protected TableType lpsdType = new TableType();
-protected TableType lpsdLength = new TableType();
-protected TableType lpsdWidth = new TableType();
-protected TableType lpsdDepth = new TableType();
-protected TableType detectorLength = new TableType();
-protected TableType detectorWidth = new TableType();
-protected TableType detectorDepth = new TableType();
+    protected TableType controlParameter = new TableType();
+    protected TableType detectorMapTable = new TableType();
+    protected TableType timeFieldTable = new TableType();
+    protected TableType timeScaleTable = new TableType();
+    protected TableType timeShiftTable = new TableType();
+    protected TableType areaStartTable = new TableType();
+    protected TableType timeDelayTable = new TableType();
+    protected int histStartAddress;
+    protected int numOfBlocks;
+    protected int offsetToFree;
+    protected int versionNumber;
+    protected TableType detectorAngle = new TableType();
+    protected TableType flightPath = new TableType();
+    protected TableType detectorHeight = new TableType();
+    protected TableType detectorType = new TableType();
+    protected TableType controlTable = new TableType();
+    protected TableType seqHistWidth = new TableType();
+    protected short nDet;
+    protected String userName = new String("");
+    protected String runTitle = new String("");
+    protected int runNum;
+    protected int nextRun;
+    protected String startDate = new String("01-JAN-80");
+    protected String startTime = new String("00:00:00");
+    protected String endDate = new String("01-JAN-80");;
+    protected String endTime = new String("00:00:00");
+    protected char protStatus = '\0';
+    protected char varToMonitor = '\0';
+    protected int presetMonitorCounts;
+    protected int elapsedMonitorCounts;
+    protected short numOfCyclesPreset;
+    protected short numOfCyclesCompleted;
+    protected int runAfterFinished;
+    protected int totalMonitorCounts;
+    protected int detCalibFile;
+    protected char detLocUnit;
+    protected char pseudoTimeUnit;
+    protected double sourceToSample;
+    protected double sourceToChopper;
+    protected int moderatorCalibFile;
+    protected short groupToMonitor;
+    protected short channelToMonitor;
+    protected short numOfHistograms;
+    protected short numOfTimeFields;
+    protected short numOfControl;
+    protected short controlFlag;
+    protected short clockShift;
+    protected int totalChannels;
+    protected int numOfPulses;
+    protected int sizeOfDataArea;
+    protected int hardwareTMin;
+    protected int hardwareTMax;
+    protected int hardTimeDelay;
+    protected short numOfX;
+    protected short numOfY;
+    protected short numOfWavelengths;
+    protected int maxWavelength;
+    protected int minWavelength;
+    protected double dta;
+    protected double dtd;
+    protected double omega;
+    protected double chi;
+    protected double phi;
+    protected double xLeft;
+    protected double xRight;
+    protected double yLower;
+    protected double yUpper;
+    protected double xDisplacement;
+    protected double yDisplacement;
+    protected double xLength;
+    protected short areaChannelWidth;
+    protected short areaDoubleInterval;
+    protected int addressOf1DData;
+    protected int addressOf2DData;
+    protected int endOfOverflow;
+    protected int channels1D;
+    protected short numOfOverflows;
+    protected double clockPeriod;
+    protected double energyIn;
+    protected double energyOut;
+    protected short numOfSeqHist;
+    protected double protonCurrent;
+    protected short areaBinning;
+    protected short microprocessor;
+    protected short numOfLockouts;
+    protected int firstOverflow;
+    protected int expNum;
+    protected int firstRun;
+    protected int lastRun;
+    protected int defaultRun;
+    protected short samplePos;
+    protected short numOfHeadBlocks;
+    protected short overflowSort;
+    protected double standardClock;
+    protected double lpsdClock;
+    protected int numOfLpsds;
+    protected String iName;
+    protected TableType messageRegion = new TableType();
+    protected TableType discSettings = new TableType();
+    protected TableType PSD_IDMap = new TableType();
+    protected TableType lpsdStartTable = new TableType();
+    protected TableType detectorStartTable = new TableType();
+    protected TableType lpsdMapTable = new TableType();
+    protected TableType lpsdTimeFieldTable = new TableType();
+    protected TableType lpsdAngle = new TableType();
+    protected TableType lpsdFlightPath = new TableType();
+    protected TableType lpsdHeight = new TableType();
+    protected TableType lpsdType = new TableType();
+    protected TableType lpsdLength = new TableType();
+    protected TableType lpsdWidth = new TableType();
+    protected TableType lpsdDepth = new TableType();
+    protected TableType detectorLength = new TableType();
+    protected TableType detectorWidth = new TableType();
+    protected TableType detectorDepth = new TableType();
+    protected TableType detectorSGMap = new TableType();
+    protected TableType detCoordSys = new TableType();
+    protected TableType detectorRot1 = new TableType();
+    protected TableType detectorRot2 = new TableType();
+    protected TableType detectorEfficiency = new TableType();
+    protected TableType psdOrder = new TableType();
+    protected TableType numSegs1 = new TableType();
+    protected TableType numSegs2 = new TableType();
 
-// --------------------------- readUnsignedInteger -------------------
+    // --------------------------- readUnsignedInteger -------------------
 
-  protected int readUnsignedInteger(RandomAccessFile inFile,
-   int length) throws IOException {
+    protected int readUnsignedInteger(RandomAccessFile inFile,
+				      int length) throws IOException {
 
-    byte b[] = new byte[length];
-    int c[] = new int[length];
-    int nBytesRead = inFile.read(b, 0, length);
-    int num = 0;
-    for (int i = 0; i < length; ++i) {
-       if(b[i] < 0) {
-        c[i] = b[i] + 256;
-      }
-      else {
-        c[i] = b[i];
-      }
-      num += c[i] * (int)Math.pow(256.0, (double)i);
+	byte b[] = new byte[length];
+	int c[] = new int[length];
+	int nBytesRead = inFile.read(b, 0, length);
+	int num = 0;
+	for (int i = 0; i < length; ++i) {
+	    if(b[i] < 0) {
+		c[i] = b[i] + 256;
+	    }
+	    else {
+		c[i] = b[i];
+	    }
+	    num += c[i] * (int)Math.pow(256.0, (double)i);
+	}
+	return num;
     }
-    return num;
-  }
 
-// ---------------------------- ReadVAXReal4 ------------------------
+    // ---------------------------- ReadVAXReal4 ------------------------
 
-  protected double ReadVAXReal4(RandomAccessFile inFile)
-   throws IOException {
+    protected double ReadVAXReal4(RandomAccessFile inFile)
+	throws IOException {
 
         int length = 4;
         long hi_mant, low_mant, exp, sign;
         double f_val;
         long val = (long )readUnsignedInteger(inFile, length);
         if (val < 0) {
-	   val = val + (long)Math.pow(2.0, (double)32);
-	   }
-/* add 128 to put in the implied 1 */
+	    val = val + (long)Math.pow(2.0, (double)32);
+	}
+	/* add 128 to put in the implied 1 */
         hi_mant  = (val & 127) + 128;
         val      = val >> 7;
-/* exponent is "excess 128" */
+	/* exponent is "excess 128" */
         exp      = ((int)(val & 255)) - 128;
         val      = val >> 8;
 
         sign     = val & 1;
         low_mant = val >> 1;
-/* This could also be a "reserved" operand of some sort?*/
+	/* This could also be a "reserved" operand of some sort?*/
         if ( exp == -128 )
-          f_val = 0;
+	    f_val = 0;
         else
-          f_val = (hi_mant / 256.0 + low_mant / 16777216.0) *
-            Math.pow(2.0, (double)exp );
+	    f_val = (hi_mant / 256.0 + low_mant / 16777216.0) *
+		Math.pow(2.0, (double)exp );
 
         if ( sign == 1 )
-          f_val = -f_val;
+	    f_val = -f_val;
         return f_val;
-  }
+    }
 
 
 public static void main(String[] args) throws IOException{
@@ -449,9 +460,33 @@ public static void main(String[] args) throws IOException{
 	System.out.println("detectorDepth:        " +  
 				header.detectorDepth.location +
 				", " + header.detectorDepth.size);
-
 	System.out.println("iName:                " +
 			        header.iName );
+	System.out.println("detectorSGMap:        " +  
+				header.detectorSGMap.location +
+				", " + header.detectorSGMap.size);
+	System.out.println("detCoordSys:          " +  
+				header.detCoordSys.location +
+				", " + header.detCoordSys.size);
+	System.out.println("detectorRot1:         " +  
+				header.detectorRot1.location +
+				", " + header.detectorRot1.size);
+	System.out.println("detectorRot2:         " +  
+				header.detectorRot2.location +
+				", " + header.detectorRot2.size);
+	System.out.println("detectorEfficiency:   " +  
+				header.detectorEfficiency.location +
+				", " + header.detectorEfficiency.size);
+	System.out.println("psdOrder:             " +  
+				header.psdOrder.location +
+				", " + header.psdOrder.size);
+	System.out.println("numSegs1:             " +  
+				header.numSegs1.location +
+				", " + header.numSegs1.size);
+	System.out.println("numSegs2:             " +  
+				header.numSegs2.location +
+				", " + header.numSegs2.size);
+
 	}
 
     protected Header() {
@@ -926,7 +961,23 @@ public static void main(String[] args) throws IOException{
 		temp = new byte[4];
 		runfile.read(temp, 0, 4);
 		iName = new String(temp);
-		
+		detectorSGMap.location = runfile.readInt();
+		detectorSGMap.size = runfile.readInt();
+		detCoordSys.location = runfile.readInt();
+		detCoordSys.size = runfile.readInt();
+		detectorRot1.location = runfile.readInt();
+		detectorRot1.size = runfile.readInt();
+		detectorRot2.location = runfile.readInt();
+		detectorRot2.size = runfile.readInt();
+		detectorEfficiency.location = runfile.readInt();
+		detectorEfficiency.size = runfile.readInt();
+		psdOrder.location = runfile.readInt();
+		psdOrder.size = runfile.readInt();
+		numSegs1.location = runfile.readInt();
+		numSegs1.size = runfile.readInt();
+		numSegs2.location = runfile.readInt();
+		numSegs2.size = runfile.readInt();
+
     }
 
     public void Write( RandomAccessFile runfile ) {
@@ -1076,6 +1127,22 @@ public static void main(String[] args) throws IOException{
 		runfile.writeInt( detectorDepth.location );
 		runfile.writeInt( detectorDepth.size );
 		runfile.writeBytes( iName.substring( 0, 4 ) );
+		runfile.writeInt( detectorSGMap.location );
+		runfile.writeInt( detectorSGMap.size );
+		runfile.writeInt( detCoordSys.location );
+		runfile.writeInt( detCoordSys.size );
+		runfile.writeInt( detectorRot1.location );
+		runfile.writeInt( detectorRot1.size );
+		runfile.writeInt( detectorRot2.location );
+		runfile.writeInt( detectorRot2.size );
+		runfile.writeInt( detectorEfficiency.location );
+		runfile.writeInt( detectorEfficiency.size );
+		runfile.writeInt( psdOrder.location );
+		runfile.writeInt( psdOrder.size );
+		runfile.writeInt( numSegs1.location );
+		runfile.writeInt( numSegs1.size );
+		runfile.writeInt( numSegs2.location );
+		runfile.writeInt( numSegs2.size );
 		runfile.seek(1532);
 		runfile.writeInt( (int)0 );
 		
@@ -1087,7 +1154,7 @@ public static void main(String[] args) throws IOException{
 
     public Object clone() {
 	try {
-	    Runfile copy = (Runfile)super.clone();
+	    Header copy = (Header)super.clone();
 
 	    return copy;
 
