@@ -31,6 +31,9 @@
  * Modified:
  *
  * $Log$
+ * Revision 1.3  2002/03/15 00:38:45  hammonds
+ * Made changes to reflect change of Data Object.  Now use Data.getInstance()
+ *
  * Revision 1.2  2002/02/23 13:53:48  hammonds
  * Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
  *
@@ -179,7 +182,7 @@ public class RawDASLoad extends GenericLoad
 	  // DataSet will give the DataSet a
 	  // set of operators.
 	  
-	  Data    d  = new Data( new VariableXScale(x), y, ii+1 );
+	  Data    d  = Data.getInstance( new VariableXScale(x), y, ii+1 );
 	  ds.addData_entry( d );
 
       }
