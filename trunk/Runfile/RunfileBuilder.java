@@ -9,6 +9,10 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.25  2001/10/31 22:07:47  hammonds
+ * Changed how control parameters are written to a file to account for the fact that a place holder was added for a database record for the deviceName to be stored.
+ * Also added methods that allow a header parameter to be changed.
+ *
  * Revision 5.24  2001/10/29 17:54:05  hammonds
  * Runfiles can now be written to version 5 files.
  *
@@ -1866,8 +1870,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	int size = 0;
 	Parameter[] userPars = par.getUserParameters();
 	Parameter[] instPars = par.getInstParameters();
-	int devInfoSize = 97; 
+	int devInfoSize = 113; 
 	// 16 bytes deviceName
+	// 16 bytes deviceNameDbSignal
 	// 16 bytes controllerName
 	// 16 bytes dbDevice
 	// 16 bytes vetoSignal
@@ -1897,6 +1902,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				ParameterFile par ) throws IOException {
 	try {
 	    runfile.writeBytes( fixLength( par.getDeviceName(), 16));
+	    runfile.writeBytes( fixLength( par.getDeviceNameDbSignal(), 16));
 	    runfile.writeBytes( fixLength( par.getControllerName(), 16));
 	    runfile.writeBytes( fixLength( par.getDbDevice(), 16));
 	    runfile.writeBytes( fixLength( par.getVetoSignal(), 16));
@@ -1960,4 +1966,29 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    tempBuff.setLength(length);
 	    return( new String(tempBuff));
     }
+    
+    /** 
+	Modify a parameter in an already written runfile header
+    */
+    public void ModifyHeaderElement( String element, double value ) {
+	headerSet( element, value );
+        header.reWrite(runfileName);
+    }
+    public void ModifyHeaderElement( String element, float value ) {
+	headerSet( element, value );
+        header.reWrite(runfileName);
+    }
+    public void ModifyHeaderElement( String element, int value ) {
+	headerSet( element, value );
+        header.reWrite(runfileName);
+    }
+    public void ModifyHeaderElement( String element, short value ) {
+	headerSet( element, value );
+        header.reWrite(runfileName);
+    }
+    public void ModifyHeaderElement( String element, String value ) {
+	headerSet( element, value );
+        header.reWrite(runfileName);
+    }
+
 }
