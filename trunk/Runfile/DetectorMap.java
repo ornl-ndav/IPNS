@@ -16,6 +16,7 @@ class DetectorMap{
     int moreHistBit;
 
     String iName;
+    int versionNumber;
     /**
        This function provides a test method for this class' functionality.  It
        will provide a sampling of the information that is retrieved as a new 
@@ -66,9 +67,9 @@ class DetectorMap{
 	}
 	
 	iName = new String( header.iName );
-
-	if ( !iName.equalsIgnoreCase("glad") &&
-	     !iName.equalsIgnoreCase("lpsd") ) {
+	versionNumber = header.versionNumber;
+	if ( (!iName.equalsIgnoreCase("glad") &&
+	     !iName.equalsIgnoreCase("lpsd")) || versionNumber >=5 ) {
 
 	    address = temp & 0x7FFFFF;
 	    tfType = (temp >> 24) & 0xFF;
@@ -94,8 +95,8 @@ class DetectorMap{
 
     protected void Write ( RandomAccessFile runfile ) throws IOException {
 	int tfEntry;
-	if ( !iName.equalsIgnoreCase("glad") &&
-	     !iName.equalsIgnoreCase("lpsd") ) {
+	if ( (!iName.equalsIgnoreCase("glad") &&
+	     !iName.equalsIgnoreCase("lpsd")) || versionNumber >= 5 ) {
 
 	    tfEntry = ( address & 0x7FFFFF ) | ( (tfType << 24) & 0xFF000000 )
 		| ( (moreHistBit << 23)  &  0x800000 );
