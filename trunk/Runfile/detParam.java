@@ -43,8 +43,8 @@ public detParam(Runfile runFile){
      detParamList[i][4] = new Float((float)runFile.DetectorAngle( i + 1, (int)1 ));
      detParamList[i][5] = new Float((float)runFile.DetectorHeight( i + 1 ));
      detParamList[i][6] = new Integer((short)runFile.DetectorType( i + 1 ));
-     detParamList[i][7] = new Short((short)runFile.LowerLevelDisc(i + 1));
-     detParamList[i][8] = new Short((short)runFile.UpperLevelDisc(i + 1));
+     detParamList[i][7] = new Integer((int)runFile.LowerLevelDisc(i + 1));
+     detParamList[i][8] = new Integer((int)runFile.UpperLevelDisc(i + 1));
      }
 
    String[] columnHeading = {"ID", "Raw Length", "Length", "Raw Angle",
