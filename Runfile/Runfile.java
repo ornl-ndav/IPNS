@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.46  2004/04/16 15:18:19  hammonds
+ * Fix problem TimeField Type.  NEver got properly converted to Segments.
+ *
  * Revision 6.45  2003/10/15 02:17:43  hammonds
  * Fix problems with Javadocs.
  *
@@ -4199,7 +4202,7 @@ public class Runfile implements Cloneable {
 	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
 	
-	    index  = detID + (hist-1) * this.header.nDet;
+	    index  = seg.segID + (hist-1) * this.header.numOfElements;
 	    return this.detectorMap[index].tfType;
 	}
 	else {
