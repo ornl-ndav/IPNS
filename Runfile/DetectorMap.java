@@ -54,35 +54,41 @@ class DetectorMap{
     protected  DetectorMap(RandomAccessFile runfile, int id, 
 			   Header header ) throws IOException{
 	long startingPosition;
-	int temp;
+	int temp = 0;
 
 	startingPosition = runfile.getFilePointer();
 	runfile.seek( header.detectorMapTable.location + (id - 1) * 4);
-
+	
 	if ( header.versionNumber <= 4 ) {
 	    temp = header.readUnsignedInteger(runfile, 4);
 	}
-	else {
+	else if ( header.versionNumber < 6 ){
 	    temp = runfile.readInt();
 	}
-	
-	iName = new String( header.iName );
-	versionNumber = header.versionNumber;
-	if ( (!iName.equalsIgnoreCase("glad") &&
-	     !iName.equalsIgnoreCase("lpsd")) || versionNumber >=5 ) {
-
-	    address = temp & 0x7FFFFF;
-	    tfType = (temp >> 24) & 0xFF;
-	    moreHistBit = (temp >> 23) & 0x1;
-	}
 	else {
-
-	    address = temp & 0xFFFF;
-	    address = address << 8;
-	    tfType = (temp >> 24) & 0xFF;
-	    moreHistBit = (temp >> 23) & 0x1;
-	}	    
-	    
+	    address = runfile.readInt();
+	    tfType = runfile.readShort();
+	    moreHistBit = runfile.readShort();
+	}
+	
+	if ( header.versionNumber < 6 ) {
+	    iName = new String( header.iName );
+	    versionNumber = header.versionNumber;
+	    if ( (!iName.equalsIgnoreCase("glad") &&
+		  !iName.equalsIgnoreCase("lpsd")) || versionNumber >=5 ) {
+		
+		address = temp & 0x7FFFFF;
+		tfType = (temp >> 24) & 0xFF;
+		moreHistBit = (temp >> 23) & 0x1;
+	    }
+	    else {
+		
+		address = temp & 0xFFFF;
+		address = address << 8;
+		tfType = (temp >> 24) & 0xFF;
+		moreHistBit = (temp >> 23) & 0x1;
+	    }	    
+	}
 	runfile.seek(startingPosition);
     }
 
@@ -93,20 +99,34 @@ class DetectorMap{
 	this.iName = new String( iName );
     }
 
+    protected DetectorMap(String iName, int versionNumber) {
+	this.iName = new String( iName );
+	this.versionNumber = versionNumber;
+    }
+
     protected void Write ( RandomAccessFile runfile ) throws IOException {
 	int tfEntry;
-	if ( (!iName.equalsIgnoreCase("glad") &&
-	     !iName.equalsIgnoreCase("lpsd")) || versionNumber >= 5 ) {
-
-	    tfEntry = ( address & 0x7FFFFF ) | ( (tfType << 24) & 0xFF000000 )
-		| ( (moreHistBit << 23)  &  0x800000 );
+	if ( versionNumber < 6) {
+	    if ( (!iName.equalsIgnoreCase("glad") &&
+		  !iName.equalsIgnoreCase("lpsd")) 
+		 || versionNumber >= 5 ) {
+		
+		tfEntry = ( address & 0x7FFFFF ) 
+		    | ( (tfType << 24) & 0xFF000000 )
+		    | ( (moreHistBit << 23)  &  0x800000 );
+	    }
+	    else {
+		tfEntry = ( address & 0x7FFFFF ) 
+		    | ( (tfType << 24) & 0xFF000000 )
+		    | ( (moreHistBit << 23)  &  0x800000 );
+	    }
+	    runfile.writeInt( tfEntry );
 	}
 	else {
-	    tfEntry = ( address & 0x7FFFFF ) | ( (tfType << 24) & 0xFF000000 )
-		| ( (moreHistBit << 23)  &  0x800000 );
+	    runfile.writeInt( address );
+	    runfile.writeShort( tfType );
+	    runfile.writeShort( moreHistBit );
 	}
-	    runfile.writeInt( tfEntry );
-	
     }
 
     protected boolean isEqual( DetectorMap mapToCompare ) {
