@@ -23,6 +23,11 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.14  2002/07/02 14:43:34  hammonds
+ * Fixed problem where detector ID 1 must be binned.
+ * Fixed problem with SAD/SAND transmission runs.
+ * Removed diagnostic lines.
+ *
  * Revision 6.13  2002/04/25 14:55:17  hammonds
  * remove one more comment.
  *
@@ -639,6 +644,9 @@ public class Runfile implements Cloneable {
 		    else if ((header.numOfX == 128) && (header.numOfY == 128)) {
 			detectorType[ detectorType.length - 1 ] = 13;
 		    }
+		    else if ((header.numOfX == 1) && (header.numOfY == 1)) {
+			detectorType[ detectorType.length - 1 ] = 13;
+		    }
 
 		}
 		else if ( (this.header.iName).equalsIgnoreCase("sand") ){
@@ -665,24 +673,26 @@ public class Runfile implements Cloneable {
 		}
 		else if ( header.iName.equalsIgnoreCase( "hrcs" ) || 
 			  header.iName.equalsIgnoreCase( "lrcs" ) ) {
-		    switch (detectorType[ii]){
-		    case 0: {
-			if ( ii < 3 )
-			detectorType[ii] = 1;
-			break;
-		    }
-		    case 1: {
-			detectorType[ii] = 2;
-			break;
-		    }
-		    case 2: {
-			detectorType[ii] = 3;
-			break;
-		    }
-		    case 5: {
-			detectorType[ii] = 4;
-			break;
-		    }
+		    if ( header.versionNumber < 4) {
+			switch (detectorType[ii]){
+			case 0: {
+			    if ( ii < 3 )
+				detectorType[ii] = 1;
+			    break;
+			}
+			case 1: {
+			    detectorType[ii] = 2;
+			    break;
+			}
+			case 2: {
+			    detectorType[ii] = 3;
+			    break;
+			}
+			case 5: {
+			    detectorType[ii] = 4;
+			    break;
+			}
+			}
 		    }
 		}
 		else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
@@ -816,12 +826,19 @@ public class Runfile implements Cloneable {
 		    case 13: {
 			if ((header.numOfX == 64) && (header.numOfY == 64)) {
 			    detectorType[ii] = 12;
+			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			}
 			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
 			    detectorType[ii] = 13;
+			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			}
-			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+			else if ((header.numOfX == 1) && (header.numOfY == 1)) {
+			    detectorType[ii] = 12;
+			    psdOrder[ii] = 1;
+			    numSegs2[ii] = 1;
+			}
 			break;
 		    }
 		    }
@@ -835,8 +852,22 @@ public class Runfile implements Cloneable {
 		    }
 		    case 13: {
 			detectorType[ii] = 13;
-			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+			if ((header.numOfX == 64) && (header.numOfY == 64)) {
+			    detectorType[ii] = 12;
+			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+			}
+			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
+			    detectorType[ii] = 13;
+			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+			}
+			else if ((header.numOfX == 1) && (header.numOfY == 1)) {
+			    detectorType[ii] = 13;
+			    psdOrder[ii] = 2;
+			    numSegs1[ii] = 1;
+			    numSegs2[ii] = 1;
+			}
 			break;
 		    }
 		    }
@@ -905,7 +936,7 @@ public class Runfile implements Cloneable {
 		    case 13:
 		    case 15:
 		    case 16: {
-			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			//			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
 			detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
 			detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
@@ -1141,9 +1172,9 @@ public class Runfile implements Cloneable {
 			    }
 			}
 			     else { 
-				System .out.println("Adding groups for Area "+
+				 /*				System .out.println("Adding groups for Area "+
 						    "elements " + group + 
-						    " already." );
+						    " already." );*/
 				int segX = numSegs1[nDet];
 				int segY = numSegs2[nDet];
 				int [][] tempMap = new int[group +
@@ -1675,13 +1706,14 @@ public class Runfile implements Cloneable {
 	for ( i = 0; i < this.header.numOfHistograms; i++ ) {
 	    for (int jj = 0; jj < this.header.numOfElements; jj++ ) {
 		IDMap[i][jj] = runfile.readInt();
+		//		System.out.println( "IDMap["+i+"][" +jj +"] = " + IDMap[i][jj]);
 		subgroupIDList[(i)* this.header.numOfElements + jj]  = IDMap[i][jj];
 		if ( IDMap[i][jj] > maxSubgroupID[i + 1]){
 		    maxSubgroupID[i + 1] = IDMap[i][jj];
 		}
 		if ( (IDMap[i][jj] < minSubgroupID[i + 1] 
-		      && IDMap[i][jj] > 0 ) 
-		     || minSubgroupID[i + 1] == 0 ) {
+		      || minSubgroupID[i + 1] == 0)
+		      && (IDMap[i][jj] > 0)  ) {
 		    minSubgroupID[i+1] = IDMap[i][jj];
 		}
 	    }
@@ -3737,6 +3769,8 @@ public class Runfile implements Cloneable {
        @return A list of detector IDs
     */
     public int[] IdsInSubgroup( int sg ) {
+	System.out.println("subgroupMap.length : " + subgroupMap.length);
+	System.out.println("sg: " + sg);
 	return subgroupMap[sg];
     }
 
@@ -4265,6 +4299,14 @@ public class Runfile implements Cloneable {
     public ParameterFile[] getControlParams() {
 	return params;
     }
+
+    /** 
+	returns instrument name from the header 
+    */
+    public String iName() {
+	return header.iName;
+    }
+
 }
 
    
