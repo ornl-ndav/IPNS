@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.7  2000/02/23 23:33:27  hammonds
+ * Fixed Some problems with subgroup maps in new files.
+ *
  * Revision 5.6  2000/02/23 04:52:50  hammonds
  * Made changes to fix problems with setting up a run from a default run.  Subgroup Map was not being read and there was a problem with disc levels.
  *
@@ -666,12 +669,37 @@ public class Runfile implements Cloneable {
 	    }
 
 	runfile.seek(this.header.detectorSGMap.location );
-	subgroupMap = 
+	int [][] IDMap = 
 	    new int[this.header.numOfHistograms][this.header.nDet];
+	minSubgroupID = new int[this.header.numOfHistograms + 1];
+	maxSubgroupID = new int[this.header.numOfHistograms + 1];
 	for ( i = 0; i < this.header.numOfHistograms; i++ ) {
 	    for (int jj = 0; jj < this.header.nDet; jj++ ) {
-		subgroupMap[i][jj] = runfile.readInt();
+		IDMap[i][jj] = runfile.readInt();
+		if ( IDMap[i][jj] > maxSubgroupID[i + 1]){
+		    maxSubgroupID[i + 1] = IDMap[i][jj];
+		}
+		if ( IDMap[i][jj] < minSubgroupID[i + 1] 
+		     || minSubgroupID[i + 1] == 0 ) {
+		    minSubgroupID[i+1] = IDMap[i][jj];
+		}
 	    }
+	}
+	subgroupMap = 
+	    new int[maxSubgroupID[this.header.numOfHistograms]+ 1][];
+	for ( i = 1 ; i <= maxSubgroupID[this.header.numOfHistograms]; i++ ) {
+	    int[] idList = new int[0];
+	    for ( int jj = 0; jj < this.header.numOfHistograms; jj++ ) {
+		for ( int kk = 0; kk < this.header.nDet; kk++ ) {
+		    if ( IDMap[jj][kk] == i ) {
+			int[] temp = new int[ idList.length + 1];
+			System.arraycopy( idList, 0, temp, 0, idList.length );
+			temp[idList.length] = kk + 1;
+ 			idList = temp;
+		    } 
+		}
+	    }
+	    subgroupMap[i] = idList;
 	}
 
 	runfile.seek(this.header.timeScaleTable.location);
