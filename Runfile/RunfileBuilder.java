@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.38  2001/12/03 18:02:49  hammonds
+ * Refix problem with start addresses for detectors.
+ *
  * Revision 5.37  2001/12/03 17:31:11  chatterjee
  * Added a method to group detectors by angles, groupIdsByAngle.
  *
@@ -1784,7 +1787,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		
 		detectorMap[index].tfType= tf;
 		detectorMap[index].address = header.channels1D;
-		header.channels1D += timeField[tf].numOfChannels * 4;
+		header.channels1D += timeField[tf].numOfChannels * 4 +4;
  		
 	    }
 	    else {
@@ -1881,7 +1884,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			    detectorMap[index].tfType= tf;
 			    detectorMap[index].address = header.channels1D;
 			    header.channels1D += timeField[tf].numOfChannels *
-				4;
+				4 + 4;
 			    subgroupMap = tempMap;
 			    if (minSubgroupID[hist ] > (subgroupMap.length -1)
 				|| minSubgroupID[hist] == 0 ) 
