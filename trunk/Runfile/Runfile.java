@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.47  2001/12/11 22:13:59  hammonds
+ * Fixed problem with segments in old GLAD files.
+ *
  * Revision 5.46  2001/12/11 18:41:30  hammonds
  * Changes from detectorID to segment mapping for LPSDs
  *
@@ -915,6 +918,7 @@ public class Runfile implements Cloneable {
 					DEPTH[7]; 
 				    segments[tminID + ll].efficiency = 
 					EFFICIENCY[7]; 
+				    segments[tminID + ll].segID = tminID + ll;
 				    gladbank[tminID + ll] = jj;
 				    gladdetinbank[tminID + ll] = kk;
 				}
@@ -2966,7 +2970,7 @@ public class Runfile implements Cloneable {
     */
     public int NumChannelsBinned(int subgroup) throws IOException{
 	int hist=0;
-	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
+	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.numOfElements) 
 	    return -1;
 	Segment[] segsInSg = SegsInSubgroup(subgroup);
 	Segment seg = segsInSg[0];
@@ -2987,7 +2991,7 @@ public class Runfile implements Cloneable {
     public int NumChannelsBinned( Segment seg, int hist )  {
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    int index = ( hist - 1 ) * header.nDet + id;
+	    int index = ( hist - 1 ) * header.numOfElements + seg.segID;
 	    int tfType = detectorMap[index].tfType;
 	    int nch = (int)(timeField[tfType].NumOfChannels());
 	    return nch;
@@ -3024,7 +3028,7 @@ public class Runfile implements Cloneable {
     */
     public double MinBinned(int subgroup) throws IOException{
 	int hist=0;
-	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
+	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.numOfElements) 
 	    return -9999;
 	Segment[] segsInSg = SegsInSubgroup(subgroup);
 	Segment seg = segsInSg[0];
@@ -3045,7 +3049,7 @@ public class Runfile implements Cloneable {
     public double MinBinned( Segment seg, int hist ) {
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    int index = ( hist - 1 ) * header.nDet + id;
+	    int index = ( hist - 1 ) * header.numOfElements + seg.segID;
 	    int tfType = detectorMap[index].tfType;
 	    return timeField[tfType].tMin;
 	}
@@ -3075,7 +3079,7 @@ public class Runfile implements Cloneable {
     */
     public double MaxBinned(int subgroup) throws IOException{
 	int hist=0;
-	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
+	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.numOfElements) 
 	    return -9999.;
 	Segment[] segsInSg = SegsInSubgroup(subgroup);
 	Segment seg = segsInSg[0];
@@ -3097,7 +3101,7 @@ public class Runfile implements Cloneable {
     public double MaxBinned( Segment seg, int hist ) {
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    int index = ( hist - 1 ) * header.nDet + id;
+	    int index = ( hist - 1 ) * header.numOfElements + seg.segID;
 	    int tfType = detectorMap[index].tfType;
 	    return timeField[tfType].tMax;
 	}
@@ -3197,7 +3201,7 @@ public class Runfile implements Cloneable {
 	int id = seg.detID;
 	if ( id > header.numOfElements || 
 	     hist > header.numOfHistograms ) return null;
-	int index = header.numOfSegments * (hist - 1) + seg.segID;
+	int index = header.numOfElements * (hist - 1) + seg.segID;
 
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    if (detectorMap[index].tfType == 0 ) {
