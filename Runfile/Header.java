@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.6  2001/04/03 20:45:07  hammonds
+ * added detector dataSource and minID tables.
+ *
  * Revision 5.5  2001/03/15 17:24:53  hammonds
  * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
  *
@@ -162,6 +165,8 @@ public class Header implements Cloneable {
     protected TableType crateNum = new TableType();
     protected TableType slotNum = new TableType();
     protected TableType inputNum = new TableType();
+    protected TableType dataSource = new TableType();
+    protected TableType minID = new TableType();
 
     // --------------------------- readUnsignedInteger -------------------
 
@@ -1026,6 +1031,10 @@ public static void main(String[] args) throws IOException{
 		slotNum.size = runfile.readInt();
 		inputNum.location = runfile.readInt();
 		inputNum.size = runfile.readInt();
+		dataSource.location = runfile.readInt();
+		dataSource.size = runfile.readInt();
+		minID.location = runfile.readInt();
+		minID.size = runfile.readInt();
 		
     }
 
@@ -1198,6 +1207,10 @@ public static void main(String[] args) throws IOException{
 		runfile.writeInt( slotNum.size );
 		runfile.writeInt( inputNum.location );
 		runfile.writeInt( inputNum.size );
+		runfile.writeInt( dataSource.location );
+		runfile.writeInt( dataSource.size );
+		runfile.writeInt( minID.location );
+		runfile.writeInt( minID.size );
 		runfile.seek(1532);
 		runfile.writeInt( (int)0 );
 		
