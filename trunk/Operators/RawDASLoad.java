@@ -31,6 +31,9 @@
  * Modified:
  *
  * $Log$
+ * Revision 1.5  2003/03/12 03:29:52  hammonds
+ * Cleanup imports.
+ *
  * Revision 1.4  2002/07/08 14:35:57  hammonds
  * Use byte buffers to speed up file access.
  *
@@ -47,13 +50,20 @@
  */
 package IPNS.Operators;
 
-import DataSetTools.operator.*;
-import DataSetTools.operator.Generic.Load.*;
-import DataSetTools.util.*;
-import DataSetTools.dataset.*;
-import DataSetTools.viewer.*;
-import java.util.*;
-import java.io.*;
+import DataSetTools.operator.Operator;
+import DataSetTools.operator.Parameter;
+import DataSetTools.operator.Generic.Load.GenericLoad;
+import DataSetTools.util.ErrorString;
+import DataSetTools.dataset.DataSet;
+import DataSetTools.dataset.Data;
+import DataSetTools.dataset.DataSetFactory;
+import DataSetTools.dataset.VariableXScale;
+import DataSetTools.viewer.ViewManager;
+import DataSetTools.viewer.IViewManager;
+import java.util.Vector;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.RandomAccessFile;
 /** 
  *    This operator provides an example of an operator that reads data from
  *  from an ASCII text file and stores the data stored in a DataSet.  The data

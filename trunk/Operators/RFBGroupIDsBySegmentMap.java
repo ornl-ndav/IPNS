@@ -33,6 +33,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2003/03/12 03:29:52  hammonds
+ *  Cleanup imports.
+ *
  *  Revision 1.2  2002/02/25 17:33:44  hammonds
  *  Added new import for change in Generic Batch location
  *
@@ -45,11 +48,11 @@
 
 package IPNS.Operators;
 
-import  java.io.*;
-import  java.util.*;
-import  DataSetTools.operator.*;
-import  DataSetTools.operator.Generic.Batch.*;
-import  IPNS.Runfile.*;
+import  java.io.Serializable;
+import  java.util.Vector;
+import  DataSetTools.operator.Parameter;
+import  DataSetTools.operator.Generic.Batch.GenericBatch;
+import  IPNS.Runfile.RunfileBuilder;
 
 /**
  * This operator instantiates IPNS.RunfileBuilder.
