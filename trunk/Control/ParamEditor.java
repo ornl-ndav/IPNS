@@ -28,7 +28,6 @@ public class ParamEditor extends JFrame implements ActionListener{
 	tabby.addTab("Inst Parameters", null, instPane, "Inst Parameters");
 	getContentPane().add(tabby);
 	pack();
-	show();
     }
 
     private JMenuItem makeMenuItem( String name ) {
