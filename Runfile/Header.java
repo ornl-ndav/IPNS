@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.9  2001/07/20 20:03:56  hammonds
+ * Added methods for setting the values in the Header from the Runfile.  Setting these involves.  Also made some small changes that will allow a runfile with a header to be constructed from the main method of RunfileBuilder.
+ *
  * Revision 5.8  2001/07/18 18:41:46  hammonds
  * Added a request for debug messages to be printed.  Added extra output in the main method.
  *
@@ -55,7 +58,7 @@ public class Header implements Cloneable {
     protected int histStartAddress;
     protected int numOfBlocks;
     protected int offsetToFree;
-    protected int versionNumber;
+    protected int versionNumber = 5;
     protected TableType detectorAngle = new TableType();
     protected TableType flightPath = new TableType();
     protected TableType detectorHeight = new TableType();
@@ -141,7 +144,7 @@ public class Header implements Cloneable {
     protected double standardClock;
     protected double lpsdClock;
     protected int numOfElements;
-    protected String iName;
+    protected String iName = new String("    ");
     protected int MagicNumber;
     protected TableType messageRegion = new TableType();
     protected TableType discSettings = new TableType();
@@ -1059,6 +1062,599 @@ public static void main(String[] args) throws IOException{
 		minID.location = runfile.readInt();
 		minID.size = runfile.readInt();
 		
+    }
+
+   protected int set( String element, double val  ) {
+	int errval = 0;
+	if (element.equalsIgnoreCase( "sourceToSample") ){
+	    sourceToSample = val;
+	}
+	else if ( element.equalsIgnoreCase( "sourceToChopper") ){
+	    sourceToChopper = val;
+	}
+	else if ( element.equalsIgnoreCase( "dta") ) {
+	    dta = val;
+	}
+	else if ( element.equalsIgnoreCase( "dtd") ) {
+	    dtd = val;
+	}
+	else if ( element.equalsIgnoreCase( "omega") ) {
+	    omega = val;
+	}
+	else if ( element.equalsIgnoreCase( "chi") ) {
+	    chi = val;
+	}
+	else if ( element.equalsIgnoreCase( "phi") ) {
+	    phi = val;
+	}
+	else if ( element.equalsIgnoreCase( "xLeft") ) {
+	    xLeft = val;
+	}
+	else if ( element.equalsIgnoreCase( "xRight") ) {
+	    xRight = val;
+	}
+	else if ( element.equalsIgnoreCase( "yLower") ) {
+	    yLower = val;
+	}
+	else if ( element.equalsIgnoreCase( "yUpper") ) {
+	    yUpper = val;
+	}
+	else if ( element.equalsIgnoreCase( "xDisplacement") ) {
+	    xDisplacement = val;
+	}
+	else if ( element.equalsIgnoreCase( "yDisplacement") ) {
+	    yDisplacement = val;
+	}
+	else if ( element.equalsIgnoreCase( "xLength") ) {
+	    xLength = val;
+	}
+	else if ( element.equalsIgnoreCase( "clockPeriod") ) {
+	    clockPeriod = val;
+	}
+	else if ( element.equalsIgnoreCase( "energyIn") ) {
+	    energyIn = val;
+	}
+	else if ( element.equalsIgnoreCase( "energyOut") ) {
+	    energyOut = val;
+	}
+	else if ( element.equalsIgnoreCase( "protonCurrent") ) {
+	    protonCurrent = val;
+	}
+	else if ( element.equalsIgnoreCase( "standardClock") ) {
+	    standardClock = val;
+	}
+	else if ( element.equalsIgnoreCase( "lpsdClock")) {
+	    lpsdClock = val;
+	}
+	if ( ( element.equalsIgnoreCase( "nDet") ||
+	    element.equalsIgnoreCase( "numOfCyclesPreset") ||
+	    element.equalsIgnoreCase( "numOfCyclesCompleted") ||
+	    element.equalsIgnoreCase( "groupToMonitor") ||
+	    element.equalsIgnoreCase( "channelToMonitor") ||
+	    element.equalsIgnoreCase( "numOfHistograms") ||
+	    element.equalsIgnoreCase( "numOfTimeFields") ||
+	    element.equalsIgnoreCase( "numOfControl") ||
+	    element.equalsIgnoreCase( "controlFlag") ||
+	    element.equalsIgnoreCase( "clockShift") ||
+	    element.equalsIgnoreCase( "numOfX") ||
+	    element.equalsIgnoreCase( "numOfY")  ||
+	    element.equalsIgnoreCase( "numOfWavelengths") || 
+	    element.equalsIgnoreCase( "areaChannelWidth") ||
+	    element.equalsIgnoreCase( "areaDoubleWidth") ||
+	    element.equalsIgnoreCase( "numOfSeqHist") ||
+	    element.equalsIgnoreCase( "areaBinning") ||
+	    element.equalsIgnoreCase( "microprocessor") ||
+	    element.equalsIgnoreCase( "numOfOverflows") ||
+	    element.equalsIgnoreCase( "numOfLockouts") ||
+	    element.equalsIgnoreCase( "samplePos") ||
+	    element.equalsIgnoreCase( "numOfHeadBlocks") ||
+	    element.equalsIgnoreCase( "overflowSort") ) &&
+		  (val <= 32767 && val >= -32768) ) {
+	    set( element, (short)val );
+	}
+	else if ( (element.equalsIgnoreCase( "numOfBlocks") ||
+	    element.equalsIgnoreCase( "histStartAddress") ||
+	    element.equalsIgnoreCase( "offsetToFree") ||
+	    element.equalsIgnoreCase( "versionNumber") ||
+	    element.equalsIgnoreCase( "runNum") ||
+	    element.equalsIgnoreCase( "nextRun") ||
+	    element.equalsIgnoreCase( "presetMonitorCounts") ||
+	    element.equalsIgnoreCase( "elapsedMonitorCounts") ||
+	    element.equalsIgnoreCase( "runAfterFinished") ||
+	    element.equalsIgnoreCase( "totalMonitorCounts") ||
+	    element.equalsIgnoreCase( "detCalibFile") ||
+	    element.equalsIgnoreCase( "moderatorCalibFile") ||
+	    element.equalsIgnoreCase( "totalChannels") ||
+	    element.equalsIgnoreCase( "numOfPulses") ||
+	    element.equalsIgnoreCase( "sizeOfDataArea") ||
+	    element.equalsIgnoreCase( "hardwareTMin") ||
+	    element.equalsIgnoreCase( "hardwareTMax") ||
+	    element.equalsIgnoreCase( "hardTimeDelay") ||
+	    element.equalsIgnoreCase( "maxWavelength") ||
+	    element.equalsIgnoreCase( "minWavelength") ||
+	    element.equalsIgnoreCase( "addressOf1DData") ||
+	    element.equalsIgnoreCase( "addressOf2DData") ||
+	    element.equalsIgnoreCase( "endOfOverflow") ||
+	    element.equalsIgnoreCase( "channels1D") ||
+	    element.equalsIgnoreCase( "firstOverflow") ||
+	    element.equalsIgnoreCase( "expNum") ||
+	    element.equalsIgnoreCase( "firstRun") ||
+	    element.equalsIgnoreCase( "lastRun") ||
+	    element.equalsIgnoreCase( "defaultRun") ||
+	    element.equalsIgnoreCase( "numOfElements") ||
+	    element.equalsIgnoreCase( "MagicNumber") ) &&
+		  (val >= -2147483648 && val <= 2147483647)) {
+	    set (element, (int) val);
+	}
+	else{
+	    System.out.println( "Cannot set " + element + " as a double" );
+	    return errval = -1;
+	}
+	return errval;
+    }
+
+    protected int set( String element, float val  ) {
+	int errval = 0;
+	if (element.equalsIgnoreCase( "sourceToSample") ||
+	    element.equalsIgnoreCase( "sourceToChopper") ||
+	    element.equalsIgnoreCase( "dta") ||
+	    element.equalsIgnoreCase( "dtd") ||
+	    element.equalsIgnoreCase( "omega") ||
+	    element.equalsIgnoreCase( "chi") ||
+	    element.equalsIgnoreCase( "phi") ||
+	    element.equalsIgnoreCase( "xLeft") ||
+	    element.equalsIgnoreCase( "xRight") ||
+	    element.equalsIgnoreCase( "yLower") ||
+	    element.equalsIgnoreCase( "yUpper") ||
+	    element.equalsIgnoreCase( "xDisplacement") ||
+	    element.equalsIgnoreCase( "yDisplacement") ||
+	    element.equalsIgnoreCase( "xLength") ||
+	    element.equalsIgnoreCase( "clockPeriod") ||
+	    element.equalsIgnoreCase( "energyIn") ||
+	    element.equalsIgnoreCase( "energyOut") ||
+	    element.equalsIgnoreCase( "protonCurrent") ||
+	    element.equalsIgnoreCase( "standardClock") ||
+	    element.equalsIgnoreCase( "lpsdClock")) {
+	}
+	else if ( ( element.equalsIgnoreCase( "nDet") ||
+	    element.equalsIgnoreCase( "numOfCyclesPreset") ||
+	    element.equalsIgnoreCase( "numOfCyclesCompleted") ||
+	    element.equalsIgnoreCase( "groupToMonitor") ||
+	    element.equalsIgnoreCase( "channelToMonitor") ||
+	    element.equalsIgnoreCase( "numOfHistograms") ||
+	    element.equalsIgnoreCase( "numOfTimeFields") ||
+	    element.equalsIgnoreCase( "numOfControl") ||
+	    element.equalsIgnoreCase( "controlFlag") ||
+	    element.equalsIgnoreCase( "clockShift") ||
+	    element.equalsIgnoreCase( "numOfX") ||
+	    element.equalsIgnoreCase( "numOfY")  ||
+	    element.equalsIgnoreCase( "numOfWavelengths") || 
+	    element.equalsIgnoreCase( "areaChannelWidth") ||
+	    element.equalsIgnoreCase( "areaDoubleWidth") ||
+	    element.equalsIgnoreCase( "numOfSeqHist") ||
+	    element.equalsIgnoreCase( "areaBinning") ||
+	    element.equalsIgnoreCase( "microprocessor") ||
+	    element.equalsIgnoreCase( "numOfOverflows") ||
+	    element.equalsIgnoreCase( "numOfLockouts") ||
+	    element.equalsIgnoreCase( "samplePos") ||
+	    element.equalsIgnoreCase( "numOfHeadBlocks") ||
+	    element.equalsIgnoreCase( "overflowSort") ) &&
+		  (val <= 32767 && val >= -32768) ) {
+	    set( element, (short)val );
+	}
+	else if ( (element.equalsIgnoreCase( "numOfBlocks") ||
+	    element.equalsIgnoreCase( "histStartAddress") ||
+	    element.equalsIgnoreCase( "offsetToFree") ||
+	    element.equalsIgnoreCase( "versionNumber") ||
+	    element.equalsIgnoreCase( "runNum") ||
+	    element.equalsIgnoreCase( "nextRun") ||
+	    element.equalsIgnoreCase( "presetMonitorCounts") ||
+	    element.equalsIgnoreCase( "elapsedMonitorCounts") ||
+	    element.equalsIgnoreCase( "runAfterFinished") ||
+	    element.equalsIgnoreCase( "totalMonitorCounts") ||
+	    element.equalsIgnoreCase( "detCalibFile") ||
+	    element.equalsIgnoreCase( "moderatorCalibFile") ||
+	    element.equalsIgnoreCase( "totalChannels") ||
+	    element.equalsIgnoreCase( "numOfPulses") ||
+	    element.equalsIgnoreCase( "sizeOfDataArea") ||
+	    element.equalsIgnoreCase( "hardwareTMin") ||
+	    element.equalsIgnoreCase( "hardwareTMax") ||
+	    element.equalsIgnoreCase( "hardTimeDelay") ||
+	    element.equalsIgnoreCase( "maxWavelength") ||
+	    element.equalsIgnoreCase( "minWavelength") ||
+	    element.equalsIgnoreCase( "addressOf1DData") ||
+	    element.equalsIgnoreCase( "addressOf2DData") ||
+	    element.equalsIgnoreCase( "endOfOverflow") ||
+	    element.equalsIgnoreCase( "channels1D") ||
+	    element.equalsIgnoreCase( "firstOverflow") ||
+	    element.equalsIgnoreCase( "expNum") ||
+	    element.equalsIgnoreCase( "firstRun") ||
+	    element.equalsIgnoreCase( "lastRun") ||
+	    element.equalsIgnoreCase( "defaultRun") ||
+	    element.equalsIgnoreCase( "numOfElements") ||
+	    element.equalsIgnoreCase( "MagicNumber")) &&
+		  (val > -2147483648 && val < 2147483647)) {
+	    set (element, (int) val);
+	}
+	else{
+	    System.out.println( "Cannot set " + element + " as a float" );
+	    return errval = -1;
+	}
+	return errval;
+    }
+
+    protected int set( String element, int val  ) {
+	int errval = 0;
+	if ( element.equalsIgnoreCase( "numOfBlocks") ) {
+	    numOfBlocks= val;
+	}
+	if( element.equalsIgnoreCase( "histStartAddress") ) {
+	    histStartAddress = val;
+	}
+	if( element.equalsIgnoreCase( "offsetToFree") ) {
+	    offsetToFree = val;
+	}
+	if( element.equalsIgnoreCase( "versionNumber") ) {
+	    versionNumber = val;
+	}
+	if( element.equalsIgnoreCase( "runNum") ) {
+	    runNum = val;
+	}
+	if( element.equalsIgnoreCase( "nextRun") ) {
+	    nextRun = val;
+	}
+	if( element.equalsIgnoreCase( "presetMonitorCounts") ) {
+	    presetMonitorCounts = val;
+	}
+	if( element.equalsIgnoreCase( "elapsedMonitorCounts") ) {
+	    elapsedMonitorCounts = val;
+	}
+	if( element.equalsIgnoreCase( "runAfterFinished") ) {
+	    runAfterFinished = val;
+	}
+	if( element.equalsIgnoreCase( "totalMonitorCounts") ) {
+	    totalMonitorCounts = val;
+	}
+	if( element.equalsIgnoreCase( "detCalibFile") ) {
+	    detCalibFile = val;
+	}
+	if( element.equalsIgnoreCase( "moderatorCalibFile") ) {
+	    moderatorCalibFile = val;
+	}
+	if( element.equalsIgnoreCase( "totalChannels") ) {
+	    totalChannels = val;
+	}
+	if( element.equalsIgnoreCase( "numOfPulses") ) {
+	    numOfPulses = val;
+	}
+	if( element.equalsIgnoreCase( "sizeOfDataArea") ) {
+	    sizeOfDataArea = val;
+	}
+	if( element.equalsIgnoreCase( "hardwareTMin") ) {
+	    hardwareTMin = val;
+	}
+	if( element.equalsIgnoreCase( "hardwareTMax") ) {
+	    hardwareTMax = val;
+	}
+	if( element.equalsIgnoreCase( "hardTimeDelay") ) {
+	    hardTimeDelay = val;
+	}
+	if( element.equalsIgnoreCase( "maxWavelength") ) {
+	    maxWavelength = val;
+	}
+	if( element.equalsIgnoreCase( "minWavelength") ) {
+	    minWavelength = val;
+	}
+	if( element.equalsIgnoreCase( "addressOf1DData") ) {
+	    addressOf1DData = val;
+	}
+	if( element.equalsIgnoreCase( "addressOf2DData") ) {
+	    addressOf2DData = val;
+	}
+	if( element.equalsIgnoreCase( "endOfOverflow") ) {
+	    endOfOverflow = val;
+	}
+	if( element.equalsIgnoreCase( "channels1D") ) {
+	    channels1D = val;
+	}
+	if( element.equalsIgnoreCase( "firstOverflow") ) {
+	    firstOverflow = val;
+	}
+	if( element.equalsIgnoreCase( "expNum") ) {
+	    expNum = val;
+	}
+	if( element.equalsIgnoreCase( "firstRun") ) {
+	    firstRun = val;
+	}
+	if( element.equalsIgnoreCase( "lastRun") ) {
+	    lastRun = val;
+	}
+	if( element.equalsIgnoreCase( "defaultRun") ) {
+	    defaultRun = val;
+	}
+	if( element.equalsIgnoreCase( "numOfElements") ) {
+	    numOfElements = val;
+	}
+	if( element.equalsIgnoreCase( "MagicNumber") ) {
+	    MagicNumber = val;
+	}
+	else if (element.equalsIgnoreCase( "sourceToSample") ||
+		     element.equalsIgnoreCase( "sourceToChopper") ||
+		     element.equalsIgnoreCase( "dta") ||
+		     element.equalsIgnoreCase( "dtd") ||
+		     element.equalsIgnoreCase( "omega") ||
+		     element.equalsIgnoreCase( "chi") ||
+		     element.equalsIgnoreCase( "phi") ||
+		     element.equalsIgnoreCase( "xLeft") ||
+		     element.equalsIgnoreCase( "xRight") ||
+		     element.equalsIgnoreCase( "yLower") ||
+		     element.equalsIgnoreCase( "yUpper") ||
+		     element.equalsIgnoreCase( "xDisplacement") ||
+		     element.equalsIgnoreCase( "yDisplacement") ||
+		     element.equalsIgnoreCase( "xLength") ||
+		     element.equalsIgnoreCase( "clockPeriod") ||
+		     element.equalsIgnoreCase( "energyIn") ||
+		     element.equalsIgnoreCase( "energyOut") ||
+		     element.equalsIgnoreCase( "protonCurrent") ||
+		     element.equalsIgnoreCase( "standardClock") ||
+		     element.equalsIgnoreCase( "lpsdClock") ) {
+	    set( element, (double)val );
+	}
+	else if ( ( element.equalsIgnoreCase( "nDet") ||
+		    element.equalsIgnoreCase( "numOfCyclesPreset") ||
+		    element.equalsIgnoreCase( "numOfCyclesCompleted") ||
+		    element.equalsIgnoreCase( "groupToMonitor") ||
+		    element.equalsIgnoreCase( "channelToMonitor") ||
+		    element.equalsIgnoreCase( "numOfHistograms") ||
+		    element.equalsIgnoreCase( "numOfTimeFields") ||
+		    element.equalsIgnoreCase( "numOfControl") ||
+		    element.equalsIgnoreCase( "controlFlag") ||
+		    element.equalsIgnoreCase( "clockShift") ||
+		    element.equalsIgnoreCase( "numOfX") ||
+		    element.equalsIgnoreCase( "numOfY")  ||
+		    element.equalsIgnoreCase( "numOfWavelengths") || 
+		    element.equalsIgnoreCase( "areaChannelWidth") ||
+		    element.equalsIgnoreCase( "areaDoubleWidth") ||
+		    element.equalsIgnoreCase( "numOfSeqHist") ||
+		    element.equalsIgnoreCase( "areaBinning") ||
+		    element.equalsIgnoreCase( "microprocessor") ||
+		    element.equalsIgnoreCase( "numOfOverflows") ||
+		    element.equalsIgnoreCase( "numOfLockouts") ||
+		    element.equalsIgnoreCase( "samplePos") ||
+		    element.equalsIgnoreCase( "numOfHeadBlocks") ||
+		    element.equalsIgnoreCase( "overflowSort") ) &&
+		  (val < 32767 && val > -32768) ) {
+	    set( element, (short)val );
+	}
+	else{
+	    System.out.println( "Cannot set " + element + " as an int" );
+	    return errval = -1;
+	}
+	return errval;
+    }
+
+    protected int set( String element, short val  ) {
+	int errval = 0;
+	if (  element.equalsIgnoreCase( "nDet") ) {
+	    nDet = val;
+	}
+	else if  ( element.equalsIgnoreCase( "numOfCyclesPreset") ) {
+	    numOfCyclesPreset = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfCyclesCompleted") ){
+	    numOfCyclesCompleted = val;
+	}
+	else if ( element.equalsIgnoreCase( "groupToMonitor") ) {
+	    groupToMonitor= val;
+	}
+	else if ( element.equalsIgnoreCase( "channelToMonitor")) {
+	    channelToMonitor = val;
+	}
+	else if (element.equalsIgnoreCase( "sourceToSample")) {
+	    sourceToSample = val;
+	}
+	else if ( element.equalsIgnoreCase( "sourceToChopper")) {
+	    sourceToChopper = val;
+	}
+	else if ( element.equalsIgnoreCase( "dta")) {
+	    dta = val;
+	}
+	else if ( element.equalsIgnoreCase( "dtd")) {
+	    dtd = val;
+	}
+	else if ( element.equalsIgnoreCase( "omega")) {
+	    omega = val;
+	}
+	else if ( element.equalsIgnoreCase( "chi")) {
+	    chi = val;
+	}
+	else if ( element.equalsIgnoreCase( "phi")) {
+	    phi = val;
+	}
+	else if ( element.equalsIgnoreCase( "xLeft")) {
+	    xLeft = val;
+	}
+	else if ( element.equalsIgnoreCase( "xRight")) {
+	    xRight = val;
+	}
+	else if ( element.equalsIgnoreCase( "yLower")) {
+	    yLower = val;
+	}
+	else if ( element.equalsIgnoreCase( "yUpper")) {
+	    yUpper = val;
+	}
+	else if ( element.equalsIgnoreCase( "xDisplacement")) {
+	    xDisplacement = val;
+	}
+	else if ( element.equalsIgnoreCase( "yDisplacement")) {
+	    yDisplacement = val;
+	}
+	else if ( element.equalsIgnoreCase( "xLength")) {
+	    xLength = val;
+	}
+	else if ( element.equalsIgnoreCase( "clockPeriod")) {
+	    clockPeriod = val;
+	}
+	else if ( element.equalsIgnoreCase( "energyIn")) {
+	    energyIn = val;
+	}
+	else if ( element.equalsIgnoreCase( "energyOut")) {
+	    energyOut = val;
+	}
+	else if ( element.equalsIgnoreCase( "protonCurrent")) {
+	    protonCurrent = val;
+	}
+	else if ( element.equalsIgnoreCase( "standardClock")) {
+	    standardClock = val;
+	}
+	else if ( element.equalsIgnoreCase( "lpsdClock")) {
+	    lpsdClock = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfHistograms")) {
+	    numOfHistograms = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfTimeFields")) {
+	    numOfTimeFields = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfControl")) {
+	    numOfControl = val;
+	}
+	else if ( element.equalsIgnoreCase( "controlFlag")) {
+	    controlFlag = val;
+	}
+	else if ( element.equalsIgnoreCase( "clockShift")) {
+	    clockShift = val;
+}
+	else if ( element.equalsIgnoreCase( "numOfX")) {
+	    numOfX = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfY") ) {
+	    numOfY= val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfWavelengths") ) {
+	    numOfWavelengths = val;
+	}
+	else if ( element.equalsIgnoreCase( "areaChannelWidth")) {
+	    areaChannelWidth = val;
+	}
+	else if ( element.equalsIgnoreCase( "areaDoubleInterval")) {
+	    areaDoubleInterval = val;
+}
+	else if ( element.equalsIgnoreCase( "numOfSeqHist")) {
+	    numOfSeqHist = val;
+	}
+	else if ( element.equalsIgnoreCase( "areaBinning")) {
+	    areaBinning = val;
+	}
+	else if ( element.equalsIgnoreCase( "microprocessor")) {
+	    microprocessor = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfOverflows")) {
+	    numOfOverflows = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfLockouts")) {
+	    numOfLockouts = val;
+}
+	else if ( element.equalsIgnoreCase( "samplePos")) {
+	    samplePos = val;
+	}
+	else if ( element.equalsIgnoreCase( "numOfHeadBlocks")) {
+	    numOfHeadBlocks = val;
+	}
+	else if ( element.equalsIgnoreCase( "overflowSort") ) {
+	    overflowSort = val;
+	}
+	else if ( element.equalsIgnoreCase( "sourceToSample") ||
+	    element.equalsIgnoreCase( "sourceToChopper") ||
+	    element.equalsIgnoreCase( "dta") ||
+	    element.equalsIgnoreCase( "dtd") ||
+	    element.equalsIgnoreCase( "omega") ||
+	    element.equalsIgnoreCase( "chi") ||
+	    element.equalsIgnoreCase( "phi") ||
+	    element.equalsIgnoreCase( "xLeft") ||
+	    element.equalsIgnoreCase( "xRight") ||
+	    element.equalsIgnoreCase( "yLower") ||
+	    element.equalsIgnoreCase( "yUpper") ||
+	    element.equalsIgnoreCase( "xDisplacement") ||
+	    element.equalsIgnoreCase( "yDisplacement") ||
+	    element.equalsIgnoreCase( "xLength") ||
+	    element.equalsIgnoreCase( "clockPeriod") ||
+	    element.equalsIgnoreCase( "energyIn") ||
+	    element.equalsIgnoreCase( "energyOut") ||
+	    element.equalsIgnoreCase( "protonCurrent") ||
+	    element.equalsIgnoreCase( "standardClock") ||
+	    element.equalsIgnoreCase( "lpsdClock") ) {
+	    set( element, (double)val );
+	}
+	else if ( element.equalsIgnoreCase( "numOfBlocks") ||
+	    element.equalsIgnoreCase( "histStartAddress") ||
+	    element.equalsIgnoreCase( "offsetToFree") ||
+	    element.equalsIgnoreCase( "versionNumber") ||
+	    element.equalsIgnoreCase( "runNum") ||
+	    element.equalsIgnoreCase( "nextRun") ||
+	    element.equalsIgnoreCase( "presetMonitorCounts") ||
+	    element.equalsIgnoreCase( "elapsedMonitorCounts") ||
+	    element.equalsIgnoreCase( "runAfterFinished") ||
+	    element.equalsIgnoreCase( "totalMonitorCounts") ||
+	    element.equalsIgnoreCase( "detCalibFile") ||
+	    element.equalsIgnoreCase( "moderatorCalibFile") ||
+	    element.equalsIgnoreCase( "totalChannels") ||
+	    element.equalsIgnoreCase( "numOfPulses") ||
+	    element.equalsIgnoreCase( "sizeOfDataArea") ||
+	    element.equalsIgnoreCase( "hardwareTMin") ||
+	    element.equalsIgnoreCase( "hardwareTMax") ||
+	    element.equalsIgnoreCase( "hardTimeDelay") ||
+	    element.equalsIgnoreCase( "maxWavelength") ||
+	    element.equalsIgnoreCase( "minWavelength") ||
+	    element.equalsIgnoreCase( "addressOf1DData") ||
+	    element.equalsIgnoreCase( "addressOf2DData") ||
+	    element.equalsIgnoreCase( "endOfOverflow") ||
+	    element.equalsIgnoreCase( "channels1D") ||
+	    element.equalsIgnoreCase( "firstOverflow") ||
+	    element.equalsIgnoreCase( "expNum") ||
+	    element.equalsIgnoreCase( "firstRun") ||
+	    element.equalsIgnoreCase( "lastRun") ||
+	    element.equalsIgnoreCase( "defaultRun") ||
+	    element.equalsIgnoreCase( "numOfElements") ||
+	    element.equalsIgnoreCase( "MagicNumber") ) {
+	    set (element, (int) val);
+	}
+
+	else{
+	    System.out.println( "Cannot set " + element + " as a short" );
+	    return errval = -1;
+	}
+	return errval;
+    }
+
+    protected int set( String element, String val  ) {
+	int errval = 0;
+	if ( element.equalsIgnoreCase( "userName") ) {
+	    userName = val;
+	}
+	else if ( element.equalsIgnoreCase( "runTitle") ) {
+	    runTitle = val;
+	}
+	else if ( element.equalsIgnoreCase( "startDate") ) {
+	    startDate = val;
+	}
+	else if ( element.equalsIgnoreCase( "startTime") ) {
+	    startTime = val;
+	}
+	else if ( element.equalsIgnoreCase( "endDate") ) {
+	    endDate = val;
+	}
+	else if ( element.equalsIgnoreCase( "endTime") ) {
+	    endTime = val;
+	}
+	else if ( element.equalsIgnoreCase( "iName") ) {
+	    iName = val;
+	}
+	else{
+	    System.out.println( "Cannot set " + element + " as string" );
+	    return errval = -1;
+	}
+	return errval;
     }
 
     public void Write( RandomAccessFile runfile ) {
