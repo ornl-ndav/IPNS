@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.25  2001/06/29 20:26:14  hammonds
+ * Changed some of the segment based detector position information to give area information.
+ *
  * Revision 5.24  2001/06/29 18:57:59  hammonds
  * Added segment code.
  * Started changes to allow area detectors to be read as spectra.
@@ -1985,52 +1988,56 @@ public class Runfile implements Cloneable {
     */
     public double DetectorAngle(Segment seg, int hist ){
 	int detID = seg.detID;
-	double dAngle;
-	double angle_sum= 0.0, angleSign;
-	int nDetsThisType = 0;
-	int index = (hist - 1) * header.nDet + detID;
-	int tfType = detectorMap[index].tfType;
+	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
 
-	if (tfType == 0) return detectorAngle[detID];
-
-	if ((timeField[tfType].timeFocusBit > 0)) { 
-	    if (header.pseudoTimeUnit == 'D') { 
-		for ( int nid = 1; nid <= header.nDet; nid++ ) {
-		    int nindex = (hist - 1) * header.nDet + nid;
-		    int tempType = detectorMap[nindex].tfType;
-		    
-		    if ( tempType == tfType )
-			{
-			    angle_sum += Math.abs(detectorAngle[nid]);
-			    nDetsThisType++;
-			}
-		}
-	    }
-	    else if (header.pseudoTimeUnit == 'I') { 
-		for ( int nid = 1; nid <= header.nDet; nid++ ) {
-		    int nindex = (hist - 1) * header.nDet + nid;
-		    int tempType = detectorMap[nindex].tfType;
-
-		    //		    System.out.println( "Sizeof subgroupIDList = " + 
-		    //		subgroupIDList.length );
-		    if ( tempType == tfType && 
-			 subgroupIDList[index] == 
-			 subgroupIDList[nindex] )
-			{
-			    angle_sum += Math.abs(detectorAngle[nid]);
-			    nDetsThisType++;
-			}
-		}
-	    }
-	    angleSign = detectorAngle[detID]/
-		Math.abs(detectorAngle[detID]);
-	    dAngle = angle_sum / nDetsThisType * angleSign;
+	    double dAngle;
+	    double angle_sum= 0.0, angleSign;
+	    int nDetsThisType = 0;
+	    int index = (hist - 1) * header.nDet + detID;
+	    int tfType = detectorMap[index].tfType;
 	    
+	    if (tfType == 0) return detectorAngle[detID];
+
+	    if ((timeField[tfType].timeFocusBit > 0)) { 
+		if (header.pseudoTimeUnit == 'D') { 
+		    for ( int nid = 1; nid <= header.nDet; nid++ ) {
+			int nindex = (hist - 1) * header.nDet + nid;
+			int tempType = detectorMap[nindex].tfType;
+			
+			if ( tempType == tfType )
+			    {
+				angle_sum += Math.abs(detectorAngle[nid]);
+				nDetsThisType++;
+			    }
+		    }
+		}
+		else if (header.pseudoTimeUnit == 'I') { 
+		    for ( int nid = 1; nid <= header.nDet; nid++ ) {
+			int nindex = (hist - 1) * header.nDet + nid;
+			int tempType = detectorMap[nindex].tfType;
+			
+			if ( tempType == tfType && 
+			     subgroupIDList[index] == 
+			     subgroupIDList[nindex] )
+			    {
+				angle_sum += Math.abs(detectorAngle[nid]);
+				nDetsThisType++;
+			    }
+		    }
+		}
+		angleSign = detectorAngle[detID]/
+		    Math.abs(detectorAngle[detID]);
+		dAngle = angle_sum / nDetsThisType * angleSign;
+		
+	    }
+	    else {
+		dAngle = this.detectorAngle[detID];
+	    }
+	    return dAngle;
 	}
 	else {
-	    dAngle = this.detectorAngle[detID];
+	    return header.dta;
 	}
-	return dAngle;
     }
 
     /**
@@ -2106,7 +2113,13 @@ public class Runfile implements Cloneable {
        @return The scattering angle.
     */
     public double RawDetectorAngle(Segment seg){
-	return this.detectorAngle[seg.detID];
+	int detID = seg.detID;
+	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
+	    return this.detectorAngle[seg.detID];
+	}
+	else {
+	    return header.dta;
+	}
     }
 
     /**
@@ -2121,25 +2134,30 @@ public class Runfile implements Cloneable {
     public double FlightPath(Segment seg, int hist){
 	double fp;
 	int detID = seg.detID;
-	int index = (hist - 1) * header.nDet + detID;
-	int tfType = detectorMap[index].tfType;
-
-	if (tfType == 0) return flightPath[detID];
-
-	if ((timeField[tfType].timeFocusBit > 0) && 
-	    (header.pseudoTimeUnit == 'I')) { 
-	    if (flightPath[detID] > 3.0 ) {
-		fp = 4.0;
+	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
+	    int index = (hist - 1) * header.nDet + detID;
+	    int tfType = detectorMap[index].tfType;
+	    
+	    if (tfType == 0) return flightPath[detID];
+	    
+	    if ((timeField[tfType].timeFocusBit > 0) && 
+		(header.pseudoTimeUnit == 'I')) { 
+		if (flightPath[detID] > 3.0 ) {
+		    fp = 4.0;
+		}
+		else {
+		    fp = 2.5;
+		}
 	    }
 	    else {
-		fp = 2.5;
+		fp = flightPath[detID];
 	    }
+ 
+	    return fp;
 	}
 	else {
-	    fp = flightPath[detID];
+	    return header.dtd;
 	}
- 
-	return fp;
     }
 
     /**
@@ -2181,8 +2199,13 @@ public class Runfile implements Cloneable {
        @return The flight path length.
     */
     public double RawFlightPath(Segment seg){
-	int detID = seg.detID;
-	return this.flightPath[detID];
+	int id = seg.detID;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    return this.flightPath[id];
+	}
+	else {
+	    return header.dtd;
+	}
     }
 
     /**
@@ -2211,7 +2234,7 @@ public class Runfile implements Cloneable {
        @param seg The detector segment.
        @return The height of the detector above the scattering plane.
     */
-    public double DetectorHeight(Segment seg){
+    public double DetectorHeight(Segment seg, int hist){
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    return this.detectorHeight[id];
