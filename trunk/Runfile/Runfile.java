@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.util.Enumeration;
 import IPNS.Control.*;
 import IPNS.Calib.*;
-
+import IPNS.Runfile.RandomAccessRunfile;
 /**
 This class is designed to provide an interface to IPNS run files for versions
 V4 and earlier.  The Runfile constructor loads information from the run file
@@ -24,8 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
- * Revision 6.30  2003/03/27 22:33:52  pfpeterson
- * Fixed atan to asin problem (JPH).
+ * Revision 6.31  2003/03/30 04:24:24  hammonds
+ * Change to use new RandomAccessRunfile and RunfileInputStream Classes.  These classes were introduced to simplify the code somewhat.  Some of this simplification has been made, more is to come.
+ * Also, new methods DetectorLength, DetectorWidth and DetectorDepth have been introduced to get these values for a detector.
  *
  * Revision 6.29  2003/03/19 16:13:39  hammonds
  * Remove debug print.
@@ -290,7 +291,7 @@ public class Runfile implements Cloneable {
     /** Flag to indicate if file is left open */ boolean leaveOpen;
     /** The file name associated with this Runfile object. */
     protected String runfileName;
-    /** The FileStream containing the data. */   RandomAccessFile runfile;
+    /** The FileStream containing the data. */   RandomAccessRunfile runfile;
     /** The runfile header */ 			protected Header header; 
     /** The detector mapping table */		DetectorMap[] detectorMap =
 	new DetectorMap[1];
@@ -338,59 +339,12 @@ public class Runfile implements Cloneable {
     int[] minID = new int[0];
     ParameterFile[] params = new ParameterFile[0];
     //-----------------------------------------------------------------
-  /*    public static final float[] 
-	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
-		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
-	          20.0F, 20.32F};
-    public static final float[] 
-	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
-		 0.493F, 3.81F, 3.81F, 30.F, 20.0F, 40.0F, 40.0F, 1.0F, 1.0F,
-		 2.377F };
-    public static final float[] 
-	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
-		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F,
-		 2.377F};
-    public static final float[] 
-	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
-		      1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 
-		      1.00F, 1.00F, 1.0F};
-    public static final int[]
-	PSD_DIMENSION = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1,
-			  1 };
-    public static final int[]
-	NUM_OF_SEGS_1 = { 1, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
-			  256, 256,8 };
-    public static final int[]
-	NUM_OF_SEGS_2 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128, 
-			  1, 1,1  };
-    public static final int[] SEGMENT_SELECT = {
-	1, 2, 4, 8, 16, 32, 64, 128, 256 };
-    public static final String[] TYPE_DESCRIPTION ={"Not a detector",
-						    "3\" pancake monitor",
-						    "1\" x 18\"",
-		 				    "1\" x 9\"",
-						    "1\" x 4.5\"",
-						    "1\" x 36\" LPSD",
-						    "0.5\" x 15\"",
-						    "0.5\" x 15\" LPSD",
-						    "0.25\" x 5\"",
-						    "1.5\" pancake monitor",
-						    "OrdellaBeam Monitor",
-						    "SCD Anger Camera",
-						    "Ordella 2210 SAD 20cm",
-						    "Ordella 2400 SAND 40cm",
-						    "Ordella 2410 SAND 40cm",
-						    "Ordella 1204 POSY1 10cm",
-						    "Ordella 1210 POSY2 20cm",
-  						    "1\" x 8\" LPSD"  
-    };
-  */
     static double MEV_FROM_VEL = 
 	PhysicalConstants.meV_FROM_m_PER_microsec_CONST;
 
 // --------------------------- readUnsignedInteger -------------------
-
-  protected int readUnsignedInteger(RandomAccessFile inFile,
+/*
+  protected int readUnsignedInteger(RandomAccessRunfile inFile,
    int length) throws IOException {
 
     byte b[] = new byte[length];
@@ -405,14 +359,13 @@ public class Runfile implements Cloneable {
       else {
         c[i] = b[i];
       }
-       /*      num += c[i] * (int)Math.pow(256.0, (double)i);*/
        num += c[i] << (8*i);
     }
     return num;
   }
-
+*/
     //-------------------- ReadIntegerArray ----------------------------------
-    protected int[] ReadIntegerArray(RandomAccessFile inFile, int wordSize,
+    protected int[] ReadIntegerArray(RandomAccessRunfile inFile, int wordSize,
 				     int numWords)
 	throws IOException {
 	int[] data = new int[numWords+1];
@@ -446,7 +399,7 @@ public class Runfile implements Cloneable {
 
     //-------------------- ReadVaxReal4Array ---------------------------------
 
-    protected float[] ReadVAXReal4Array(RandomAccessFile inFile, int numWords)
+    protected float[] ReadVAXReal4Array(RandomAccessRunfile inFile, int numWords)
 	throws IOException {
 	int[] data;
 	float[] fdata = new float[numWords+1];
@@ -484,7 +437,7 @@ public class Runfile implements Cloneable {
 	return fdata;
     }
 
-    protected short[] ReadShortArray(RandomAccessFile inFile, int numWords)
+    protected short[] ReadShortArray(RandomAccessRunfile inFile, int numWords)
 	throws IOException {
 	short[] sdata = new short[numWords + 1];
 	int[] data;  
@@ -593,8 +546,12 @@ public class Runfile implements Cloneable {
     */
     public Runfile( String infileName ) throws IOException {
 	int i;
+	byte[] bArray = new byte[0];
+	ByteArrayInputStream bArrayIS;
+	RunfileInputStream dataStream;
 
-	RandomAccessFile runfile = new RandomAccessFile ( infileName, "r");
+	RandomAccessRunfile runfile = 
+	  new RandomAccessRunfile ( infileName, "r");
 	runfileName = new String(infileName);
 	int slashIndex = runfileName
 	    .lastIndexOf( System.getProperty( "file.separator"));
@@ -603,6 +560,31 @@ public class Runfile implements Cloneable {
 	header = new Header(runfile, iName  );
 	timeField[0] = new TimeField();
 	runfile.seek(68);  
+
+	detectorMap = new DetectorMap[this.header.detectorMapTable.size/
+				      DetectorMap.mapSize(header.versionNumber)
+				     + 1];
+	runfile.seek(  header.detectorMapTable.location );
+	bArray = new byte[header.detectorMapTable.size];
+	runfile.read(bArray);
+	bArrayIS = new ByteArrayInputStream(bArray);
+	dataStream = new RunfileInputStream(bArrayIS, header.versionNumber);
+	for (i=1; 
+	     i <= this.header.detectorMapTable.size
+		 /DetectorMap.mapSize(header.versionNumber); 
+	     i++){
+	    detectorMap[i] = new DetectorMap(dataStream, i, header);
+	}
+	dataStream.close();
+	bArrayIS.close();
+	bArray = new byte[0];
+
+	timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
+	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
+	    timeField[i] = new TimeField(runfile, i, header);
+	}
+	
+
 	if ( header.versionNumber > 4 ) {
 	    if ( System.getProperty("Runfile_Debug", "no" )
 		 .equalsIgnoreCase("yes") ) {
@@ -623,34 +605,14 @@ public class Runfile implements Cloneable {
 	runfile.close();
     }
 
-    void LoadV4( RandomAccessFile runfile ) throws IOException {
+    void LoadV4( RandomAccessRunfile runfile ) throws IOException {
 	int i;
 	int[] gladbank = new int[0];
 	int[] gladdetinbank = new int[0];
 	byte[] bArray = new byte[0];
 	ByteArrayInputStream bArrayIS;
-	DataInputStream dataStream;
-	/*
-	  if ( header.nDet > 0 ) {
-	*/
-	detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
-				      + 1];
-	runfile.seek(  header.detectorMapTable.location );
-	bArray = new byte[header.detectorMapTable.size];
-	runfile.read(bArray);
-	bArrayIS = new ByteArrayInputStream(bArray);
-	dataStream = new DataInputStream(bArrayIS);
-	for (i=1; i <= this.header.detectorMapTable.size/4; i++){
-	    detectorMap[i] = new DetectorMap(dataStream, i, header);
-	}
-	dataStream.close();
-	bArrayIS.close();
-	bArray = new byte[0];
-	timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
-	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
-	    timeField[i] = new TimeField(runfile, i, header);
-	}
-	
+	RunfileInputStream dataStream;
+
 	runfile.seek(this.header.detectorAngle.location);
 	detectorAngle = ReadVAXReal4Array(runfile, 
 					  header.detectorAngle.size/4);
@@ -701,7 +663,8 @@ public class Runfile implements Cloneable {
 			     flightPath.length );
 	    System.arraycopy(detectorHeight, 0 , tDetectorHeight, 0, 
 			     detectorHeight.length );
-	    System.arraycopy(detectorType, 0 , tDetectorType, 0,				 detectorType.length );
+	    System.arraycopy(detectorType, 0 , tDetectorType, 0,				 
+			     detectorType.length );
 	    System.arraycopy(detectorMap, 0 , tDetectorMap, 0, 
 			     detectorMap.length );
 	    detectorAngle = tDetectorAngle;
@@ -1055,8 +1018,8 @@ public class Runfile implements Cloneable {
 		case 15:
 		case 16: {
 		    //			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-		    detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
+		    detectorLength[ii] = (float)(header.yUpper - header.yLower);
+		    detectorWidth[ii] = (float)(header.xLeft - header.xRight);
 		    detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
 		    minID[ii] = ii;
 		    int index;
@@ -1098,6 +1061,9 @@ public class Runfile implements Cloneable {
 	    detectorRot2 = new float[header.numOfElements +1];
 	    gladbank = new int[header.numOfElements + 1];
 	    gladdetinbank = new int[header.numOfElements + 1];
+	    detector.length = new float[numOfElements + 1];
+	    detector.width = new float[numOfElements + 1];
+	    detector.depth = new float[numOfElements + 1];
 	    int detNum = 0;
 	    int[] dets =new int[0];
 	    for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
@@ -1146,6 +1112,9 @@ public class Runfile implements Cloneable {
 				numSegs2[tminID + ll] = 1;
 				detectorRot1[tminID + ll] = 0.0f;
 				detectorRot2[tminID + ll] = 0.0f;
+				detectorLength[tminID] = DC5.LENGTH[7]/64; 
+				detectorWidth[tminID] = DC5.WIDTH7]; 
+				detectorDepth[tminID] = DC5.DEPTH[7]; 
 				segments[tminID + ll] = new Segment();
 				segments[tminID + ll].detID = tminID + ll; 
 				segments[tminID + ll].row = ll; 
@@ -1485,34 +1454,11 @@ public class Runfile implements Cloneable {
 
     }
 
-    void LoadV5( RandomAccessFile runfile ) throws IOException {
+    void LoadV5( RandomAccessRunfile runfile ) throws IOException {
 	int i;
 	byte[] bArray = new byte[0];
 	ByteArrayInputStream bArrayIS;
-	DataInputStream dataStream;
-
-	detectorMap = new DetectorMap[this.header.detectorMapTable.size/
-				      DetectorMap.mapSize(header.versionNumber)
-				     + 1];
-	runfile.seek(  header.detectorMapTable.location );
-	bArray = new byte[header.detectorMapTable.size];
-	runfile.read(bArray);
-	bArrayIS = new ByteArrayInputStream(bArray);
-	dataStream = new DataInputStream(bArrayIS);
-	for (i=1; 
-	     i <= this.header.detectorMapTable.size
-		 /DetectorMap.mapSize(header.versionNumber); 
-	     i++){
-	    detectorMap[i] = new DetectorMap(dataStream, i, header);
-	}
-	dataStream.close();
-	bArrayIS.close();
-	bArray = new byte[0];
-
-	timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
-	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
-	    timeField[i] = new TimeField(runfile, i, header);
-	}
+	RunfileInputStream dataStream;
 
 	runfile.seek(this.header.detectorAngle.location);
 	detectorAngle = new float[header.detectorAngle.size / 4 + 1];
@@ -1520,7 +1466,7 @@ public class Runfile implements Cloneable {
 	runfile.read( bArray );
 	bArrayIS = 
 	    new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	for ( i = 1; i <= header.detectorAngle.size / 4; i++ ) {
 	    detectorAngle[i] = dataStream.readFloat();
 	}
@@ -1531,7 +1477,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.flightPath.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	flightPath = new float[header.flightPath.size / 4 + 1];
 	for ( i = 1; i <= header.flightPath.size / 4; i++ ) {
 	    flightPath[i] = dataStream.readFloat();
@@ -1543,7 +1489,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorHeight.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	detectorHeight = new float[header.detectorHeight.size / 4 + 1];
 	for ( i = 1; i <= header.detectorHeight.size / 4; i++ ) {
 	    detectorHeight[i] = dataStream.readFloat();
@@ -1555,7 +1501,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorType.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	detectorType = new short[header.detectorType.size / 2 + 1];
 	for ( i = 1; i <= header.detectorType.size / 2; i++ ) {
 	    detectorType[i] = dataStream.readShort();
@@ -1567,7 +1513,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorLength.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS,header.versionNumber );
 	detectorLength = new float[header.detectorLength.size / 4 + 1];
 	for ( i = 1; i <= header.detectorLength.size / 4; i++ ) {
 	    detectorLength[i] = dataStream.readFloat();
@@ -1579,7 +1525,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorWidth.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS,header.versionNumber );
 	detectorWidth = new float[header.detectorWidth.size / 4 + 1];
 	for ( i = 1; i <= header.detectorWidth.size / 4; i++ ) {
 	    detectorWidth[i] = dataStream.readFloat();
@@ -1591,7 +1537,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorDepth.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS,header.versionNumber );
 	detectorDepth = new float[header.detectorDepth.size / 4 + 1];
 	for ( i = 1; i <= header.detectorDepth.size / 4; i++ ) {
 	    detectorDepth[i] = dataStream.readFloat();
@@ -1603,7 +1549,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detCoordSys.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	detCoordSys = new short[header.detCoordSys.size / 2 + 1];
 	for ( i = 1; i <= header.detCoordSys.size / 2; i++ ) {
 	    detCoordSys[i] = dataStream.readShort();
@@ -1615,7 +1561,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorRot1.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	detectorRot1 = new float[header.detectorRot1.size / 4 + 1];
 	for ( i = 1; i <= header.detectorRot1.size / 4; i++ ) {
 	    detectorRot1[i] = dataStream.readFloat();
@@ -1627,7 +1573,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorRot2.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	detectorRot2 = new float[header.detectorRot2.size / 4 + 1];
 	for ( i = 1; i <= header.detectorRot2.size / 4; i++ ) {
 	    detectorRot2[i] = dataStream.readFloat();
@@ -1639,7 +1585,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.detectorEfficiency.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	detectorEfficiency = 
 	    new float[header.detectorEfficiency.size / 4 + 1];
 	for ( i = 1; i <= header.detectorEfficiency.size / 4; i++ ) {
@@ -1653,7 +1599,7 @@ public class Runfile implements Cloneable {
 	    bArray = new byte[ this.header.psdOrder.size ];
 	    runfile.read( bArray );
 	    bArrayIS = new ByteArrayInputStream( bArray );
-	    dataStream = new DataInputStream( bArrayIS );
+	    dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	    psdOrder = new int[header.psdOrder.size / 4 + 1];
 	    for ( i = 1; i <= header.psdOrder.size / 4; i++ ) {
 		psdOrder[i] = dataStream.readInt();
@@ -1673,7 +1619,7 @@ public class Runfile implements Cloneable {
 	    bArray = new byte[ this.header.numSegs1.size ];
 	    runfile.read( bArray );
 	    bArrayIS = new ByteArrayInputStream( bArray );
-	    dataStream = new DataInputStream( bArrayIS );
+	    dataStream = new RunfileInputStream( bArrayIS,header.versionNumber );
 	    numSegs1 = new int[header.numSegs1.size / 4 + 1];
 	    for ( i = 1; i <= header.numSegs1.size / 4; i++ ) {
 		numSegs1[i] = dataStream.readInt();
@@ -1697,7 +1643,7 @@ public class Runfile implements Cloneable {
 	    bArray = new byte[ this.header.numSegs2.size ];
 	    runfile.read( bArray );
 	    bArrayIS = new ByteArrayInputStream( bArray );
-	    dataStream = new DataInputStream( bArrayIS );
+	    dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	    numSegs2 = new int[header.numSegs2.size / 4 + 1];
 	    for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
 		numSegs2[i] = dataStream.readInt();
@@ -1716,7 +1662,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.crateNum.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	if (header.crateNum.size > 0 ) {
 	    crateNum = new int[header.crateNum.size / 4 + 1];
 	    for ( i = 1; i <= header.crateNum.size / 4; i++ ) {
@@ -1733,7 +1679,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.slotNum.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	if ( header.slotNum.size > 0 ) { 
 	    slotNum = new int[header.slotNum.size / 4 + 1];
 	    for ( i = 1; i <= header.slotNum.size / 4; i++ ) {
@@ -1750,7 +1696,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.inputNum.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS,header.versionNumber );
 	if ( header.inputNum.size > 0 ) {
 	    inputNum = new int[header.inputNum.size / 4 + 1];
 	    for ( i = 1; i <= header.inputNum.size / 4; i++ ) {
@@ -1767,7 +1713,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.dataSource.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	if ( header.dataSource.size > 0 ) {
 	    dataSource = new int[header.dataSource.size / 4 + 1];
 	    for ( i = 1; i <= header.dataSource.size / 4; i++ ) {
@@ -1788,7 +1734,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.minID.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	if ( header.minID.size > 0 ) {
 	    boolean ifLess = false;
 	    minID = new int[header.minID.size / 4 + 1];
@@ -1811,7 +1757,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.discSettings.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
 	discriminator = new DiscLevel[this.header.discSettings.size/8 + 1];
 	for (i = 1; i <= this.header.discSettings.size/8; i++) {
 	    discriminator[i] = new DiscLevel();
@@ -1921,7 +1867,7 @@ public class Runfile implements Cloneable {
 	bArray = new byte[ this.header.timeScaleTable.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
+	dataStream = new RunfileInputStream( bArrayIS,  header.versionNumber );
 	timeScale = new float[this.header.timeScaleTable.size/4 + 1];
 	for (i = 1; i <= this.header.timeScaleTable.size/4; i++) {
 	    timeScale[i] = dataStream.readFloat();
@@ -2890,6 +2836,33 @@ public class Runfile implements Cloneable {
 	}
     }
 
+  /**
+     This method retrieves the detector length
+     @param detID The detector ID
+     @return The detector length
+   */
+  public float DetectorLength(int detID) {
+    return detectorLength[detID];
+  }
+
+  /**
+     This method retrieves the detector width
+     @param detID The detector ID
+     @return The detector width
+   */
+  public float DetectorWidth(int detID) {
+    return detectorWidth[detID];
+  }
+
+  /**
+     This method retrieves the detector depth
+     @param detID The detector ID
+     @return The detector depth
+   */
+  public float DetectorDepth(int detID) {
+    return detectorDepth[detID];
+  }
+
     /**
        This method retrieves the detector type.  
        @param detID The detector ID.
@@ -3074,7 +3047,7 @@ public class Runfile implements Cloneable {
 
 	if ( leaveOpen == false){
 	    System.out.println("GetSpectrum1D opening file");
-	    runfile = new RandomAccessFile(runfileName, "r");
+	    runfile = new RandomAccessRunfile(runfileName, "r");
 	}
 	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
@@ -3214,7 +3187,7 @@ public class Runfile implements Cloneable {
 
 	if ( leaveOpen == false){
 	    System.out.println("GetSpectrum1D opening file");
-	    runfile = new RandomAccessFile(runfileName, "r");
+	    runfile = new RandomAccessRunfile(runfileName, "r");
 	}
 
 	index = detID + (hist-1) * this.header.nDet;
@@ -3319,7 +3292,7 @@ public class Runfile implements Cloneable {
 	int wordLength;
 
 	if ( leaveOpen == false){
-	    runfile = new RandomAccessFile(runfileName, "r");
+	    runfile = new RandomAccessRunfile(runfileName, "r");
 	}
 	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
@@ -3396,7 +3369,7 @@ public class Runfile implements Cloneable {
 	int wordLength;
 
 	if ( leaveOpen == false){
-	    runfile = new RandomAccessFile(runfileName, "r");
+	    runfile = new RandomAccessRunfile(runfileName, "r");
 	}
 
 	index = detID + (hist-1) * this.header.nDet;
@@ -3645,7 +3618,7 @@ public class Runfile implements Cloneable {
     public void LeaveOpen() {
 	if (leaveOpen == true ) return; 
 	try {
-	    runfile = new RandomAccessFile ( runfileName, "r");
+	    runfile = new RandomAccessRunfile ( runfileName, "r");
 	}
 	catch ( IOException e ) {
 	    System.out.println("Problem Opening File: " + runfileName );
@@ -4321,7 +4294,7 @@ public class Runfile implements Cloneable {
 
 	if ( leaveOpen == false){
 	    System.out.println("GetSpectrum1D opening file");
-	    runfile = new RandomAccessFile(runfileName, "r");
+	    runfile = new RandomAccessRunfile(runfileName, "r");
 	}
 	
 	float[][] slice = new float[numY][numX];
@@ -4414,7 +4387,7 @@ public class Runfile implements Cloneable {
 	}
     }
     
-    void readParamFileFromRunfile( RandomAccessFile runfile, 
+    void readParamFileFromRunfile( RandomAccessRunfile runfile, 
 				   ParameterFile par ) throws IOException {
 	if ( header.versionNumber >=5 ) {
 	    try {
@@ -4494,12 +4467,12 @@ public class Runfile implements Cloneable {
 		 runfile.read(temp, 0, 16);
 		 par.setDeviceName(new String(temp));
 		 //		 System.out.println( "Reading Parrameter:" + (new String(temp)));
-		 int numUserParams = (int)header.ReadVAXReal4(runfile);
+		 int numUserParams = (int)runfile.readRunFloat();
 		 Parameter[] userPars = new Parameter[numUserParams];
 		 for (int ii = 0; ii < numUserParams; ii++) {
 		     userPars[ii] = new Parameter();
 		     userPars[ii].setName((new String ("uParam" + ii)));
-		     float ftemp = (float)header.ReadVAXReal4(runfile);
+		     float ftemp = (float)runfile.readRunFloat();
 		     userPars[ii].setValue(ftemp);
 		     userPars[ii].setDbSignal((new String("undefined")));
 		     
