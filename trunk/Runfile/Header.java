@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.2  2000/02/16 01:26:21  hammonds
+ * Changed code to handle glad LPSDs.  Have decided to handle all detectors with a common interface.  Most Lpsd<...> classes will be removed.  LpsdDetIDMap will stay since it implements old functionality.
+ *
  * Revision 5.1  2000/02/11 23:16:37  hammonds
  * Added code to read/write discriminator levels in the new files.  Changed type for disc level methods to int.  Added many parameters to specify detector posistion in the runfile.
  *
@@ -122,7 +125,7 @@ public class Header implements Cloneable {
     protected short overflowSort;
     protected double standardClock;
     protected double lpsdClock;
-    protected int numOfLpsds;
+    protected int numOfElements;
     protected String iName;
     protected TableType messageRegion = new TableType();
     protected TableType discSettings = new TableType();
@@ -449,8 +452,8 @@ public static void main(String[] args) throws IOException{
 				header.standardClock );
 	System.out.println("lpsdClock:            " + 
 				header.lpsdClock );
-	System.out.println("numOfLpsds:           " + 
-				header.numOfLpsds );
+	System.out.println("numOfElements:           " + 
+				header.numOfElements );
 	System.out.println("detectorLength:       " + 
 				header.detectorLength.location +
 				", " + header.detectorLength.size);
@@ -494,51 +497,24 @@ public static void main(String[] args) throws IOException{
 
     protected Header( RandomAccessFile runfile, String iName ) 
 	throws IOException {
-	//	Header tempHeader = new Header( r unfile );
 	this( runfile );
 	if ( versionNumber < 5 ) {
 	    this.iName = iName;
 	    if ( (this.iName).equalsIgnoreCase( "glad") || 
 		 (this.iName).equalsIgnoreCase( "lpsd") ) {
 		int nLpsdCrates = nDet/8192 + 1;
-		this.numOfLpsds = (nDet - (nLpsdCrates -1) * 8192)/64 + 
-		    (nLpsdCrates - 1) * 80;
-		this.nDet = 0;
-      		this.lpsdTimeFieldTable.location = 
-		    this.timeFieldTable.location;
-		this.lpsdTimeFieldTable.size = this.timeFieldTable.size;
-		this.timeFieldTable.size = 0;
-		this.timeFieldTable.location = 0;
-		this.lpsdMapTable.location = this.detectorMapTable.location;
-		this.lpsdMapTable.size = this.detectorMapTable.size;
-		this.detectorMapTable.size = 0;
-		this.detectorMapTable.location = 0;
-		this.lpsdAngle.location = this.detectorAngle.location;
-		this.lpsdAngle.size = this.detectorAngle.size;
-		this.detectorAngle.location = 0;
-		this.detectorAngle.size = 0;
-
-		this.lpsdFlightPath.location = this.flightPath.location;
-		this.lpsdFlightPath.size = this.flightPath.size;
-		this.flightPath.location = 0;
-		this.flightPath.size = 0;
-
-		this.lpsdHeight.location = this.detectorHeight.location;
-		this.lpsdHeight.size = this.detectorHeight.size;
-		this.detectorHeight.location = 0;
-		this.detectorHeight.size = 0;
-
-		this.lpsdType.location = this.detectorType.location;
-		this.lpsdType.size = this.detectorType.size;
-		this.detectorType.location = 0;
-		this.detectorType.size = 0;
-
-		this.lpsdStartTable.location = this.areaStartTable.location;
-		this.lpsdStartTable.size = this.areaStartTable.size;
-		this.areaStartTable.location = 0;
-		this.areaStartTable.size = 0;
-	    
-
+		this.numOfElements = this.nDet;
+		//		this.nDet = (short)((nDet - (nLpsdCrates -1) * 8192)/64 + 
+		//		    (nLpsdCrates - 1) * 80);
+		LpsdDetIdMap lpsdDetIdMap = new LpsdDetIdMap( runfile, this);
+		int numDets = 0;
+		for ( int ii = 0; ii < lpsdDetIdMap.NumOfBanks(); ii++ ) {
+		    numDets += lpsdDetIdMap.DetsInBank( ii ).length;
+		}
+	        this.nDet = (short)numDets;
+	    }
+	    else {
+		this.numOfElements = this.nDet;
 	    }
 	}
 		
@@ -950,7 +926,7 @@ public static void main(String[] args) throws IOException{
 		runfile.seek(632);
 		standardClock = (double)runfile.readFloat();
 		lpsdClock = (double)runfile.readFloat();
-		numOfLpsds = runfile.readInt();
+		//		numOfLpsds = runfile.readInt();
 		runfile.seek(700);
 		detectorLength.location = runfile.readInt();
 		detectorLength.size = runfile.readInt();
