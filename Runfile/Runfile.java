@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.19  2002/09/16 14:43:17  hammonds
+ * Changed detector position code for version 5 & up. This better reflects positions for lpsds and area detectors.
+ * Added crate, slot, input info for old area detectors.
+ *
  * Revision 6.18  2002/08/21 17:38:04  hammonds
  * Changed code to use new logBinBit instead of wavelength bit for dt/t bin binning.
  *
@@ -813,10 +817,16 @@ public class Runfile implements Cloneable {
 		    case 0:
 		    case 1:{
 			detectorType[ii] = 1;
+			crateNum[ii] = 1;
+			slotNum[ii] = 1;
+			inputNum[ii] = ii;
 			break;
 		    }
 		    case 11: {
 			detectorType[ii] = 11;
+			crateNum[ii] = 1;
+			slotNum[ii] = 19;
+			inputNum[ii] = 1;
 			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
 			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
@@ -831,14 +841,23 @@ public class Runfile implements Cloneable {
 		    switch (detectorType[ii]){
 		    case 1: {
 			detectorType[ii] = 9;
+			crateNum[ii] = 1;
+			slotNum[ii] = 1;
+			inputNum[ii] = ii;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 9;
+			crateNum[ii] = 1;
+			slotNum[ii] = 1;
+			inputNum[ii] = ii;
 			break;
 		    }
 		    case 12: 
 		    case 13: {
+			crateNum[ii] = 1;
+			slotNum[ii] = 19;
+			inputNum[ii] = 1;
 			if ((header.numOfX == 64) && (header.numOfY == 64)) {
 			    detectorType[ii] = 12;
 			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
@@ -865,10 +884,16 @@ public class Runfile implements Cloneable {
 		    case 0: 
 		    case 1: {
 			detectorType[ii] = 9;
+			crateNum[ii] = 1;
+			slotNum[ii] = 1;
+			inputNum[ii] = ii;
 			break;
 		    }
 		    case 13: {
 			detectorType[ii] = 13;
+			crateNum[ii] = 1;
+			slotNum[ii] = 19;
+			inputNum[ii] = 1;
 			if ((header.numOfX == 64) && (header.numOfY == 64)) {
 			    detectorType[ii] = 12;
 			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
@@ -900,6 +925,9 @@ public class Runfile implements Cloneable {
 		    }
 		    case 15: {
 			detectorType[ii] = 15;
+			crateNum[ii] = 1;
+			slotNum[ii] = 19;
+			inputNum[ii] = 1;
 			psdOrder[ii] = 2;
 			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = 2;
@@ -916,6 +944,9 @@ public class Runfile implements Cloneable {
 		    }
 		    case 16: {
 			detectorType[ii] = 16;
+			crateNum[ii] = 1;
+			slotNum[ii] = 19;
+			inputNum[ii] = 1;
 			psdOrder[ii] = 2;
 			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
@@ -2366,50 +2397,14 @@ public class Runfile implements Cloneable {
 		    dAngle = this.detectorAngle[detID];
 		}
 		else{
-		    float rotCos = 
-			(float) Math.cos(detectorRot2[detID] * Math.PI/180.0);
-		    double rotSin = Math.sin(detectorRot2[detID] * Math.PI/180.0);
-		    
-		    float psdFromCenter = 
-			(float)(detectorHeight[detID] - 
-				(detectorLength[detID]/200.0f) * rotSin +
-				(((float)seg.row / (float)numSegs1[detID]) * 
-				 detectorLength[detID]/100.0f) * rotSin);
-		    float psdFromCenter2 = psdFromCenter - 
-			detectorHeight[detID];
-		    
-		    float psdHeight = detectorHeight[detID] - 
-			(detectorLength[detID]/200.0f) * rotCos +
-			(((float)seg.row / (float)numSegs1[detID]) * 
-			 detectorLength[detID]/100.0f) * rotCos;
-		    float psdHeight2 = psdHeight - detectorHeight[detID];
-		    
-		    float psdFlightPath = 
-			(float)Math.sqrt(
-					 (flightPath[detID]*flightPath[detID])+ 
-					 (psdFromCenter2 * psdFromCenter2));
-		    
-		    float psdAngle = 
-			(float)(Math.asin( (double)(psdFromCenter2)/
-					   (double)psdFlightPath ) * 
-				180.0/Math.PI+
-				detectorAngle[detID]);
-		    
-		    dAngle = psdAngle;
+		    dAngle = RawDetectorAngle(seg);
 		}		    		    
 		
 	    }
 	    return dAngle;
 	}
 	else {
-	    double fromLeft = 
-		(seg.column * ( header.xLeft -header.xRight)/100 ) 
-		/ header.numOfX;
-	    double fromCenter = fromLeft 
-		 - ( header.xDisplacement + header.xLeft )/100;
-	    double offsetAngle = Math.atan(fromCenter / (header.dtd/100.0) )
-		* ( 180 / Math.PI );
-	    return header.dta + offsetAngle;
+	    return RawDetectorAngle(seg);
 	}
     }
 
@@ -2493,13 +2488,22 @@ public class Runfile implements Cloneable {
 		return this.detectorAngle[seg.detID];
 	    }
 	    else{
-		float rotCos = 
-		    (float) Math.cos((double)(detectorRot2[detID] * 
-					       Math.PI/180.0));
-		float rotSin = (float)Math.sin((double)(detectorRot2[detID] 
-						  * Math.PI/180.0));
+		float relX = -detectorWidth[detID]/200.0f +
+		    ((float)(seg.column-0.5f )/numSegs2[detID]) * 
+		    detectorWidth[detID]/100.0f;
+		float relY = -detectorLength[detID]/200.0f +
+		    ((float)(seg.row -0.5f)/numSegs1[detID]) * 
+		    detectorLength[detID]/100.0f;
+		     
+		float rotCos2 = 
+		    (float) Math.cos(Math.toRadians((double)detectorRot2[detID]));
+		float rotSin2 = 
+		    (float) Math.sin(Math.toRadians(detectorRot2[detID]));
+		
+		float rotX2 = relX * rotCos2 + relY * rotSin2;
+		float rotY2 = relY * rotCos2 - relX * rotSin2;
 
-		float psdFromCenter = (float)(detectorHeight[detID] - 
+		/*		float psdFromCenter = (float)(detectorHeight[detID] - 
 		    (detectorLength[detID]/200.0f) * rotSin +
 		    (((float)seg.row / (float) numSegs1[detID]) * 
 		     detectorLength[detID]/100.0f) * rotSin);
@@ -2511,12 +2515,13 @@ public class Runfile implements Cloneable {
 		     detectorLength[detID]/100.0f) * rotCos;
 		float psdHeight2 = psdHeight - detectorHeight[detID];
 
+		*/
 		float psdFlightPath = 
 		    (float)Math.sqrt((flightPath[detID]*flightPath[detID])+ 
-				     (psdFromCenter2 * psdFromCenter2));
+				     (rotX2 * rotX2));
 
 		float psdAngle = 
-		    (float)(Math.atan( (double)(psdFromCenter2)/
+		    (float)(Math.atan( (double)(rotX2)/
 				       (double)psdFlightPath ) * 180.0/Math.PI+
 			    detectorAngle[detID]);
 
@@ -2568,33 +2573,13 @@ public class Runfile implements Cloneable {
 		    fp = flightPath[detID];
 		}
 		else {
-		    float rotCos = 
-			(float) Math.cos(Math.toRadians((double)detectorRot2[detID]));
-		    float rotSin = 
-			(float) Math.sin(Math.toRadians(detectorRot2[detID]));
-		    float psdHeight = detectorHeight[detID] - 
-			(detectorLength[detID]/200.0f) * rotCos +
-			(((float)seg.row / (float)numSegs1[detID]) * 
-			 detectorLength[detID]/100.0f) * rotCos;
-		    float psdHeight2 = psdHeight - detectorHeight[detID];
-		    float psdFlightPath = 
-			(float)Math.sqrt((float)(psdHeight2 * psdHeight2) + 
-					 (flightPath[detID]*flightPath[detID]));
-		    fp = psdFlightPath;
+		    fp = RawFlightPath(seg);
 		}
 	    }
 	    return fp;
 	}
 	else {
-	    float fromLeft = (float)
-		(seg.column * ( header.xLeft -header.xRight)/100.0f ) 
-		/ header.numOfX;
-	    float fromCenter = (float)(fromLeft 
-		 - ( header.xDisplacement + header.xLeft )/100.0f);
-	    
-	    return Math.sqrt(flightPath[detID] * flightPath[detID] 
-			     + RawDetectorHeight(seg)*RawDetectorHeight (seg)
-			     + fromCenter * fromCenter );
+	    return RawFlightPath(seg);
 	}
     }
 
@@ -2644,19 +2629,25 @@ public class Runfile implements Cloneable {
 		return this.flightPath[id];
 	    }
 	    else {
-		float rotCos = 
+		float relX = -detectorWidth[id]/200.0f +
+		    ((float)(seg.column - .5f)/numSegs2[id]) * detectorWidth[id]/100.0f;
+		float relY = -detectorLength[id]/200.0f +
+		    ((float)(seg.row - .5f)/numSegs1[id]) * detectorLength[id]/100.0f;
+		
+		float rotCos2 = 
 		    (float) Math.cos(Math.toRadians((double)detectorRot2[id]));
-		float rotSin = 
-		    (float) Math.sin(Math.toRadians((double)detectorRot2[id]));
-		float psdHeight = detectorHeight[id] - 
-		    (detectorLength[id]/200.0f) * rotCos +
-		    (((float)seg.row / (float)numSegs1[id]) * 
-		     detectorLength[id]/100.0f) * rotCos;
-		float psdHeight2 = psdHeight - detectorHeight[id];
+		float rotSin2 = 
+		    (float) Math.sin(Math.toRadians(detectorRot2[id]));
+		
+		float rotX2 = relX * rotCos2 + relY * rotSin2;
+		float rotY2 = relY * rotCos2 - relX * rotSin2;
+		float psdHeight2 = rotY2 + detectorHeight[id];
 		float psdFlightPath = 
-		    (float)Math.sqrt((double)((psdHeight2 * psdHeight2) + 
-				     (flightPath[id]*flightPath[id])));
-		return (psdFlightPath);
+		    (float)Math.sqrt((float)(rotY2 * rotY2) + 
+				     (rotX2 * rotX2) +
+				     (flightPath[id]*flightPath[id]));
+		float fp = psdFlightPath;
+		return (fp);
 	    }
 	}
 	else {
@@ -2706,19 +2697,11 @@ public class Runfile implements Cloneable {
 		return this.detectorHeight[id];
 	    }
 	    else {
-		float rotCos = 
-		    (float) Math.cos(Math.toRadians((double)detectorRot2[id]));
-		float psdHeight = detectorHeight[id] - 
-		    (detectorLength[id]/200.0f) * rotCos +
-		    (((float)seg.row / (float)numSegs1[id]) * 
-		     detectorLength[id]/100.0f) * rotCos;
-		return psdHeight;
+		return RawDetectorHeight(seg);
 	    }
 	}
 	else {
-	    double height = header.yDisplacement + header.yLower + 
-		(seg.row * (header.yUpper - header.yLower)) / header.numOfY;
-	    return height/100.0f;
+	    return RawDetectorHeight(seg);
 	}
     }
 
@@ -2745,13 +2728,22 @@ public class Runfile implements Cloneable {
 		return this.detectorHeight[seg.detID];
 	    }
 	    else {
-		float rotCos = 
+		float relX = -detectorWidth[id]/200.0f +
+		    ((float)(seg.column - .5f)/numSegs2[id]) * 
+		    detectorWidth[id]/100.0f;
+		float relY = -detectorLength[id]/200.0f +
+		    ((float)(seg.row - .5f)/numSegs1[id]) * 
+		    detectorLength[id]/100.0f;
+		     
+		float rotCos2 = 
 		    (float) Math.cos(Math.toRadians((double)detectorRot2[id]));
-		float psdHeight = detectorHeight[id] - 
-		    (detectorLength[id]/200.0f) * rotCos +
-		    (((float)seg.row / (float)numSegs1[id]) * 
-		     detectorLength[id]/100.0f) * rotCos;
-		return psdHeight;
+		float rotSin2 = 
+		    (float) Math.sin(Math.toRadians(detectorRot2[id]));
+		
+		float rotX2 = relX * rotCos2 + relY * rotSin2;
+		float rotY2 = relY * rotCos2 - relX * rotSin2;
+		float psdHeight2 = rotY2 + detectorHeight[id];
+		return psdHeight2;
 	    }
 	}
 	else {
