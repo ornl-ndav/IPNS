@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.47  2002/12/17 01:31:43  hammonds
+ * Added documentation
+ *
  * Revision 5.46  2002/08/21 17:38:04  hammonds
  * Changed code to use new logBinBit instead of wavelength bit for dt/t bin binning.
  *
@@ -2114,6 +2117,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	return ( filename );
     }
 
+    /**
+       This method adds ancillary control parameters from a device file.
+     */
     public int addAncillaryEquipment(String inName) {
 	int rval = 0;
 	ParameterFile[] tparams = new ParameterFile[params.length + 1];
