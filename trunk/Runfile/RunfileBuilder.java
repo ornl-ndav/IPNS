@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.26  2001/11/02 16:34:06  hammonds
+ * Make ModifyHeaderElements return an int to be used with operators.
+ *
  * Revision 5.25  2001/10/31 22:07:47  hammonds
  * Changed how control parameters are written to a file to account for the fact that a place holder was added for a database record for the deviceName to be stored.
  * Also added methods that allow a header parameter to be changed.
@@ -1456,6 +1459,18 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     public int addFocusedTimeField(float min, float max, float step, 
 				  int TFNum ) {
 				  
+	char pseudo = ' ';
+	
+	if (InstrumentType.getIPNSInstType( header.iName ) == 
+	    InstrumentType.TOF_DG_SPECTROMETER ) {
+	    pseudo = 'I';
+	}
+	else if ( InstrumentType.getIPNSInstType( header.iName ) == 
+	    InstrumentType.TOF_DIFFRACTOMETER ) {
+	    pseudo = 'D';
+	}
+	header.pseudoTimeUnit = pseudo;
+	
 	int rval = 0;
 	if ( (min >= max) && (step >= (max-min)) ) {
 	    rval = -98;
@@ -1499,7 +1514,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].used = true;
 	timeField = tempFields;
 	header.numOfTimeFields = (short)(timeField.length - 1);
-
+	
 	return(rval);
 
     }
@@ -1970,25 +1985,30 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     /** 
 	Modify a parameter in an already written runfile header
     */
-    public void ModifyHeaderElement( String element, double value ) {
+    public int ModifyHeaderElement( String element, double value ) {
 	headerSet( element, value );
         header.reWrite(runfileName);
+	return (0);
     }
-    public void ModifyHeaderElement( String element, float value ) {
+    public int ModifyHeaderElement( String element, float value ) {
 	headerSet( element, value );
         header.reWrite(runfileName);
+	return (0);
     }
-    public void ModifyHeaderElement( String element, int value ) {
+    public int ModifyHeaderElement( String element, int value ) {
 	headerSet( element, value );
         header.reWrite(runfileName);
+	return (0);
     }
-    public void ModifyHeaderElement( String element, short value ) {
+    public int ModifyHeaderElement( String element, short value ) {
 	headerSet( element, value );
         header.reWrite(runfileName);
+	return (0);
     }
-    public void ModifyHeaderElement( String element, String value ) {
+    public int ModifyHeaderElement( String element, String value ) {
 	headerSet( element, value );
         header.reWrite(runfileName);
+	return (0);
     }
 
 }
