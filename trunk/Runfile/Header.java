@@ -3,7 +3,7 @@ package IPNS.Runfile;
 //import.RandomAccessRunfile; 
 import java.io.IOException;
 import java.io.DataInputStream; 
-import java.lang.Math;
+//import java.lang.Math;
 
 /**
 This class is a utility class for the IPNS.Runfile package.  Access to the
@@ -14,6 +14,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.26  2004/10/11 14:46:41  hammonds
+ * Separate what is in main out into a separate print method.
+ *
  * Revision 5.25  2003/04/14 21:42:23  hammonds
  * Fixed problem with #of segments for SCD.
  *
@@ -363,306 +366,184 @@ public class Header implements Cloneable {
   //}
 
 
-public static void main(String[] args) throws IOException{
+  public static void main(String[] args) throws IOException{
     System.setProperty( "Runfile_Debug", "yes" );
-	System.out.println("Runfile Name is " + args[0]);
-	RandomAccessRunfile runfile = new RandomAccessRunfile(
-		args[0], "r");
-	int slashIndex = args[0]
-	    .lastIndexOf( System.getProperty( "file.separator"));
-	String iName = args[0].substring( slashIndex+1, slashIndex + 5 );
-//	System.out.println( "iName: " + iName );
-	Header header = new Header(runfile, iName );
-	runfile.close();
+    System.out.println("Runfile Name is " + args[0]);
+    RandomAccessRunfile runfile = new RandomAccessRunfile(
+							  args[0], "r");
+    int slashIndex = args[0]
+      .lastIndexOf( System.getProperty( "file.separator"));
+    String iName = args[0].substring( slashIndex+1, slashIndex + 5 );
+    //	System.out.println( "iName: " + iName );
+    Header header = new Header(runfile, iName );
+    runfile.close();
+    header.Print();
+  }
+	
+  public void Print() {
+    System.out.println("controlParameter:  " + controlParameter.location +
+		       ", " + controlParameter.size);
+    System.out.println("detectorMapTable:  " + detectorMapTable.location +
+		       ", " + detectorMapTable.size);
+    System.out.println("timeFieldTable:    " + timeFieldTable.location +
+		       ", " + timeFieldTable.size);
+    System.out.println("timeScaleTable:    " + timeScaleTable.location +
+		       ", " + timeScaleTable.size);
+    System.out.println("timeShiftTable:    " + timeShiftTable.location +
+		       ", " + timeShiftTable.size);
+    System.out.println("areaStartTable:    " + areaStartTable.location +
+		       ", " + areaStartTable.size);
+    System.out.println("timeDelayTable:    " + timeDelayTable.location +
+		       ", " + timeDelayTable.size);
+    System.out.println("histStartAddress:  " + histStartAddress );
+    System.out.println("numOfBlocks:       " + numOfBlocks );
+    System.out.println("offsetToFree:      " + offsetToFree );
+    System.out.println("versionNumber:     " + versionNumber );
+    System.out.println("detectorAngle:     " + detectorAngle.location +
+		       ", " + detectorAngle.size);
+    System.out.println("flightPath:        " + flightPath.location +
+		       ", " + flightPath.size);
+    System.out.println("detectorHeight:    " + detectorHeight.location +
+		       ", " + detectorHeight.size);
+    System.out.println("detectorType:      " + detectorType.location +
+		       ", " + detectorType.size);
+    System.out.println("controlTable:      " + controlTable.location +
+		       ", " + controlTable.size);
+    System.out.println("seqHistWidth:      " + seqHistWidth.location +
+		       ", " + seqHistWidth.size);
+    System.out.println("nDet:              " + nDet );
+    System.out.println("userName:          " + userName );
+    System.out.println("runTitle:          " + runTitle );
+    System.out.println("runNum:          " + runNum );
+    System.out.println("nextRun:          " + nextRun );
+    System.out.println("startDate:         " + startDate );
+    System.out.println("startTime:         " + startTime );
+    System.out.println("endDate:           " + endDate );
+    System.out.println("endTime:           " + endTime );
+    System.out.println("protStatus:        " + (int)protStatus );
+    System.out.println("varToMonitor:      " + varToMonitor );
+    System.out.println("presetMonitorCounts:  " + presetMonitorCounts );
+    System.out.println("elapsedMonitorCounts: " + elapsedMonitorCounts );
+    System.out.println("numOfCyclesPreset:    " + numOfCyclesPreset );
+    System.out.println("numOfCyclesCompleted: " + numOfCyclesCompleted );
+    System.out.println("runAfterFinished:     " + runAfterFinished );
+    System.out.println("totalMonitorCounts:   " + totalMonitorCounts );
+    System.out.println("detCalibFile:         " + detCalibFile );
+    System.out.println("detLocUnit:           " + detLocUnit );
+    System.out.println("pseudoTimeUnit:       " + pseudoTimeUnit );
+    System.out.println("sourceToSample:       " + sourceToSample );
+    System.out.println("sourceToChopper:      " + sourceToChopper );
+    System.out.println("moderatorCalibFile:   " + moderatorCalibFile );
+    System.out.println("groupToMonitor:       " + groupToMonitor );
+    System.out.println("channelToMonitor:     " + channelToMonitor );
+    System.out.println("numOfHistograms:      " + numOfHistograms );
+    System.out.println("numOfTimeFields:      " + numOfTimeFields );
+    System.out.println("numOfControl:         " + numOfControl );
+    System.out.println("controlFlag:          " + controlFlag );
+    System.out.println("clockShift:           " + clockShift );
+    System.out.println("totalChannels:        " + totalChannels );
+    System.out.println("numOfPulses:          " + numOfPulses );
+    System.out.println("sizeOfDataArea:       " + sizeOfDataArea );
+    System.out.println("hardwareTMin:         " + hardwareTMin );
+    System.out.println("hardwareTMax:         " + hardwareTMax );
+    System.out.println("hardTimeDelay:        " + hardTimeDelay );
+    System.out.println("numOfX:               " + numOfX );
+    System.out.println("numOfY:               " + numOfY );
+    System.out.println("numOfWavelengths:     " + numOfWavelengths );
+    System.out.println("maxWavelength:        " + maxWavelength );
+    System.out.println("minWavelength:        " + minWavelength );
+    System.out.println("dta:                  " + dta );
+    System.out.println("dtd:                  " + dtd );
+    System.out.println("omega                 " + omega );
+    System.out.println("chi:                  " + chi );
+    System.out.println("phi:                  " + phi );
+    System.out.println("xLeft:                " + xLeft );
+    System.out.println("xRight:               " + xRight );
+    System.out.println("yLower:               " + yLower );
+    System.out.println("yUpper:               " + yUpper );
+    System.out.println("xDisplacement:        " + xDisplacement );
+    System.out.println("yDisplacement:        " + yDisplacement );
+    System.out.println("xLength:              " + xLength );
+    System.out.println("areaChannelWidth:     " + areaChannelWidth );
+    System.out.println("areaDoubleInterval:   " + areaDoubleInterval );
+    System.out.println("addressOf1DData       " + addressOf1DData );
+    System.out.println("addressOf2DData       " + addressOf2DData );
+    System.out.println("endOfOverflow:        " + endOfOverflow );
+    System.out.println("channels1D:           " + channels1D );
+    System.out.println("numOfOverflows:       " + numOfOverflows );
+    System.out.println("clockPeriod:          " + clockPeriod );
+    System.out.println("energyIn:             " + energyIn );
+    System.out.println("energyOut:            " + energyOut );
+    System.out.println("numOfSeqHist:         " + numOfSeqHist );
+    System.out.println("protonCurrent:        " + protonCurrent );
+    System.out.println("areaBinning:          " + areaBinning );
+    System.out.println("microprocessor:       " + microprocessor );
+    System.out.println("numOfLockouts:        " + numOfLockouts );
+    System.out.println("firstOverflow:        " + firstOverflow );
+    System.out.println("expNum:               " + expNum );
+    System.out.println("firstRun:             " + firstRun );
+    System.out.println("lastRun:              " + lastRun );
+    System.out.println("defaultRun:           " + defaultRun );
+    System.out.println("samplePos:            " + samplePos );
+    System.out.println("numOfHeadBlocks:      " + numOfHeadBlocks );
+    System.out.println("overflowSort:         " + overflowSort );
+    System.out.println("messageRegion:     " + messageRegion.location +
+		       ", " + messageRegion.size);
+    System.out.println("discSettings:      " + discSettings.location +
+		       ", " + discSettings.size);
+    System.out.println("PSD_IDMap:         " + PSD_IDMap.location +
+		       ", " + PSD_IDMap.size);
+    System.out.println("lpsdStartTable      " + lpsdStartTable.location +
+		       ", " + lpsdStartTable.size);
+    System.out.println("lpsdMapTable       " + lpsdMapTable.location +
+		       ", " + lpsdMapTable.size);
+    System.out.println("lpsdTimeFieldTable:" + lpsdTimeFieldTable.location +
+		       ", " + lpsdTimeFieldTable.size);
+    System.out.println("lpsdAngle:     " + lpsdAngle.location +
+		       ", " + lpsdAngle.size);
+    System.out.println("lpsdFlightPath:        " + lpsdFlightPath.location +
+				", " + lpsdFlightPath.size);
+    System.out.println("lpsdHeight:    " + lpsdHeight.location +
+		       ", " + lpsdHeight.size);
+    System.out.println("lpsdType:      " + lpsdType.location +
+		       ", " + lpsdType.size);
+    System.out.println("standardClock:        " + standardClock );
+    System.out.println("lpsdClock:            " + lpsdClock );
+    System.out.println("numOfElements:           " + numOfElements );
+    System.out.println("detectorLength:       " + detectorLength.location +
+		       ", " + detectorLength.size);
+    System.out.println("detectorWidth:        " + detectorWidth.location +
+		       ", " + detectorWidth.size);
+    System.out.println("detectorDepth:        " +  detectorDepth.location +
+		       ", " + detectorDepth.size);
+    System.out.println("iName:                " + iName );
+    System.out.println("detectorSGMap:        " + detectorSGMap.location +
+		       ", " + detectorSGMap.size);
+    System.out.println("detCoordSys:          " +  detCoordSys.location +
+		       ", " + detCoordSys.size);
+    System.out.println("detectorRot1:         " +  detectorRot1.location +
+		       ", " + detectorRot1.size);
+    System.out.println("detectorRot2:         " +  detectorRot2.location +
+		       ", " + detectorRot2.size);
+    System.out.println("detectorEfficiency:   " + detectorEfficiency.location +
+		       ", " + detectorEfficiency.size);
+    System.out.println("psdOrder:             " + psdOrder.location +
+		       ", " + psdOrder.size);
+    System.out.println("numSegs1:             " + numSegs1.location +
+		       ", " + numSegs1.size);
+    System.out.println("numSegs2:             " + numSegs2.location +
+		       ", " + numSegs2.size);
+    System.out.println("dataSource:             " + dataSource.location +
+		       ", " + dataSource.size);
+    System.out.println("minID:             " + minID.location +
+		       ", " + minID.size);
+    System.out.println("instrumentType:                " + instrumentType );
+    System.out.println("filterType:                    " + filterType );
+    System.out.println("sampleEnv:                     " + sampleEnv );
+    System.out.println("detectorConfig:                " + detectorConfig );
+    System.out.println("runType:                       " + runType );
 
-	System.out.println("controlParameter:  " + 
-				header.controlParameter.location +
-				", " + header.controlParameter.size);
-	System.out.println("detectorMapTable:  " + 
-				header.detectorMapTable.location +
-				", " + header.detectorMapTable.size);
-	System.out.println("timeFieldTable:    " + 
-				header.timeFieldTable.location +
-				", " + header.timeFieldTable.size);
-	System.out.println("timeScaleTable:    " + 
-				header.timeScaleTable.location +
-				", " + header.timeScaleTable.size);
-	System.out.println("timeShiftTable:    " + 
-				header.timeShiftTable.location +
-				", " + header.timeShiftTable.size);
-	System.out.println("areaStartTable:    " + 
-				header.areaStartTable.location +
-				", " + header.areaStartTable.size);
-	System.out.println("timeDelayTable:    " + 
-				header.timeDelayTable.location +
-				", " + header.timeDelayTable.size);
-	System.out.println("histStartAddress:  " + 
-				header.histStartAddress );
-	System.out.println("numOfBlocks:       " + 
-				header.numOfBlocks );
-	System.out.println("offsetToFree:      " + 
-				header.offsetToFree );
-	System.out.println("versionNumber:     " + 
-				header.versionNumber );
-	System.out.println("detectorAngle:     " + 
-				header.detectorAngle.location +
-				", " + header.detectorAngle.size);
-	System.out.println("flightPath:        " + 
-				header.flightPath.location +
-				", " + header.flightPath.size);
-	System.out.println("detectorHeight:    " + 
-				header.detectorHeight.location +
-				", " + header.detectorHeight.size);
-	System.out.println("detectorType:      " + 
-				header.detectorType.location +
-				", " + header.detectorType.size);
-	System.out.println("controlTable:      " + 
-				header.controlTable.location +
-				", " + header.controlTable.size);
-	System.out.println("seqHistWidth:      " + 
-				header.seqHistWidth.location +
-				", " + header.seqHistWidth.size);
-	System.out.println("nDet:              " + 
-				header.nDet );
-	System.out.println("userName:          " + 
-				header.userName );
-	System.out.println("runTitle:          " + 
-				header.runTitle );
-	System.out.println("runNum:          " + 
-				header.runNum );
-	System.out.println("nextRun:          " + 
-				header.nextRun );
-	System.out.println("startDate:         " + 
-				header.startDate );
-	System.out.println("startTime:         " + 
-				header.startTime );
-	System.out.println("endDate:           " + 
-				header.endDate );
-	System.out.println("endTime:           " + 
-				header.endTime );
-	System.out.println("protStatus:        " + 
-				(int)header.protStatus );
-	System.out.println("varToMonitor:      " + 
-				header.varToMonitor );
-	System.out.println("presetMonitorCounts:  " + 
-				header.presetMonitorCounts );
-	System.out.println("elapsedMonitorCounts: " + 
-				header.elapsedMonitorCounts );
-	System.out.println("numOfCyclesPreset:    " + 
-				header.numOfCyclesPreset );
-	System.out.println("numOfCyclesCompleted: " + 
-				header.numOfCyclesCompleted );
-	System.out.println("runAfterFinished:     " + 
-				header.runAfterFinished );
-	System.out.println("totalMonitorCounts:   " + 
-				header.totalMonitorCounts );
-	System.out.println("detCalibFile:         " + 
-				header.detCalibFile );
-	System.out.println("detLocUnit:           " + 
-				header.detLocUnit );
-	System.out.println("pseudoTimeUnit:       " + 
-				header.pseudoTimeUnit );
-	System.out.println("sourceToSample:       " + 
-				header.sourceToSample );
-	System.out.println("sourceToChopper:      " + 
-				header.sourceToChopper );
-	System.out.println("moderatorCalibFile:   " + 
-				header.moderatorCalibFile );
-	System.out.println("groupToMonitor:       " + 
-				header.groupToMonitor );
-	System.out.println("channelToMonitor:     " + 
-				header.channelToMonitor );
-	System.out.println("numOfHistograms:      " + 
-				header.numOfHistograms );
-	System.out.println("numOfTimeFields:      " + 
-				header.numOfTimeFields );
-	System.out.println("numOfControl:         " + 
-				header.numOfControl );
-	System.out.println("controlFlag:          " + 
-				header.controlFlag );
-	System.out.println("clockShift:           " + 
-				header.clockShift );
-	System.out.println("totalChannels:        " + 
-				header.totalChannels );
-	System.out.println("numOfPulses:          " + 
-				header.numOfPulses );
-	System.out.println("sizeOfDataArea:       " + 
-				header.sizeOfDataArea );
-	System.out.println("hardwareTMin:         " + 
-				header.hardwareTMin );
-	System.out.println("hardwareTMax:         " + 
-				header.hardwareTMax );
-	System.out.println("hardTimeDelay:        " + 
-				header.hardTimeDelay );
-	System.out.println("numOfX:               " + 
-				header.numOfX );
-	System.out.println("numOfY:               " + 
-				header.numOfY );
-	System.out.println("numOfWavelengths:     " + 
-				header.numOfWavelengths );
-	System.out.println("maxWavelength:        " + 
-				header.maxWavelength );
-	System.out.println("minWavelength:        " + 
-				header.minWavelength );
-	System.out.println("dta:                  " + 
-				header.dta );
-	System.out.println("dtd:                  " + 
-				header.dtd );
-	System.out.println("omega                 " + 
-				header.omega );
-	System.out.println("chi:                  " + 
-				header.chi );
-	System.out.println("phi:                  " + 
-				header.phi );
-	System.out.println("xLeft:                " + 
-				header.xLeft );
-	System.out.println("xRight:               " + 
-				header.xRight );
-	System.out.println("yLower:               " + 
-				header.yLower );
-	System.out.println("yUpper:               " + 
-				header.yUpper );
-	System.out.println("xDisplacement:        " + 
-				header.xDisplacement );
-	System.out.println("yDisplacement:        " + 
-				header.yDisplacement );
-	System.out.println("xLength:              " + 
-				header.xLength );
-	System.out.println("areaChannelWidth:     " + 
-				header.areaChannelWidth );
-	System.out.println("areaDoubleInterval:   " + 
-				header.areaDoubleInterval );
-	System.out.println("addressOf1DData       " + 
-				header.addressOf1DData );
-	System.out.println("addressOf2DData       " + 
-				header.addressOf2DData );
-	System.out.println("endOfOverflow:        " + 
-				header.endOfOverflow );
-	System.out.println("channels1D:           " + 
-				header.channels1D );
-	System.out.println("numOfOverflows:       " + 
-				header.numOfOverflows );
-	System.out.println("clockPeriod:          " + 
-				header.clockPeriod );
-	System.out.println("energyIn:             " + 
-				header.energyIn );
-	System.out.println("energyOut:            " + 
-				header.energyOut );
-	System.out.println("numOfSeqHist:         " + 
-				header.numOfSeqHist );
-	System.out.println("protonCurrent:        " + 
-				header.protonCurrent );
-	System.out.println("areaBinning:          " + 
-				header.areaBinning );
-	System.out.println("microprocessor:       " + 
-				header.microprocessor );
-	System.out.println("numOfLockouts:        " + 
-				header.numOfLockouts );
-	System.out.println("firstOverflow:        " + 
-				header.firstOverflow );
-	System.out.println("expNum:               " + 
-				header.expNum );
-	System.out.println("firstRun:             " + 
-				header.firstRun );
-	System.out.println("lastRun:              " + 
-				header.lastRun );
-	System.out.println("defaultRun:           " + 
-				header.defaultRun );
-	System.out.println("samplePos:            " + 
-				header.samplePos );
-	System.out.println("numOfHeadBlocks:      " + 
-				header.numOfHeadBlocks );
-	System.out.println("overflowSort:         " + 
-				header.overflowSort );
-	System.out.println("messageRegion:     " + 
-				header.messageRegion.location +
-				", " + header.messageRegion.size);
-	System.out.println("discSettings:      " + 
-				header.discSettings.location +
-				", " + header.discSettings.size);
-	System.out.println("PSD_IDMap:         " + 
-				header.PSD_IDMap.location +
-				", " + header.PSD_IDMap.size);
-	System.out.println("lpsdStartTable      " + 
-				header.lpsdStartTable.location +
-				", " + header.lpsdStartTable.size);
-	System.out.println("lpsdMapTable       " + 
-				header.lpsdMapTable.location +
-				", " + header.lpsdMapTable.size);
-	System.out.println("lpsdTimeFieldTable:" + 
-				header.lpsdTimeFieldTable.location +
-				", " + header.lpsdTimeFieldTable.size);
-	System.out.println("lpsdAngle:     " + 
-				header.lpsdAngle.location +
-				", " + header.lpsdAngle.size);
-	System.out.println("lpsdFlightPath:        " + 
-				header.lpsdFlightPath.location +
-				", " + header.lpsdFlightPath.size);
-	System.out.println("lpsdHeight:    " + 
-				header.lpsdHeight.location +
-				", " + header.lpsdHeight.size);
-	System.out.println("lpsdType:      " + 
-				header.lpsdType.location +
-				", " + header.lpsdType.size);
-	System.out.println("standardClock:        " + 
-				header.standardClock );
-	System.out.println("lpsdClock:            " + 
-				header.lpsdClock );
-	System.out.println("numOfElements:           " + 
-				header.numOfElements );
-	System.out.println("detectorLength:       " + 
-				header.detectorLength.location +
-				", " + header.detectorLength.size);
-	System.out.println("detectorWidth:        " + 
-				header.detectorWidth.location +
-				", " + header.detectorWidth.size);
-	System.out.println("detectorDepth:        " +  
-				header.detectorDepth.location +
-				", " + header.detectorDepth.size);
-	System.out.println("iName:                " +
-			        header.iName );
-	System.out.println("detectorSGMap:        " +  
-				header.detectorSGMap.location +
-				", " + header.detectorSGMap.size);
-	System.out.println("detCoordSys:          " +  
-				header.detCoordSys.location +
-				", " + header.detCoordSys.size);
-	System.out.println("detectorRot1:         " +  
-				header.detectorRot1.location +
-				", " + header.detectorRot1.size);
-	System.out.println("detectorRot2:         " +  
-				header.detectorRot2.location +
-				", " + header.detectorRot2.size);
-	System.out.println("detectorEfficiency:   " +  
-				header.detectorEfficiency.location +
-				", " + header.detectorEfficiency.size);
-	System.out.println("psdOrder:             " +  
-				header.psdOrder.location +
-				", " + header.psdOrder.size);
-	System.out.println("numSegs1:             " +  
-				header.numSegs1.location +
-				", " + header.numSegs1.size);
-	System.out.println("numSegs2:             " +  
-				header.numSegs2.location +
-				", " + header.numSegs2.size);
-	System.out.println("dataSource:             " +  
-				header.dataSource.location +
-				", " + header.dataSource.size);
-	System.out.println("minID:             " +  
-				header.minID.location +
-				", " + header.minID.size);
-	System.out.println("instrumentType:                " +
-			        header.instrumentType );
-	System.out.println("filterType:                    " +
-			        header.filterType );
-	System.out.println("sampleEnv:                     " +
-			        header.sampleEnv );
-	System.out.println("detectorConfig:                " +
-			        header.detectorConfig );
-	System.out.println("runType:                       " +
-			        header.runType );
-
-	}
+  }
 
     protected Header() {
     }
