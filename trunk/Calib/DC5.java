@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.8  2002/12/03 19:58:28  hammonds
+ * Change SCD Calib detector to a 1x74.
+ *
  * Revision 1.7  2002/09/30 18:54:41  hammonds
  * Added new SCD detector and SCD diagnostic signals
  *
@@ -94,7 +97,7 @@ public class DC5 {
 			  1, 2, 1 };
     public static final int[]
 	NUM_OF_SEGS_1 = { 1, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
-			  256, 256, 8, 150, 36 };
+			  256, 256, 8, 150, 74 };
     public static final int[]
 	NUM_OF_SEGS_2 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128,
 			  1, 1, 1, 150, 1};
