@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.27  2001/07/03 20:20:34  hammonds
+ * Fixed array limit problem defining segmentMap for V5 files.
+ *
  * Revision 5.26  2001/07/02 16:43:15  hammonds
  * Changed Code for area detector Locations.
  * Added some javadoc comments.
@@ -1377,8 +1380,8 @@ public class Runfile implements Cloneable {
 				  segments.length);
 		segments = tsegments;
 	    }
-	    for ( int segY = 0; segY <= numSegs1[ii]; segY ++ ) {
-		for ( int segX = 0; segX <= numSegs2[ii]; segX ++ ) {
+	    for ( int segY = 0; segY < numSegs1[ii]; segY ++ ) {
+		for ( int segX = 0; segX < numSegs2[ii]; segX ++ ) {
 		    int segID = minID[ii] + segX + segY * numSegs2[ii];
 		    segments[segID] = 
 			new Segment( ii, segX, segY, 
