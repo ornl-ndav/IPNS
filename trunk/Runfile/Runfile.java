@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.20  2001/03/15 17:24:56  hammonds
+ * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
+ *
  * Revision 5.19  2001/02/27 21:07:28  hammonds
  * add fujnction to return the instrument type.
  *
@@ -124,6 +127,9 @@ public class Runfile implements Cloneable {
     int[] psdOrder = new int[0];
     int[] numSegs1 = new int[0];
     int[] numSegs2 = new int[0];
+    int[] crateNum = new int[0];
+    int[] slotNum = new int[0];
+    int[] inputNum = new int[0];
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
@@ -388,6 +394,9 @@ public class Runfile implements Cloneable {
 	    int[] psdOrder = new int[header.nDet + 1];
 	    int[] numSegs1 = new int[header.nDet + 1];
 	    int[] numSegs2 = new int[header.nDet + 1];
+	    int[] crateNum = new int[header.nDet + 1];
+	    int[] slotNum = new int[header.nDet + 1];
+	    int[] inputNum = new int[header.nDet + 1];
 
 	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
 		if ( detectorAngle[ii] == 0.0F &&
@@ -779,6 +788,57 @@ public class Runfile implements Cloneable {
 	numSegs1 = new int[header.numSegs1.size / 4 + 1];
 	for ( i = 1; i <= header.numSegs1.size / 4; i++ ) {
 	    numSegs1[i] = dataStream.readInt();
+	}
+	bArrayIS.close();
+	dataStream.close();
+
+	runfile.seek(this.header.crateNum.location);
+	bArray = new byte[ this.header.crateNum.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
+	if (header.crateNum.size > 0 ) {
+	    crateNum = new int[header.crateNum.size / 4 + 1];
+	    for ( i = 1; i <= header.crateNum.size / 4; i++ ) {
+		crateNum[i] = dataStream.readInt();
+	    }
+	}
+	else {
+	    crateNum = new int[header.nDet + 1];
+	}
+	bArrayIS.close();
+	dataStream.close();
+
+	runfile.seek(this.header.slotNum.location);
+	bArray = new byte[ this.header.slotNum.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
+	if ( header.slotNum.size > 0 ) { 
+	    slotNum = new int[header.slotNum.size / 4 + 1];
+	    for ( i = 1; i <= header.slotNum.size / 4; i++ ) {
+		slotNum[i] = dataStream.readInt();
+	    }
+	}
+	else {
+	    slotNum = new int[header.nDet + 1];
+	}
+	bArrayIS.close();
+	dataStream.close();
+
+	runfile.seek(this.header.inputNum.location);
+	bArray = new byte[ this.header.inputNum.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
+	if ( header.inputNum.size > 0 ) {
+	    inputNum = new int[header.inputNum.size / 4 + 1];
+	    for ( i = 1; i <= header.inputNum.size / 4; i++ ) {
+		inputNum[i] = dataStream.readInt();
+	    }
+	}
+	else {
+	    inputNum = new int[header.nDet + 1];
 	}
 	bArrayIS.close();
 	dataStream.close();

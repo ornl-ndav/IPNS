@@ -12,9 +12,8 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
- * Revision 5.4  2001/02/27 21:06:36  hammonds
- * Took out excess prints in read Unsigned Integer.
- * Added readUnsignedLong
+ * Revision 5.5  2001/03/15 17:24:53  hammonds
+ * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
  *
  * Revision 5.3  2000/05/22 18:37:21  hammonds
  * Fixed problem reading run numbers out of vesion 2 files
@@ -134,6 +133,7 @@ public class Header implements Cloneable {
     protected double lpsdClock;
     protected int numOfElements;
     protected String iName;
+    protected int MagicNumber;
     protected TableType messageRegion = new TableType();
     protected TableType discSettings = new TableType();
     protected TableType PSD_IDMap = new TableType();
@@ -159,6 +159,9 @@ public class Header implements Cloneable {
     protected TableType psdOrder = new TableType();
     protected TableType numSegs1 = new TableType();
     protected TableType numSegs2 = new TableType();
+    protected TableType crateNum = new TableType();
+    protected TableType slotNum = new TableType();
+    protected TableType inputNum = new TableType();
 
     // --------------------------- readUnsignedInteger -------------------
 
@@ -1017,7 +1020,13 @@ public static void main(String[] args) throws IOException{
 		numSegs1.size = runfile.readInt();
 		numSegs2.location = runfile.readInt();
 		numSegs2.size = runfile.readInt();
-
+		crateNum.location = runfile.readInt();
+		crateNum.size = runfile.readInt();
+		slotNum.location = runfile.readInt();
+		slotNum.size = runfile.readInt();
+		inputNum.location = runfile.readInt();
+		inputNum.size = runfile.readInt();
+		
     }
 
     public void Write( RandomAccessFile runfile ) {
@@ -1183,6 +1192,12 @@ public static void main(String[] args) throws IOException{
 		runfile.writeInt( numSegs1.size );
 		runfile.writeInt( numSegs2.location );
 		runfile.writeInt( numSegs2.size );
+		runfile.writeInt( crateNum.location );
+		runfile.writeInt( crateNum.size );
+		runfile.writeInt( slotNum.location );
+		runfile.writeInt( slotNum.size );
+		runfile.writeInt( inputNum.location );
+		runfile.writeInt( inputNum.size );
 		runfile.seek(1532);
 		runfile.writeInt( (int)0 );
 		
