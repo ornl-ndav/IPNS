@@ -4,6 +4,7 @@ package IPNS.Runfile;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
+import IPNS.Control.*;
 
 /**
 This class is designed to provide an interface to IPNS run files for versions
@@ -22,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.40  2001/10/10 15:27:37  hammonds
+ * First level adding Control Parameters.
+ *
  * Revision 5.39  2001/10/08 19:25:32  hammonds
  * Condense assignment of values for length, width, ... for old runfiles.
  *
@@ -194,6 +198,7 @@ public class Runfile implements Cloneable {
     int[] inputNum = new int[0];
     int[] dataSource = new int[0];
     int[] minID = new int[0];
+    ParameterFile[] params = new ParameterFile[0];
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
