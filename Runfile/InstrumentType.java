@@ -3,6 +3,9 @@
  *
  *
  *  $Log$
+ *  Revision 1.3  2002/04/24 14:50:50  hammonds
+ *  Fixed some instrument names for IPNS instruments
+ *
  *  Revision 1.2  2001/03/05 19:42:36  hammonds
  *  Added test and dlab to instrument types
  *
@@ -85,20 +88,21 @@ public class InstrumentType implements Serializable
   */
  public static int getIPNSInstType( String  inst_name)
   {
-    if ( inst_name.equalsIgnoreCase( "GPPD" )  ||
+     if ( inst_name.equalsIgnoreCase( "GPPD" )  ||
          inst_name.equalsIgnoreCase( "SEPD" )  ||
          inst_name.equalsIgnoreCase( "GLAD")    ) 
       return TOF_DIFFRACTOMETER;
     
-    else if (inst_name.equalsIgnoreCase( "SCD" ) )
+    else if (inst_name.equalsIgnoreCase( "SCD0" ) )
       return TOF_SCD;
 
     else if ( inst_name.equalsIgnoreCase( "SAND" )  ||
-              inst_name.equalsIgnoreCase( "SAD" )     )
+              inst_name.equalsIgnoreCase( "SAD0" )  ||
+              inst_name.equalsIgnoreCase( "SAD1" )     )
       return TOF_SAD;
 
-    else if ( inst_name.equalsIgnoreCase( "POSY1" )  ||   // ##### fix this
-              inst_name.equalsIgnoreCase( "POSY2" )    )
+    else if ( inst_name.equalsIgnoreCase( "POSY" )  ||   // ##### fix this
+              inst_name.equalsIgnoreCase( "PNE0" )    )
       return TOF_REFLECTROMETER;
 
     else if ( inst_name.equalsIgnoreCase( "HRCS" )  ||
