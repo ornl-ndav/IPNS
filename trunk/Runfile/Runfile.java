@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.16  2000/07/11 03:32:44  hammonds
+ * Changed DetectorAngle() to return average angle for time focused spectrometer runs.  Also added RawDetectorHeight() method to balance out the calls to locate a detector.
+ *
  * Revision 5.15  2000/06/01 16:23:31  hammonds
  * Corrected Get1DSum for new runfiles (byte order was wrong).  Changed solidAngle() to SolidAngle().
  *
@@ -1392,17 +1395,32 @@ public class Runfile implements Cloneable {
 
 	if (tfType == 0) return detectorAngle[detID];
 
-	if ((timeField[tfType].timeFocusBit > 0) && 
-	    (header.pseudoTimeUnit == 'D')) { 
-	    for ( int nid = 1; nid <= header.nDet; nid++ ) {
-		int nindex = (hist - 1) * header.nDet + nid;
-		int tempType = detectorMap[nindex].tfType;
-
-		if ( tempType == tfType )
-		    {
-			angle_sum += Math.abs(detectorAngle[nid]);
-			nDetsThisType++;
-		    }
+	if ((timeField[tfType].timeFocusBit > 0)) { 
+	    if (header.pseudoTimeUnit == 'D') { 
+		for ( int nid = 1; nid <= header.nDet; nid++ ) {
+		    int nindex = (hist - 1) * header.nDet + nid;
+		    int tempType = detectorMap[nindex].tfType;
+		    
+		    if ( tempType == tfType )
+			{
+			    angle_sum += Math.abs(detectorAngle[nid]);
+			    nDetsThisType++;
+			}
+		}
+	    }
+	    else if (header.pseudoTimeUnit == 'I') { 
+		for ( int nid = 1; nid <= header.nDet; nid++ ) {
+		    int nindex = (hist - 1) * header.nDet + nid;
+		    int tempType = detectorMap[nindex].tfType;
+		    
+		    if ( tempType == tfType && 
+			 subgroupIDList[index] == 
+			 subgroupIDList[nindex] )
+			{
+			    angle_sum += Math.abs(detectorAngle[nid]);
+			    nDetsThisType++;
+			}
+		}
 	    }
 	    angleSign = detectorAngle[detID]/
 		Math.abs(detectorAngle[detID]);
@@ -1473,6 +1491,16 @@ public class Runfile implements Cloneable {
        @return The height of the detector above the scattering plane.
     */
     public double DetectorHeight(int detID){
+	return this.detectorHeight[detID];
+    }
+
+    /**
+       This method retrieves the height of the detector above the scattering 
+       plane.  
+       @param detID The detector ID.
+       @return The height of the detector above the scattering plane.
+    */
+    public double RawDetectorHeight(int detID){
 	return this.detectorHeight[detID];
     }
 
