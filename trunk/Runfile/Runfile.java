@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.46  2001/12/11 18:41:30  hammonds
+ * Changes from detectorID to segment mapping for LPSDs
+ *
  * Revision 5.45  2001/11/26 15:21:14  hammonds
  * Added some code for POSY instruments.
  * Also added printStackTrace to caught exceptions.
@@ -515,6 +518,18 @@ public class Runfile implements Cloneable {
 	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
 
 	   	    
+	    detectorLength = new float[header.nDet + 1];
+	    detectorWidth = new float[header.nDet + 1];
+	    detectorDepth = new float[header.nDet + 1];
+	    detectorEfficiency = new float[header.nDet + 1];
+	    psdOrder = new int[header.nDet + 1];
+	    numSegs1 = new int[header.nDet + 1];
+	    numSegs2 = new int[header.nDet + 1];
+	    crateNum = new int[header.nDet + 1];
+	    slotNum = new int[header.nDet + 1];
+	    inputNum = new int[header.nDet + 1];
+	    dataSource = new int[header.nDet + 1];
+	    minID = new int[header.nDet + 1];
 	    
 	        
 	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
@@ -527,7 +542,9 @@ public class Runfile implements Cloneable {
 		float[] tFlightPath = new float[ flightPath.length + 1];
 		float[] tDetectorHeight = new float[ detectorHeight.length+ 1];
 		short[] tDetectorType = new short[ detectorType.length + 1];
+		
 		DetectorMap[] tDetectorMap = new DetectorMap[detectorMap.length + 1];
+
 		System.arraycopy(detectorAngle, 0 , tDetectorAngle, 0, 
 				 detectorAngle.length );
 		System.arraycopy(flightPath, 0 , tFlightPath, 0, 
@@ -571,18 +588,6 @@ public class Runfile implements Cloneable {
 	    }
 
 	    lpsdIDMap = new LpsdDetIdMap( runfile, header );
-	    detectorLength = new float[header.nDet + 1];
-	    detectorWidth = new float[header.nDet + 1];
-	    detectorDepth = new float[header.nDet + 1];
-	    detectorEfficiency = new float[header.nDet + 1];
-	    psdOrder = new int[header.nDet + 1];
-	    numSegs1 = new int[header.nDet + 1];
-	    numSegs2 = new int[header.nDet + 1];
-	    crateNum = new int[header.nDet + 1];
-	    slotNum = new int[header.nDet + 1];
-	    inputNum = new int[header.nDet + 1];
-	    dataSource = new int[header.nDet + 1];
-	    minID = new int[header.nDet + 1];
 	    segments = new Segment[header.numOfElements + 1];
 	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
 		if ( detectorAngle[ii] == 0.0F &&
@@ -684,6 +689,7 @@ public class Runfile implements Cloneable {
 		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    minID[ii] = ii;
 		    segments[ii] = new Segment();
 		    segments[ii].detID = ii; 
 		    segments[ii].row = 1; 
@@ -795,6 +801,7 @@ public class Runfile implements Cloneable {
 			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			minID[ii] = ii;
 			segments[ii] = new Segment();
 			segments[ii].detID = ii; 
 			segments[ii].row = 1; 
@@ -817,6 +824,7 @@ public class Runfile implements Cloneable {
 			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			minID[ii] = ii;
 			for ( int segY = 0; segY < header.numOfY; segY++) {
 			    for ( int segX = 0; segX < header.numOfX; segX++) {
 				int index = ii + segX + segY *( header.numOfX);
@@ -1529,7 +1537,7 @@ public class Runfile implements Cloneable {
 	int [][] IDMap = 
 	    new int[this.header.numOfHistograms][this.header.numOfElements];
 	subgroupIDList = 
-	    new int[this.header.nDet *this.header.numOfHistograms +1];
+	    new int[this.header.numOfElements *this.header.numOfHistograms +1];
 	
 	minSubgroupID = new int[this.header.numOfHistograms + 1];
 	maxSubgroupID = new int[this.header.numOfHistograms + 1];
@@ -1556,17 +1564,17 @@ public class Runfile implements Cloneable {
 	    Segment[] segList = new Segment[0];
 	    for ( int jj = 0; jj < this.header.numOfHistograms; jj++ ) {
 		for ( int kk = 0; kk < this.header.numOfElements; kk++ ) {
-			if ( minID[kk + 1] >=0 ) {
+		    //	if ( minID[kk + 1] >=0 ) {
 		    if ( IDMap[jj][kk] == i ) {
 			int[] temp = new int[ idList.length + 1];
 			System.arraycopy( idList, 0, temp, 0, idList.length );
 			temp[idList.length] = kk + 1;
  			idList = temp;
 			Segment[] tseg = new Segment[ segList.length + 1];
-			tseg[segList.length] = segments[ minID[kk + 1]];
+			tseg[segList.length] = segments[ kk + 1];
 			segList = tseg;
 		    } 
-            }
+		    //}
             }
 	    }
 	    subgroupMap[i] = idList;
@@ -2588,7 +2596,7 @@ public class Runfile implements Cloneable {
 	}
 	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
-	    index = detID + (hist-1) * this.header.nDet;
+	    index = seg.segID + (hist-1) * this.header.nDet;
 	    if (detectorMap[index].tfType == 0 ) {
 		System.out.println( "invalid id in Get1DSpectrum(id,hist), " +
 				    "returning null");
@@ -2819,7 +2827,7 @@ public class Runfile implements Cloneable {
 	}
 	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
-	    index = detID + (hist-1) * this.header.nDet;
+	    index = seg.segID + (hist-1) * this.header.numOfElements;
 	    tfType =  this.detectorMap[index].tfType;
 	    numOfTimeChannels = this.timeField[tfType].NumOfChannels();
 	    data = -1;
@@ -3189,12 +3197,12 @@ public class Runfile implements Cloneable {
 	int id = seg.detID;
 	if ( id > header.numOfElements || 
 	     hist > header.numOfHistograms ) return null;
-	int index = header.nDet * (hist - 1) + id;
+	int index = header.numOfSegments * (hist - 1) + seg.segID;
 
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    if (detectorMap[index].tfType == 0 ) {
 		System.out.println( "invalid id in TimeChannelBoundaries" +
-				    "(id,hist), returning null");
+				    "(seg,hist), returning null");
 		return null;
 	    }
      
