@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.35  2001/11/28 16:31:49  hammonds
+ * Fixed problem with final data size.
+ *
  * Revision 5.34  2001/11/26 15:23:55  hammonds
  * Removed some printlns that clutter output.
  * Also added printStackTrace to caught exceptions.
@@ -925,7 +928,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.totalChannels = header.channels1D;
 	header.histStartAddress = offsetToFree;
 	header.offsetToFree = header.histStartAddress + 
-	    header.totalChannels * 4;
+	    header.totalChannels;
 	header.sizeOfDataArea = header.totalChannels;
 
 	runfile.seek( 56 );
