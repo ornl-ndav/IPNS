@@ -88,7 +88,7 @@ class PrunHead{
            rs+=eol; */
 
         // Headers
-        rs+="******************** TAKING DATA FROM FILE FOR RUN"
+        rs+="******************** TAKING DATA FROM FILE FOR RUN "
             + header.runNum + " ********************" +eol;
         rs+=eol;
         rs+="******************** LPSDs or Standard Detectors "
@@ -96,11 +96,13 @@ class PrunHead{
         rs+=eol;
 
         // distances and settings
-        rs+="LI= " + header.sourceToSample + " LC= " + header.sourceToChopper 
-            +", Hardware time range= " + header.hardwareTMin + " - " 
-            + header.hardwareTMax + " microseconds" +eol;
-        rs+="EIN = " + header.energyIn + " meV :   EOUT= " + header.energyOut 
-            + " meV :   NUMDET = " + header.nDet +eol;
+        rs+="LI= " + format(header.sourceToSample,2) + " LC= " 
+            + format(header.sourceToChopper,2) +", Hardware time range= " 
+            + header.hardwareTMin + " - " + header.hardwareTMax 
+            + " microseconds" +eol;
+        rs+="EIN = " + format(header.energyIn,2) + " meV :   EOUT= " 
+            + format(header.energyOut,2) + " meV :   NUMDET = " 
+            + header.nDet +eol;
         // something funny is comming into the variables that are
         // printed here, John will fix them in Header
         rs+="Detector Calibration: " + header.detCalibFile 
@@ -150,9 +152,9 @@ class PrunHead{
                 if(temp>=0.) rs+=" ";
                 rs+=format(temp,2)+"    ";
                 temp=run.MinBinned(j);
-                rs+=format(temp,3)+" - ";
+                rs+=space_thousand(temp)+format(temp,3)+" - ";
                 temp=run.MaxBinned(j);
-                rs+=format(temp,3)+"    ";
+                rs+=space_thousand(temp)+format(temp,3)+"    ";
                 itemp=run.TimeFieldType(segs[0],i+1);
                 temp=timeField[itemp].tStep;
                 rs+=space_thousand(temp) + format(temp,3)+" ";
@@ -215,7 +217,7 @@ class PrunHead{
 
     */
     public static void main(String[] args) throws IOException {
-        System.out.print("*****\n"+createHeader(args[0])+"*****\n");
+        System.out.print("*****\n"+getHeader(args[0])+"*****\n");
     }
 
     static private String format( double number, int sigfig){
