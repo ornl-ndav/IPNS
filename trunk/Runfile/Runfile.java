@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.43  2003/09/16 02:07:12  hammonds
+ * Fix FirstRun() and add LastRun()
+ *
  * Revision 6.42  2003/08/27 02:24:09  hammonds
  * Fix problem identifying area detector as beam monitor in new SAND files.
  *
@@ -2275,6 +2278,13 @@ public class Runfile implements Cloneable {
        @return The first run in a multirun experiment
     */
     public int FirstRun(){
+	return this.header.firstRun;
+    }
+
+    /**
+       @return The first run in a multirun experiment
+    */
+    public int LastRun(){
 	return this.header.lastRun;
     }
 
