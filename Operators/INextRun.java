@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2003/03/12 02:30:26  hammonds
+ *  Trim up imports.
+ *
  *  Revision 1.3  2002/02/23 13:50:08  hammonds
  *  Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
  *
@@ -49,11 +52,14 @@
 
 package IPNS.Operators;
 
-import  java.io.*;
-import  java.util.*;
-import  DataSetTools.operator.*;
-import  DataSetTools.operator.Generic.Batch.*;
-import  IPNS.Runfile.*;
+import  java.io.FileInputStream;
+import  java.io.Serializable;
+import  java.io.IOException;
+import  java.util.Vector;
+import  java.util.Properties;
+import  DataSetTools.operator.Parameter;
+import  DataSetTools.operator.Generic.Batch.GenericBatch;
+//import  IPNS.Runfile.*;
 
 /**
  * This operator instantiates IPNS.RunfileBuilder.
