@@ -22,6 +22,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.26  2001/07/02 16:43:15  hammonds
+ * Changed Code for area detector Locations.
+ * Added some javadoc comments.
+ *
  * Revision 5.25  2001/06/29 20:26:14  hammonds
  * Changed some of the segment based detector position information to give area information.
  *
@@ -1748,6 +1752,7 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       The number of y channels in and area detector.
        @return The number of x channels in and area detector.
     */
     public short NumOfX(){
@@ -1755,6 +1760,7 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       The number of y channels in and area detector.
        @return The number of y channels in and area detector.
     */
     public short NumOfY(){
@@ -1762,6 +1768,7 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       The number of wavelengths binned for an area detector.
        @return The number of wavelength channels for an area detector.
     */
     public short NumOfWavelengths(){
@@ -1769,6 +1776,7 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       The minimum wavelength binned for an area detector.
        @return The minimum wavelength for an area detector.
     */
     public int MinWavelength(){
@@ -1776,6 +1784,7 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       The maximum wavelength binned for an area detector.
        @return The maximum wavelength for an area detector.
     */
     public int MaxWavelength(){
@@ -1783,13 +1792,15 @@ public class Runfile implements Cloneable {
     }
 
     /**
-       @return The dta.
+       The angle for placement of an area detector.
+       @return The angle.
     */
     public double Dta(){
 	return this.header.dta;
     }
 
     /**
+       Source to detector distance for an area detector
        @return The dtd.
     */
     public double Dtd(){
@@ -2036,7 +2047,12 @@ public class Runfile implements Cloneable {
 	    return dAngle;
 	}
 	else {
-	    return header.dta;
+	    double fromLeft = 
+		(seg.row * ( header.xLeft -header.xRight) ) / header.numOfX;
+	    double fromCenter = fromLeft 
+		 + ( header.xDisplacement + header.xLeft );
+	    double offsetAngle = fromCenter / header.dta * ( 180 / Math.PI );
+	    return header.dta + offsetAngle;
 	}
     }
 
@@ -2240,8 +2256,8 @@ public class Runfile implements Cloneable {
 	    return this.detectorHeight[id];
 	}
 	else {
-	    double height = header.yDisplacement - header.yLower + 
-		(seg.row * 2 * header.yLower) / header.numOfY;
+	    double height = header.yDisplacement + header.yLower + 
+		(seg.row * (header.yUpper - header.yLower)) / header.numOfY;
 	    return height;
 	}
     }
@@ -2268,8 +2284,8 @@ public class Runfile implements Cloneable {
 	return this.detectorHeight[seg.detID];
 	}
 	else {
-	    double height = header.yDisplacement - header.yLower + 
-		(seg.row * 2 * header.yLower) / header.numOfY;
+	    double height = header.yDisplacement + header.yLower + 
+		(seg.row * (header.yUpper - header.yLower)) / header.numOfY;
 	    return height;
 	}
     }
