@@ -33,6 +33,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/02/25 17:33:44  hammonds
+ *  Added new import for change in Generic Batch location
+ *
  *  Revision 1.1  2002/02/06 16:22:26  chatterjee
  *  Takes a list of detector IDs and imposes a segment map for LPSD's
  *
@@ -45,6 +48,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

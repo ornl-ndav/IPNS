@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/02/25 17:34:03  hammonds
+ *  Added new import for change in Generic Batch location
+ *
  *  Revision 1.1  2001/12/03 18:16:28  chatterjee
  *  Renamed file to include the word separate
  *
@@ -57,6 +60,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**
