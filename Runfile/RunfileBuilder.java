@@ -4,9 +4,13 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 import IPNS.Calib.*;
+
 /*
  *
  * $Log$
+ * Revision 5.21  2001/10/08 19:30:32  hammonds
+ * Change how segments are specified since the segment IDs have been changed.  minIDs are now assigned even if the detector type is 0.
+ *
  * Revision 5.20  2001/08/27 16:12:12  hammonds
  * Fixed problem in the calculation of the numberOfElements.  The calculated number was always one higher than were actually there.
  *
@@ -77,7 +81,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.headerSet( "energyIn", 5.0);
  	newRF.startDateAndTimeToCurrent();
 	newRF.headerSetFromParams( "/home/hammonds/inst/hrcs__V5.par");
-	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0117.dc5");
+	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0120.dc5");
 	newRF.headerSet( "clockPeriod", 5.0);
 	newRF.headerSet( "numOfHistograms", (short)1);
 	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 1);
@@ -1215,7 +1219,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	segments = new Segment[1];
 	segments[0] = new Segment();
 	for (int ii = 1; ii <= header.nDet; ii++ ) {
-	    if (minID[ii] != -1 ) {
+	    if (detectorType[ii] != 0 ) {
 		int segs = minID[ii] + numSegs1[ii] * numSegs2[ii] - 1;
 		if ( segments.length < ( segs + 1 ) ){
 		    Segment [] tsegments =new Segment[segs + 1];
@@ -1239,7 +1243,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		}
 	    }
 	}
-	header.numOfElements = segments.length -1 ;
+	header.numOfElements = segments.length - 1;
 	System.out.println("numOfSegment: " + header.numOfElements);
 	return rval;
     }
