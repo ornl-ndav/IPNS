@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.33  2001/11/21 22:21:00  hammonds
+ * Check Constant delay bit for added focused time fields if hardTimeDelay is nonzero.
+ *
  * Revision 5.32  2001/11/19 22:43:12  hammonds
  * Put in focusing constants in groupIds separate for inelastic instruments.
  *
@@ -1533,7 +1536,12 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
 	tempFields[matchingTimeField].timeFocusBit = 1;
 	tempFields[matchingTimeField].emissionDelayBit = 0;
-	tempFields[matchingTimeField].constantDelayBit = 0;
+	if (header.hardTimeDelay != 0 ) {
+	    tempFields[matchingTimeField].constantDelayBit = 1;
+	}
+	else {
+	    tempFields[matchingTimeField].constantDelayBit = 0;
+	}
 	tempFields[matchingTimeField].energyBinBit = 0;
 	tempFields[matchingTimeField].wavelengthBinBit = 0;
 	tempFields[matchingTimeField].pulseHeightBit = 0;
