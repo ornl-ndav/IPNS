@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.8  2000/02/25 04:07:42  hammonds
+ * Made changes to detector subgroups
+ *
  * Revision 5.7  2000/02/23 23:33:27  hammonds
  * Fixed Some problems with subgroup maps in new files.
  *
@@ -252,7 +255,8 @@ public class Runfile implements Cloneable {
 	float data[];
 	data = runFile.Get1DSpectrum(1, 1);
 	float[]  energies = runFile.TimeChannelBoundaries( 100, 1);
-	for (i = 1; i <= runFile.MaxSubgroupID(runFile.NumOfHistograms())
+	
+	for (i = runFile.MinSubgroupID(1); i <= runFile.MaxSubgroupID(runFile.NumOfHistograms())
 		 ; i++){
 	    System.out.print( i + " - ");
 	    int[] ids = runFile.IdsInSubgroup(i);
@@ -262,6 +266,7 @@ public class Runfile implements Cloneable {
 	    System.out.println(runFile.IsSubgroupBeamMonitor(i));
 	}
 	}
+	System.out.println( runFile.NumElements() );
 	for ( Enumeration propNames= runFile.propertyNames(); 
 	      propNames.hasMoreElements();  ) {
 	    String key = (String)propNames.nextElement();
@@ -679,7 +684,7 @@ public class Runfile implements Cloneable {
 		if ( IDMap[i][jj] > maxSubgroupID[i + 1]){
 		    maxSubgroupID[i + 1] = IDMap[i][jj];
 		}
-		if ( IDMap[i][jj] < minSubgroupID[i + 1] 
+		if ( (IDMap[i][jj] < minSubgroupID[i + 1] && IDMap[i][jj] > 0 ) 
 		     || minSubgroupID[i + 1] == 0 ) {
 		    minSubgroupID[i+1] = IDMap[i][jj];
 		}
@@ -707,6 +712,19 @@ public class Runfile implements Cloneable {
 	for (i = 1; i <= this.header.timeScaleTable.size/4; i++) {
 	    timeScale[i] = runfile.readFloat();
 	}
+
+	/*	for ( int ii = 1; ii <= header.nDet; ii++ ) {
+	    if ( psdOrder[ii] == 1 ) {
+		header.numOfElements += numSegs1[ii];
+		System.out.println( "Num Segs: " + ii + " " + numSegs1[ii]);
+	    }
+	    else if ( psdOrder[ii] == 2 ) {
+		header.numOfElements += numSegs1[ii] * numSegs2[ii];
+	    }
+	}
+	*/
+	header.numOfElements = header.nDet;
+
     }
 
     /**

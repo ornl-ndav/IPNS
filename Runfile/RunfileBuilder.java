@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.5  2000/02/25 04:08:34  hammonds
+ * Made changes to detector subgroups
+ *
  * Revision 5.4  2000/02/22 06:13:35  hammonds
  * Fix to change time scale problem.
  *
@@ -39,6 +42,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	timeDelay = new float[1];
 	timeField = new TimeField[1];
 	detectorMap = new DetectorMap[1];
+	subgroupMap = new int[1][];
+	minSubgroupID = new int[0];
+	maxSubgroupID = new int[0];
     }
     
     public RunfileBuilder( String infileName ) throws IOException {
@@ -180,7 +186,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	timeField = new TimeField[1];
 	timeField[0] = new TimeField();
-	subgroupMap = new int[header.numOfHistograms][header.nDet];
+	minSubgroupID = new int[numOfHistograms + 1];
+	maxSubgroupID = new int[numOfHistograms + 1];
+	//	subgroupMap = new int[header.numOfHistograms][header.nDet];
     }
 
     public void setNumOfTimeFields ( short numOfTimeFields ) {
@@ -395,6 +403,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.iName = iName;
     }
 
+    public void setNumOfElements ( int numOfElements ) {
+	header.numOfElements = numOfElements;
+    }
+
     public void addDetectorCoordSys( int[] detCoordSys ) {
 	this.detCoordSys = new short[ detCoordSys.length +1 ];
 	for ( int ii = 1; ii <= detCoordSys.length; ii++ ) {
@@ -592,6 +604,8 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
 	try {
 	runfile = new RandomAccessFile (runfileName, "rw" );
+	header.numOfElements = 0;
+
 	header.Write( runfile );
 
 	// Write Detector Angles
@@ -679,7 +693,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    runfile.seek( offsetToFree );
 	    for( int ii = 1; ii < detectorMap.length; ii++ ) {
 		detectorMap[ii].Write( runfile );
-	    }
+ 	    }
 	    offsetToFree = offsetToFree + ( detectorMap.length - 1 ) * 4;
 	}
 
@@ -701,9 +715,24 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    runfile.writeInt( offsetToFree );
 	    runfile.writeInt( header.numOfHistograms * header.nDet * 4 );
 	    runfile.seek( offsetToFree );
+	    int[][] IDList = new int[header.numOfHistograms][header.nDet];
 	    for( int ii = 0; ii < header.numOfHistograms; ii++ ) {
 		for ( int jj = 0; jj < header.nDet; jj++ ) {
-		    runfile.writeInt( subgroupMap[ii][jj] );
+		    IDList[ii][jj] = -1;
+		}
+	    }
+	    for ( int kk = 0; kk < header.numOfHistograms; kk++ ){
+		for ( int ii = minSubgroupID[kk+ 1]; 
+		      ii <= maxSubgroupID[kk + 1]; ii++ ) {
+		    for (int jj = 0; jj < subgroupMap[ii].length; jj++ ){
+			IDList[kk][subgroupMap[ii][jj] -1] = ii;
+		    }
+		}
+	    }
+		
+	    for( int ii = 0; ii < header.numOfHistograms; ii++ ) {
+		for ( int jj = 0; jj < header.nDet; jj++ ) {
+		    runfile.writeInt( IDList[ii][jj] );
 		}
 	    }
 	    offsetToFree += header.numOfHistograms * header.nDet * 4;
@@ -853,6 +882,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			     short constDelay, short energyBin,
 			     short wavelengthBin, short pulseHeightBin,
 			     int hist, int sgNum ) {
+	if ( sgNum > maxSubgroupID[hist + 1]) maxSubgroupID[hist + 1] = sgNum;
+	if ( sgNum < minSubgroupID[hist + 1] || minSubgroupID[hist + 1] == 0 ) 
+	    minSubgroupID[hist +1] = sgNum;
 	float maxDiff = 0.0000001f;
 	int matchingTimeField;
 	matchingTimeField = 0;
@@ -901,12 +933,16 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	header.numOfTimeFields = (short)(timeField.length -1);
 	
+	int[][] tempMap = new int[subgroupMap.length + 1][];
+	System.arraycopy( subgroupMap, 0, tempMap, 0, subgroupMap.length );
+	tempMap[subgroupMap.length] = ids;
+	subgroupMap = tempMap;
 	for ( int jj = 0; jj < ids.length; jj++ ) {
 	    int index = ( hist ) * header.nDet + ids[jj];
 	    detectorMap[index].tfType = matchingTimeField;
 	    detectorMap[index].address = header.channels1D * 4;
 	    header.channels1D = header.channels1D + nChanns + 1;
-	    subgroupMap[ hist ][ids[jj] - 1] = sgNum;
+	    //	    subgroupMap[ hist ][ids[jj] - 1] = sgNum;
 	    switch ( header.pseudoTimeUnit ) {
 
 	    case ('I'): {
