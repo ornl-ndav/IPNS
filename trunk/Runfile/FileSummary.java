@@ -15,6 +15,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.4  2002/07/10 14:31:05  hammonds
+ * Changed to get info from Header object directly.  Before info was pulled from Runfile object which gets more from file.
+ *
  * Revision 1.3  2002/07/02 17:05:01  hammonds
  * Changed how much space was alloted for User names
  *
@@ -48,16 +51,21 @@ public class FileSummary {
 		//     		System.out.println( dirList[ii].getPath()  );
 		if ( dirList[ii].isFile() ){
 		    StringBuffer sb1 = new StringBuffer();
-		    Runfile rfile = new Runfile ( dirList[ii].getPath() );
+		    RandomAccessFile runFile = 
+			new RandomAccessFile( dirList[ii].getPath(), "r" );
+		    Header head = new Header(runFile);
+								    
+		    // Runfile rfile = new Runfile ( dirList[ii].getPath() );
 		    sb1.append( dirList[ii].getName() );
 		    while ( sb1.length() < 18 )
 			sb1.append(" ");
-		    sb1.append( rfile.UserName().trim() );
+		    sb1.append( head.userName.trim() );
 		    while ( sb1.length() < 42 )
 		        sb1.append(" ");
-		    sb1.append( rfile.RunTitle() );
+		    sb1.append( head.runTitle );
 		    sb1.append( "\n" );
 		    summaryContents.append( sb1.toString() );
+		    runFile.close();
 		}
 		else if (dirList[ii].isDirectory() ){ }
 		
