@@ -24,7 +24,7 @@ class TimeField{
     short pulseHeightBit;
     short gBit;
     short hBit;
-
+    boolean used;
     String iName;
     /**
        This function provides a test method for this class' functionality.  It
@@ -65,7 +65,8 @@ class TimeField{
 				+ timeField[i].constantDelayBit + " "
 				+ timeField[i].energyBinBit + " " 
 				+ timeField[i].wavelengthBinBit + " "
-				+ timeField[i].pulseHeightBit );
+				+ timeField[i].pulseHeightBit + "  "
+				+ timeField[i].used );
 	}
 	runfile.close();
     }
@@ -131,7 +132,7 @@ class TimeField{
 	tDoubleLength = 32768;
 	emissionDelayBit = 0;
 	constantDelayBit = 0;
-
+	used = false;
     }
     protected int NumOfChannels(){
 	return (int)((tMax-tMin)/tStep);
@@ -140,7 +141,6 @@ class TimeField{
     protected void Write ( RandomAccessFile runfile ) throws IOException {
 
 	int flagword;
-		
 	int chwword;
 		
 	flagword = ( (timeFocusBit << 31) & 0x80000000 ) |
@@ -158,6 +158,9 @@ class TimeField{
 
     }
 
+    protected boolean isUsed() {
+	return this.used;
+    }
     protected boolean isEqual( TimeField FieldToCompare ) {
 	boolean answer;
 
