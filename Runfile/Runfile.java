@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.13  2000/03/15 15:25:53  hammonds
+ * Changed the way arrays were read for V5 files.  Now read all elements into a stream and then read from the stream.  This speeds up the read.
+ *
  * Revision 5.12  2000/03/11 03:06:19  hammonds
  * Fixed small problem with TimeScales for V<4 and with SourceToSampleTime( float)
  *
@@ -610,96 +613,187 @@ public class Runfile implements Cloneable {
 	}
 	runfile.seek(this.header.detectorAngle.location);
 	detectorAngle = new float[header.detectorAngle.size / 4 + 1];
+	byte[] bArray = new byte[ this.header.detectorAngle.size ];
+	runfile.read( bArray );
+	ByteArrayInputStream bArrayIS = 
+	    new ByteArrayInputStream( bArray );
+	DataInputStream dataStream = new DataInputStream( bArrayIS );
 	for ( i = 1; i <= header.detectorAngle.size / 4; i++ ) {
-	    detectorAngle[i] = runfile.readFloat();
+	    detectorAngle[i] = dataStream.readFloat();
 	}
-
+	bArrayIS.close();
+	dataStream.close();
+	
 	runfile.seek(this.header.flightPath.location);
+	bArray = new byte[ this.header.flightPath.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	flightPath = new float[header.flightPath.size / 4 + 1];
 	for ( i = 1; i <= header.flightPath.size / 4; i++ ) {
-	    flightPath[i] = runfile.readFloat();
+	    flightPath[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorHeight.location);
+	bArray = new byte[ this.header.detectorHeight.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorHeight = new float[header.detectorHeight.size / 4 + 1];
 	for ( i = 1; i <= header.detectorHeight.size / 4; i++ ) {
-	    detectorHeight[i] = runfile.readFloat();
+	    detectorHeight[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorType.location);
+	bArray = new byte[ this.header.detectorType.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorType = new short[header.detectorType.size / 2 + 1];
 	for ( i = 1; i <= header.detectorType.size / 2; i++ ) {
-	    detectorType[i] = runfile.readShort();
+	    detectorType[i] = dataStream.readShort();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
-	runfile.seek(this.header.detectorHeight.location);
+	runfile.seek(this.header.detectorLength.location);
+	bArray = new byte[ this.header.detectorLength.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorLength = new float[header.detectorLength.size / 4 + 1];
 	for ( i = 1; i <= header.detectorLength.size / 4; i++ ) {
-	    detectorLength[i] = runfile.readFloat();
+	    detectorLength[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorWidth.location);
+	bArray = new byte[ this.header.detectorWidth.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorWidth = new float[header.detectorWidth.size / 4 + 1];
 	for ( i = 1; i <= header.detectorWidth.size / 4; i++ ) {
-	    detectorWidth[i] = runfile.readFloat();
+	    detectorWidth[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorDepth.location);
+	bArray = new byte[ this.header.detectorDepth.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorDepth = new float[header.detectorDepth.size / 4 + 1];
 	for ( i = 1; i <= header.detectorDepth.size / 4; i++ ) {
-	    detectorDepth[i] = runfile.readFloat();
+	    detectorDepth[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detCoordSys.location);
+	bArray = new byte[ this.header.detCoordSys.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detCoordSys = new short[header.detCoordSys.size / 2 + 1];
 	for ( i = 1; i <= header.detCoordSys.size / 2; i++ ) {
-	    detCoordSys[i] = runfile.readShort();
+	    detCoordSys[i] = dataStream.readShort();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorRot1.location);
+	bArray = new byte[ this.header.detectorRot1.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorRot1 = new float[header.detectorRot1.size / 4 + 1];
 	for ( i = 1; i <= header.detectorRot1.size / 4; i++ ) {
-	    detectorRot1[i] = runfile.readFloat();
+	    detectorRot1[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorRot2.location);
+	bArray = new byte[ this.header.detectorRot2.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorRot2 = new float[header.detectorRot2.size / 4 + 1];
 	for ( i = 1; i <= header.detectorRot2.size / 4; i++ ) {
-	    detectorRot2[i] = runfile.readFloat();
+	    detectorRot2[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorEfficiency.location);
+	bArray = new byte[ this.header.detectorEfficiency.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	detectorEfficiency = 
 	    new float[header.detectorEfficiency.size / 4 + 1];
 	for ( i = 1; i <= header.detectorEfficiency.size / 4; i++ ) {
-	    detectorEfficiency[i] = runfile.readFloat();
+	    detectorEfficiency[i] = dataStream.readFloat();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.psdOrder.location);
+	bArray = new byte[ this.header.psdOrder.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	psdOrder = new int[header.psdOrder.size / 4 + 1];
 	for ( i = 1; i <= header.psdOrder.size / 4; i++ ) {
-	    psdOrder[i] = runfile.readInt();
+	    psdOrder[i] = dataStream.readInt();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.numSegs1.location);
+	bArray = new byte[ this.header.numSegs1.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	numSegs1 = new int[header.numSegs1.size / 4 + 1];
 	for ( i = 1; i <= header.numSegs1.size / 4; i++ ) {
-	    numSegs1[i] = runfile.readInt();
+	    numSegs1[i] = dataStream.readInt();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.numSegs2.location);
+	bArray = new byte[ this.header.numSegs2.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	numSegs2 = new int[header.numSegs2.size / 4 + 1];
 	for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
-	    numSegs2[i] = runfile.readInt();
+	    numSegs2[i] = dataStream.readInt();
 	}
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.discSettings.location);
+	bArray = new byte[ this.header.discSettings.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	discriminator = new DiscLevel[this.header.discSettings.size/8 + 1];
 	for (i = 1; i <= this.header.discSettings.size/8; i++) {
 	    discriminator[i] = new DiscLevel();
-	    discriminator[i].lowerLevel = runfile.readInt();
-	    discriminator[i].upperLevel = runfile.readInt();
+	    discriminator[i].lowerLevel = dataStream.readInt();
+	    discriminator[i].upperLevel = dataStream.readInt();
 	    }
+	bArrayIS.close();
+	dataStream.close();
 
 	runfile.seek(this.header.detectorSGMap.location );
 	int [][] IDMap = 
@@ -736,11 +830,16 @@ public class Runfile implements Cloneable {
 	}
 
 	runfile.seek(this.header.timeScaleTable.location);
+	bArray = new byte[ this.header.timeScaleTable.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
 	timeScale = new float[this.header.timeScaleTable.size/4 + 1];
 	for (i = 1; i <= this.header.timeScaleTable.size/4; i++) {
-	    timeScale[i] = runfile.readFloat();
+	    timeScale[i] = dataStream.readFloat();
 	}
-
+	bArrayIS.close();
+	dataStream.close();
 	/*	for ( int ii = 1; ii <= header.nDet; ii++ ) {
 	    if ( psdOrder[ii] == 1 ) {
 		header.numOfElements += numSegs1[ii];
@@ -1466,9 +1565,16 @@ public class Runfile implements Cloneable {
 		}
 	    }
 	    else {
+		byte[] bArray = new byte[ 4 * numOfTimeChannels ];
+		runfile.read( bArray );
+		ByteArrayInputStream bArrayIS = 
+		    new ByteArrayInputStream( bArray );
+		DataInputStream dataStream = new DataInputStream( bArrayIS );
 		for ( i = 0; i < numOfTimeChannels; i++ ) {
-		    data[i] = runfile.readInt();
+		    data[i] = dataStream.readInt();
 		}
+		bArrayIS.close();
+		dataStream.close();
 	    }
 	}
 	if (!leaveOpen ){
