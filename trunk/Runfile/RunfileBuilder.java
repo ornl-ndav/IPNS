@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.43  2002/02/05 19:54:09  chatterjee
+ * Added method  groupIdsBySegmentMap that makes separate subgroups by segment map
+ *
  * Revision 5.42  2002/01/03 18:53:45  hammonds
  * fixed problem with data size in runfile.  Up til now total Channels is off.
  *
@@ -2316,7 +2319,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 
 	for (int ij = 0; ij < list.length; ij++ )  { 
-	    if ( (numSegs1[ij]*numSegs2[ij]) != segList.length ){
+	    if ( (numSegs1[list[ij]]*numSegs2[list[ij]]) != segList.length ){
 		System.out.println("ERROR: Total number of segments in "
 				   + "detector not equal to segList");
 		return (rval);
@@ -2343,22 +2346,17 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 							  subgroupMap.length);
 					subgroupMap = tempMap;
 				    } 
-				    int[] tempList = 
-					new int[subgroupMap[nsg + segList[kk]].length + 1];
-				    System.arraycopy( subgroupMap[nsg + segList[kk]], 0, 
+				    int[] tempList = new int[subgroupMap[nsg + segList[kk] - 1].length + 1];
+
+				    System.arraycopy( subgroupMap[nsg + segList[kk] -1], 0, 
 						      tempList, 0, 
 						      tempList.length - 1);
-				    tempList[tempList.length - 1] = segID;
-				    subgroupMap[nsg + segList[kk]] = tempList;
-				    
-				    // Need to work on the address part. Not correct right now.
-
-
-
+				    tempList[tempList.length - 1] = segID + kk;
+				    subgroupMap[nsg + segList[kk] -1] = tempList;
 				    int kindex = index + kk;
-				    if ( subgroupMap[ nsg + segList[kk]].length > 1 ) { 
+				    if ( subgroupMap[ nsg + segList[kk] -1].length > 1 ) { 
 					detectorMap[kindex].address = 
-					    detectorMap[subgroupMap[nsg+segList[kk]][0]].address;
+					    detectorMap[subgroupMap[nsg+segList[kk] -1][0]].address;
 					detectorMap[kindex].tfType = tf;
 
 				    }
