@@ -1,6 +1,7 @@
 from IPNS.Operators import *
 from IPNS.Runfile import Runfile
 from IPNS.Control import ParameterFile
+from DataSetTools.util import SharedData
 
 class PrintControl(GenericOperator):
 
@@ -76,10 +77,12 @@ class PrintControl(GenericOperator):
             print "RunTitle:"
             print runTitle
             for x in range(numControl):
-                params[x].printDeviceBrief()
-                params[x].printUserParametersBrief()
+                print params[x].getPrintDeviceBrief()
+                print params[x].getPrintUserParametersBrief()
             nextRun = runfile.NextRun()
             lastRun = runfile.LastRun()
+            if lastRun == 0 and  nextRun == curRun:
+                lastRun = curRun
             print "********************************************"
             if curRun == lastRun:
                 done = 1
