@@ -12,7 +12,7 @@ import java.io.*;
 This class is intended to add a window which contains an ImageView object with
 data from a specified runfile.
 @author John P. Hammonds, Intense Pulsed Neutron Source, Argonne National Lab
-@version 4.0beta1
+@version 6.0
 */
 
 //public class PlotPane extends JScrollPane {
