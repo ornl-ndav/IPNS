@@ -7,6 +7,9 @@ import IPNS.Calib.*;
 /*
  *
  * $Log$
+ * Revision 5.19  2001/08/03 19:06:01  hammonds
+ * Changes to allow grouping detectors via a script.
+ *
  * Revision 5.18  2001/07/24 16:56:26  hammonds
  * Updated addxxxxxTimeField methods.
  *
@@ -63,6 +66,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	String filename = args[0];
 	RunfileBuilder newRF = new RunfileBuilder();
         newRF.setFileName(filename);
+	newRF.headerSet( "iName", "test");
 	newRF.headerSet( "userName", "hammonds");
 	newRF.headerSet( "runTitle", "RunfileBuilder test from main");
 	newRF.headerSet( "versionNumber", 6);
@@ -70,8 +74,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.headerSet( "energyIn", 5.0);
  	newRF.startDateAndTimeToCurrent();
 	newRF.headerSetFromParams( "/home/hammonds/inst/hrcs__V5.par");
-	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0116.dc5");
+	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0115.dc5");
 	newRF.headerSet( "clockPeriod", 5.0);
+	newRF.headerSet( "numOfHistograms", (short)1);
 	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 1);
 	newRF.addFocusedTimeField( 1000.0f, 25000.0f, 7.0f, 3);
 	newRF.addPulseHeightTimeField( 1000.0f, 10000.0f, 10.0f, 3);
@@ -79,7 +84,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.addEnergyTimeField( -100.0f, 100.0f, 5.0f, 4);
 	newRF.addWavelengthTimeField( 2.0f, 5.0f, 10.0f, 7);
 	newRF.addWavelengthTimeField( 1.0f, 6.0f, 10.0f, 5);
-
+       	newRF.groupAllSeparate(1, 1);
 	newRF.endDateAndTimeToCurrent();
 
 	newRF.Write();
@@ -247,7 +252,16 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
     public void setNumberOfHistograms ( short numOfHistograms ) {
 	header.numOfHistograms = numOfHistograms;
-	detectorMap = new DetectorMap[numOfHistograms * header.nDet + 1];
+	if ( header.numOfElements > 0){
+	    System.out.println( "numElements != 0: "  + header.numOfElements);
+	    detectorMap = 
+		new DetectorMap[numOfHistograms * (header.numOfElements) + 1];
+	}
+	else {
+	    System.out.println( "numElements == 0: "  + header.numOfElements);
+	    detectorMap = 
+		new DetectorMap[numOfHistograms * (header.numOfElements + 1)];
+	}
 	for ( int i = 0; i < detectorMap.length; i++ ) {
 	    detectorMap[i] = new DetectorMap( header.iName );
 	}
@@ -255,7 +269,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	timeField[0] = new TimeField();
 	minSubgroupID = new int[numOfHistograms + 1];
 	maxSubgroupID = new int[numOfHistograms + 1];
-	//	subgroupMap = new int[header.numOfHistograms][header.nDet];
+	subgroupMap = new int[1][];
     }
 
     public void setNumOfTimeFields ( short numOfTimeFields ) {
@@ -698,10 +712,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     public void Write () {
 	RandomAccessFile runfile;
 	 int offsetToFree = header.numOfHeadBlocks * 512;
-
 	try {
 	runfile = new RandomAccessFile (runfileName, "rw" );
-	header.numOfElements = 0;
+	//      	header.numOfElements = 0;
 
 	header.Write( runfile );
 
@@ -750,14 +763,14 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 
 	//  Write detector subgroup map
-	if( header.numOfHistograms * header.nDet > 0 ) {
+	if( header.numOfHistograms * header.numOfElements > 0 ) {
 	    runfile.seek( 728 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( header.numOfHistograms * header.nDet * 4 );
+	    runfile.writeInt( header.numOfHistograms * header.numOfElements * 4 );
 	    runfile.seek( offsetToFree );
-	    int[][] IDList = new int[header.numOfHistograms][header.nDet];
+	    int[][] IDList = new int[header.numOfHistograms][header.numOfElements];
 	    for( int ii = 0; ii < header.numOfHistograms; ii++ ) {
-		for ( int jj = 0; jj < header.nDet; jj++ ) {
+		for ( int jj = 0; jj < header.numOfElements; jj++ ) {
 		    IDList[ii][jj] = -1;
 		}
 	    }
@@ -765,13 +778,13 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		for ( int ii = minSubgroupID[kk+ 1]; 
 		      ii <= maxSubgroupID[kk + 1]; ii++ ) {
 		    for (int jj = 0; jj < subgroupMap[ii].length; jj++ ){
-			IDList[kk][subgroupMap[ii][jj] -1] = ii;
+ 			IDList[kk][subgroupMap[ii][jj] -1] = ii;
 		    }
 		}
 	    }
 		
 	    for( int ii = 0; ii < header.numOfHistograms; ii++ ) {
-		for ( int jj = 0; jj < header.nDet; jj++ ) {
+		for ( int jj = 0; jj < header.numOfElements; jj++ ) {
 		    runfile.writeInt( IDList[ii][jj] );
 		}
 	    }
@@ -998,10 +1011,14 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	
 	int[][] tempMap = new int[subgroupMap.length + 1][];
 	System.arraycopy( subgroupMap, 0, tempMap, 0, subgroupMap.length );
-	tempMap[subgroupMap.length] = ids;
+	int[] segIDs = new int[ ids.length];
+    for (int kk = 0;  kk < ids.length; kk++ ){
+        	segIDs[kk] = minID[ids[kk]];
+    }
+	tempMap[subgroupMap.length] = segIDs;
 	subgroupMap = tempMap;
 	for ( int jj = 0; jj < ids.length; jj++ ) {
-	    int index = ( hist ) * header.nDet + ids[jj];
+	    int index = ( hist ) * header.numOfElements + minID[ids[jj]];
 	    detectorMap[index].tfType = matchingTimeField;
 	    detectorMap[index].address = header.channels1D * 4;
 	    header.channels1D = header.channels1D + nChanns + 1;
@@ -1074,6 +1091,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( String element, short val ) {
+	if (element.equalsIgnoreCase("numOfHistograms")) {
+	    setNumberOfHistograms(val);
+	}
 	int rval = this.header.set(element, (short)val);
 	return rval;
     }
@@ -1189,6 +1209,35 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         this.addDetectorDataSource(dCalib.DataSource());
         this.addDetectorMinID(dCalib.MinID());
 	this.header.nDet = (short)dCalib.NDet();
+	segments = new Segment[1];
+	segments[0] = new Segment();
+	for (int ii = 1; ii <= header.nDet; ii++ ) {
+	    if (minID[ii] != -1 ) {
+		int segs = minID[ii] + numSegs1[ii] * numSegs2[ii];
+		if ( segments.length < ( segs + 1 ) ){
+		    Segment [] tsegments =new Segment[segs + 1];
+		    System.arraycopy( segments, 0 , tsegments, 0, 
+				      segments.length);
+		    segments = tsegments;
+		}
+		for ( int segY = 0; segY < numSegs1[ii]; segY ++ ) {
+		    for ( int segX = 0; segX < numSegs2[ii]; segX ++ ) {
+			int segID = minID[ii] + segX + segY * numSegs2[ii];
+			segments[segID] = 
+			    new Segment( ii, segX +1 , segY + 1, 
+					 detectorLength[ii]/numSegs1[ii],
+					 detectorWidth[ii]/numSegs2[ii],
+					 detectorDepth[ii],
+					 detectorEfficiency[ii],
+					 segID
+					 );
+			
+		    }
+		}
+	    }
+	}
+	header.numOfElements = segments.length -1 ;
+	System.out.println("numOfSegment: " + header.numOfElements);
 	return rval;
     }
 
@@ -1526,6 +1575,41 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
     }
 
+    /**
+       Makes a separate subgroup for all detector Elements
+       @param tf The time Field to associate with all detectors.
+       @return an error code.
+     */
+    public int groupAllSeparate(int tf, int hist) {
+	int rval = 0;
+	if ( !timeField[tf].isUsed() ) {
+	    System.out.println( "Error in groupAllSeparate: Time Field " + 
+				tf + " is not valid.");
+	}
+       	int[][] tempMap = new int[subgroupMap.length + header.numOfElements][];
+       	System.arraycopy( subgroupMap, 0, tempMap, 0, subgroupMap.length);
+	for (int ii = 1; ii <= header.numOfElements; ii++ ) {
+	    int index = (hist - 1) * (header.numOfElements + 1 ) + ii;
+	    if (segments[index] != null ){
+	    int segID = segments[index].segID;
+	    if (minSubgroupID[hist ] > segID || minSubgroupID[hist] == 0 ) 
+		minSubgroupID[hist] = segID;
+	    if (maxSubgroupID[hist] < ii ) maxSubgroupID[hist] = segID;
+	    tempMap[subgroupMap.length +ii -1] = new int[1];
+	    tempMap[subgroupMap.length +ii -1][0] = segID;
+	     
+	    detectorMap[index].tfType= tf;
+	    detectorMap[index].address = header.channels1D;
+	    header.channels1D += timeField[tf].numOfChannels;
+	    
+	    }	    
+	}
+       	subgroupMap = tempMap;
+	System.out.println("minSubgroupID[" + hist + "], maxSubgroupID[" +
+			   hist + "] = " +minSubgroupID[hist] + ", " +
+			   maxSubgroupID[hist] );
+	return (rval);
+    }
     public Object clone() {
 	try {
 	    RunfileBuilder copy = (RunfileBuilder)super.clone();
