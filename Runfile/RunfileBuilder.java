@@ -7,6 +7,9 @@ import IPNS.Calib.*;
 /*
  *
  * $Log$
+ * Revision 5.20  2001/08/27 16:12:12  hammonds
+ * Fixed problem in the calculation of the numberOfElements.  The calculated number was always one higher than were actually there.
+ *
  * Revision 5.19  2001/08/03 19:06:01  hammonds
  * Changes to allow grouping detectors via a script.
  *
@@ -74,7 +77,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.headerSet( "energyIn", 5.0);
  	newRF.startDateAndTimeToCurrent();
 	newRF.headerSetFromParams( "/home/hammonds/inst/hrcs__V5.par");
-	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0115.dc5");
+	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0117.dc5");
 	newRF.headerSet( "clockPeriod", 5.0);
 	newRF.headerSet( "numOfHistograms", (short)1);
 	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 1);
@@ -1213,7 +1216,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	segments[0] = new Segment();
 	for (int ii = 1; ii <= header.nDet; ii++ ) {
 	    if (minID[ii] != -1 ) {
-		int segs = minID[ii] + numSegs1[ii] * numSegs2[ii];
+		int segs = minID[ii] + numSegs1[ii] * numSegs2[ii] - 1;
 		if ( segments.length < ( segs + 1 ) ){
 		    Segment [] tsegments =new Segment[segs + 1];
 		    System.arraycopy( segments, 0 , tsegments, 0, 
