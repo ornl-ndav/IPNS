@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.37  2001/08/03 19:04:06  hammonds
+ * Made Changes to add detector grouping via scripts.
+ *
  * Revision 5.36  2001/07/23 20:37:35  hammonds
  * Fixed some problems with missing data in early HRMECS V5 files.
  *
@@ -356,8 +359,7 @@ public class Runfile implements Cloneable {
 			       + (float)runFile.detectorAngle[i]
 			       + " " + (float)runFile.flightPath[i] + " "
 			       + (float)runFile.detectorHeight[i] + " "
-			       + runFile.detectorType[i] + " " 
-			       + runFile.IsPulseHeight(i,1));
+			       + runFile.detectorType[i]);
 	}
 		System.out.println(  runFile.MinSubgroupID(1) + "  " +
 				     runFile.MaxSubgroupID(runFile.NumOfHistograms() ));
@@ -571,6 +573,7 @@ public class Runfile implements Cloneable {
 		    segments[ii].depth = DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
+		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
 		    switch (detectorType[ii]){
@@ -598,6 +601,7 @@ public class Runfile implements Cloneable {
 		    segments[ii].depth = DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
+		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "sepd" ) ) {
 		    switch (detectorType[ii]){
@@ -625,6 +629,7 @@ public class Runfile implements Cloneable {
 		    segments[ii].depth = DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
+		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "qens" ) ) {
 		    switch (detectorType[ii]){
@@ -652,6 +657,7 @@ public class Runfile implements Cloneable {
 		    segments[ii].depth = DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
+		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "hipd" ) ) {
 		    switch (detectorType[ii]){
@@ -679,6 +685,7 @@ public class Runfile implements Cloneable {
 		    segments[ii].depth = DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
+		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
 		    switch (detectorType[ii]){
@@ -706,6 +713,7 @@ public class Runfile implements Cloneable {
 		    segments[ii].depth = DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
+		    segments[ii].segID = ii;
 		}
 		if ( header.iName.equalsIgnoreCase( "scd0") ) {
 		    switch (detectorType[ii]){
@@ -727,6 +735,7 @@ public class Runfile implements Cloneable {
 			segments[ii].depth = DEPTH[detectorType[ii]]; 
 			segments[ii].efficiency = 
 			    EFFICIENCY[detectorType[ii]]; 
+			segments[ii].segID = ii;
 			break;
 		    }
 		    case 11: {
@@ -752,6 +761,7 @@ public class Runfile implements Cloneable {
 				    DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
 				    EFFICIENCY[detectorType[ii]]; 
+				segments[ii].segID = ii;
 			    }
 			}
 			break;		    }
@@ -778,6 +788,7 @@ public class Runfile implements Cloneable {
 			segments[ii].depth = DEPTH[detectorType[ii]]; 
 			segments[ii].efficiency = 
 			    EFFICIENCY[detectorType[ii]]; 
+			segments[ii].segID = ii;
 			break;
 		    }
 		    case 12: {
@@ -803,6 +814,7 @@ public class Runfile implements Cloneable {
 				    DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
 				    EFFICIENCY[detectorType[ii]]; 
+				segments[ii].segID = index;
 			    }
 			}
 			break;
@@ -829,6 +841,7 @@ public class Runfile implements Cloneable {
 			segments[ii].depth = DEPTH[detectorType[ii]]; 
 			segments[ii].efficiency = 
 			    EFFICIENCY[detectorType[ii]]; 
+			segments[ii].segID = ii;
 			break;
 		    }
 		    case 13: {
@@ -854,6 +867,7 @@ public class Runfile implements Cloneable {
 				    DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
 				    EFFICIENCY[detectorType[ii]]; 
+				segments[ii].segID = index;
 			    }
 			}
 			break;
@@ -902,6 +916,7 @@ public class Runfile implements Cloneable {
 				segments[tminID].width = WIDTH[1]; 
 				segments[tminID].depth = DEPTH[1]; 
 				segments[tminID].efficiency = EFFICIENCY[1]; 
+				segments[tminID].segID = tminID;
 				gladbank[tminID] = 0;
 				gladdetinbank[tminID] = kk;
 			    }
@@ -1184,8 +1199,7 @@ public class Runfile implements Cloneable {
 		lastStart = ii + 2;
 	    }
 	}
-
-   }
+    }
 
     void LoadV5( RandomAccessFile runfile ) throws IOException {
 	int i;
@@ -1507,7 +1521,6 @@ public class Runfile implements Cloneable {
 	segments = new Segment[1];
 	segments[0] = new Segment();
 	for (int ii = 1; ii <= header.nDet; ii++ ) {
-	    System.out.println("segment binning: " + ii);
 	    int segs = minID[ii] + numSegs1[ii] * numSegs2[ii];
 	    if ( segments.length < ( segs + 1 ) ){
 		Segment [] tsegments =new Segment[segs + 1];
@@ -1523,7 +1536,8 @@ public class Runfile implements Cloneable {
 				     detectorLength[ii]/numSegs1[ii],
 				     detectorWidth[ii]/numSegs2[ii],
 				     detectorDepth[ii],
-				     detectorEfficiency[ii]
+				     detectorEfficiency[ii],
+				     segID
 				     );
 		    
 		}
@@ -1531,16 +1545,16 @@ public class Runfile implements Cloneable {
 	}
 	runfile.seek(this.header.detectorSGMap.location );
 	int [][] IDMap = 
-	    new int[this.header.numOfHistograms][this.header.nDet];
+	    new int[this.header.numOfHistograms][this.header.numOfElements];
 	subgroupIDList = 
 	    new int[this.header.nDet *this.header.numOfHistograms +1];
 	
 	minSubgroupID = new int[this.header.numOfHistograms + 1];
 	maxSubgroupID = new int[this.header.numOfHistograms + 1];
 	for ( i = 0; i < this.header.numOfHistograms; i++ ) {
-	    for (int jj = 0; jj < this.header.nDet; jj++ ) {
+	    for (int jj = 0; jj < this.header.numOfElements; jj++ ) {
 		IDMap[i][jj] = runfile.readInt();
-		subgroupIDList[(i)* this.header.nDet + jj]  = IDMap[i][jj];
+		subgroupIDList[(i)* this.header.numOfElements + jj]  = IDMap[i][jj];
 		if ( IDMap[i][jj] > maxSubgroupID[i + 1]){
 		    maxSubgroupID[i + 1] = IDMap[i][jj];
 		}
@@ -1559,7 +1573,8 @@ public class Runfile implements Cloneable {
 	    int[] idList = new int[0];
 	    Segment[] segList = new Segment[0];
 	    for ( int jj = 0; jj < this.header.numOfHistograms; jj++ ) {
-		for ( int kk = 0; kk < this.header.nDet; kk++ ) {
+		for ( int kk = 0; kk < this.header.numOfElements; kk++ ) {
+			if ( minID[kk + 1] >=0 ) {
 		    if ( IDMap[jj][kk] == i ) {
 			int[] temp = new int[ idList.length + 1];
 			System.arraycopy( idList, 0, temp, 0, idList.length );
@@ -1569,7 +1584,8 @@ public class Runfile implements Cloneable {
 			tseg[segList.length] = segments[ minID[kk + 1]];
 			segList = tseg;
 		    } 
-		}
+            }
+            }
 	    }
 	    subgroupMap[i] = idList;
 	    segmentMap[i] = segList;
@@ -1586,7 +1602,8 @@ public class Runfile implements Cloneable {
 	}
 	bArrayIS.close();
 	dataStream.close();
-	header.numOfElements = header.nDet;
+	properties = new Properties();
+	//header.numOfElements = header.nDet;
 
     }
 
@@ -3540,7 +3557,7 @@ public class Runfile implements Cloneable {
    public boolean IsPulseHeight( int id, int hist ) {
        if ( !(header.iName).equalsIgnoreCase("glad"))
        if ( header.versionNumber < 5 && psdOrder[id] > 1 ) return false;
-	int index = header.nDet * (hist - 1) + id;
+	int index = header.numOfElements * (hist - 1) + id;
 	if (detectorMap[index].tfType == 0 ) return false;
    	int tfType = detectorMap[index].tfType;
 	if ( timeField[tfType].pulseHeightBit > 0 ) {
