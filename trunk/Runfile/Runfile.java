@@ -1,3 +1,4 @@
+
 package IPNS.Runfile;
 
 import java.io.*;
@@ -21,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.17  2000/08/17 14:25:29  hammonds
+ * Added routine AreaTimeSlice to read time slice data from an area detector.
+ *
  * Revision 5.16  2000/07/11 03:32:44  hammonds
  * Changed DetectorAngle() to return average angle for time focused spectrometer runs.  Also added RawDetectorHeight() method to balance out the calls to locate a detector.
  *
@@ -2190,5 +2194,56 @@ public class Runfile implements Cloneable {
     }
 
 
+    /**
+       Returns a 2D array that contains data from time slice sliceNum
+     */
+    public float[][] AreaTimeSlice( int sliceNum ) throws IOException {
+	int numWavelength = header.numOfWavelengths;
+	int numX = header.numOfX;
+	int numY = header.numOfY;
+	int areaStartAddress;
+	int sliceInterval;
+
+	if ( leaveOpen == false){
+	    System.out.println("GetSpectrum1D opening file");
+	    runfile = new RandomAccessFile(runfileName, "r");
+	}
+	
+	float[][] slice = new float[numY][numX];
+
+	if ( header.versionNumber <= 4 ) {
+	    
+	    areaStartAddress = header.histStartAddress;
+	    sliceInterval = (header.totalChannels*2)/(header.numOfWavelengths);
+	    runfile.seek( areaStartAddress + ( sliceNum - 1 ) * sliceInterval + 2);
+
+	    int wordLength = 2;
+	    byte[] bdata;
+	    bdata = new byte[numX *numY * wordLength];
+	    int nbytes = runfile.read( bdata, 0, 
+				       numX * numY * wordLength);
+
+	    for (int ix = 0; ix < numX; ix++){
+		for (int iy = 0; iy < numY; iy++ ) {
+		    for (int j = 0; j < wordLength; j++) {
+			int byteIndex = (iy * numX + ix) * wordLength + j;
+			if ( bdata[byteIndex] < 0 ) {
+			    slice[iy][ix] += (bdata[byteIndex] + 256) * 
+				Math.pow(256.0, j);
+			}
+			else {
+			    slice[iy][ix] += bdata[byteIndex] * Math.pow(256.0, j);
+			}
+		    }
+		}
+	    }
+	    
+	}
+
+	if (!leaveOpen ){
+	    runfile.close();
+	}
+	return slice;
+    }
 
 }
