@@ -21,8 +21,8 @@ indexed starting at zero.
 /*
  *
  * $Log$
- * Revision 5.14  2000/05/22 18:42:23  hammonds
- * Removed old LPSD routines and added solid angle (JPH) and Time Field Type (DJM) methods
+ * Revision 5.15  2000/06/01 16:23:31  hammonds
+ * Corrected Get1DSum for new runfiles (byte order was wrong).  Changed solidAngle() to SolidAngle().
  *
  * Revision 5.12  2000/03/11 03:06:19  hammonds
  * Fixed small problem with TimeScales for V<4 and with SourceToSampleTime( float)
@@ -1638,23 +1638,29 @@ public class Runfile implements Cloneable {
 	}
 
 	runfile.seek(offset);
-	if (numOfTimeChannels !=0){
-	    data = 0;
-	    wordLength = 4;
-	   
-	    bdata = new byte[wordLength];
-	    int nbytes = runfile.read( bdata, 0, 
-				       wordLength);
-	    for (int j = 0; j < wordLength; j++) {
-		int byteIndex = j;
-		if ( bdata[byteIndex] < 0 ) {
-		    data  += (bdata[byteIndex] + 256) * 
-			Math.pow(256.0, j);
-		}
-		else {
-		    data += bdata[byteIndex] * Math.pow(256.0, j);
+	if (this.header.versionNumber <= 4) {
+	    if (numOfTimeChannels !=0){
+		data = 0;
+		wordLength = 4;
+		
+		bdata = new byte[wordLength];
+		int nbytes = runfile.read( bdata, 0, 
+					   wordLength);
+		for (int j = 0; j < wordLength; j++) {
+		    int byteIndex = j;
+		    if ( bdata[byteIndex] < 0 ) {
+			data  += (bdata[byteIndex] + 256) * 
+			    Math.pow(256.0, j);
+		    }
+		    else {
+			data += bdata[byteIndex] * Math.pow(256.0, j);
+		    }
 		}
 	    }
+	}
+	else {
+	    int idata = runfile.readInt();
+	    data = (float)idata;
 	}
 	if (!leaveOpen ){
 	    runfile.close();
@@ -2112,17 +2118,16 @@ public class Runfile implements Cloneable {
        Returns the solid angle for a given detector or group of detectors in
        a subgroup
     */
-    public float solidAngle( int subgroup ) {
+    public float SolidAngle( int subgroup ) {
 	return (float)subgroupMap[subgroup].length;
     }
 
     /**
        Returns the solid angle for a given detector ID
     */
-    public float solidAngle( int detID, int hist ) {
+    public float SolidAngle( int detID, int hist ) {
 	return 1.0f;
     }
-
 
     /**
        Returns the time field type for a given detector or group of detectors 
