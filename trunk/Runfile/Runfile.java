@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.11  2002/04/25 14:21:29  hammonds
+ * Corrected times for area detectors.
+ *
  * Revision 6.10  2002/04/24 15:17:06  hammonds
  * Undepricated the RawDetectorAngle(detID), RawFlightPath(detID), RawDetectorHeight(detID).  A special need for these was determined.  For General use, Segment calls are prefered.
  *
@@ -1253,7 +1256,7 @@ public class Runfile implements Cloneable {
 	}
  	// Read Control Parameters
 	if (header.controlTable.size > 0 ) {
-	    System.out.println ( "Reading Control Parameters" );
+	    //	    System.out.println ( "Reading Control Parameters" );
 	    int numOfControl = 15;
 	    params = new ParameterFile[numOfControl];
 	    runfile.seek( this.header.controlTable.location );
@@ -1267,7 +1270,7 @@ public class Runfile implements Cloneable {
 		ii++;
 	    }while ( numRead < header.controlTable.size );
 	    header.numOfControl = (short)ii;
-	    System.out.println ( "Done Reading Control Parameters" );
+	    //	    System.out.println ( "Done Reading Control Parameters" );
 	    if ( header.instrumentType == InstrumentType.TOF_SCD ) {
 		Parameter[] upar = params[0].getUserParameters();
 		header.chi = upar[0].Value();
@@ -1275,6 +1278,21 @@ public class Runfile implements Cloneable {
 		header.omega = upar[2].Value();
 	    }
 	}
+	// Read area detector start times
+	if ( header.areaStartTable.size > 0 ) {
+	    runfile.seek( this.header.areaStartTable.location );
+	    int numStart = header.areaStartTable.size/2;
+	    int[] iareaStartTime = ReadIntegerArray( runfile, 2, numStart );
+	    areaStartTime = new float[numStart];
+	    for (int ii = 0; ii < numStart; ii++) {
+		areaStartTime[ii] = 
+		    iareaStartTime[ii+1]/(float)header.clockPeriod;
+		System.out.println( ii + ", " + areaStartTime[ii] + ", " +
+				    iareaStartTime[ii+1] );
+	    }
+	    
+	}
+
 
     }
 
@@ -3504,7 +3522,8 @@ public class Runfile implements Cloneable {
 		for ( int ii = 0; ii <= header.numOfWavelengths; ii++ ) {
 		    channel[ii] = minWave + ii* stepWave;
 		}
-	    return channel;
+		//	    return channel;
+		return areaStartTime;
 	}
     }
 
@@ -4167,11 +4186,11 @@ public class Runfile implements Cloneable {
 		    userPars[ii].setDbSignal( new String(temp) );
 		    
 		    int numUserOpts = runfile.readShort(); 
-		    System.out.println("Reading UserParameter " + ii );
-		    System.out.println(" Reading " + numUserOpts + 
-				       " for parameter " + ii );
+		    //		    System.out.println("Reading UserParameter " + ii );
+		    //		    System.out.println(" Reading " + numUserOpts + 
+		    //				       " for parameter " + ii );
 		    if (numUserOpts > 0 ) {
-			System.out.println("Reading UserParameter " + ii );
+			//			System.out.println("Reading UserParameter " + ii );
 			String[] topts = new String[numUserOpts];
 			for (int jj = 0; jj < numUserOpts; jj++ ) {
 			    runfile.read( temp, 0, 16 );
@@ -4184,7 +4203,7 @@ public class Runfile implements Cloneable {
 		
 		Parameter[] instPars = new Parameter[numInstParams];
 		for ( int ii = 0; ii < numInstParams; ii++ ) {
-		    System.out.println("Reading InstParameter " + ii );
+		    //		    System.out.println("Reading InstParameter " + ii );
 		    instPars[ii] = new Parameter();
 		    runfile.read( temp, 0, 16 );
 		    instPars[ii].setName( new String(temp) );
