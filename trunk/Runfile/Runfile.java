@@ -24,6 +24,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.27  2003/03/12 03:43:44  hammonds
+ * Remove references to LENGTH, WIDTH,... in this file and redirect to those in
+ * IPNS.Calib.DC5.  Also removed these static variables
+ *
  * Revision 6.26  2003/03/11 19:14:35  hammonds
  * Fix problems with detector Rotations in v4 and below files.
  *
@@ -325,7 +329,7 @@ public class Runfile implements Cloneable {
     int[] minID = new int[0];
     ParameterFile[] params = new ParameterFile[0];
     //-----------------------------------------------------------------
-    public static final float[] 
+  /*    public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
 		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
 	          20.0F, 20.32F};
@@ -371,6 +375,7 @@ public class Runfile implements Cloneable {
 						    "Ordella 1210 POSY2 20cm",
   						    "1\" x 8\" LPSD"  
     };
+  */
     static double MEV_FROM_VEL = 
 	PhysicalConstants.meV_FROM_m_PER_microsec_CONST;
 
@@ -1111,10 +1116,10 @@ public class Runfile implements Cloneable {
 			    segments[tminID].detID = tminID; 
 			    segments[tminID].row = 1;
 			    segments[tminID].column = 1; 
-			    segments[tminID].length = LENGTH[1]; 
-			    segments[tminID].width = WIDTH[1]; 
-			    segments[tminID].depth = DEPTH[1]; 
-			    segments[tminID].efficiency = EFFICIENCY[1]; 
+			    segments[tminID].length = DC5.LENGTH[1]; 
+			    segments[tminID].width = DC5.WIDTH[1]; 
+			    segments[tminID].depth = DC5.DEPTH[1]; 
+			    segments[tminID].efficiency = DC5.EFFICIENCY[1]; 
 			    segments[tminID].segID = tminID;
 			    gladbank[tminID] = 0;
 			    gladdetinbank[tminID] = kk;
@@ -1137,13 +1142,14 @@ public class Runfile implements Cloneable {
 				segments[tminID + ll].row = ll; 
 				segments[tminID + ll].column = 1; 
 				segments[tminID + ll].length = 
-				    LENGTH[7]/ 64; 
+				    DC5.LENGTH[7]/ 64; 
+				System.out.println(segments[tminID + ll].length);
 				segments[tminID + ll].width = 
-				    WIDTH[7]; 
+				    DC5.WIDTH[7]; 
 				segments[tminID + ll].depth = 
-				    DEPTH[7]; 
+				    DC5.DEPTH[7]; 
 				segments[tminID + ll].efficiency = 
-				    EFFICIENCY[7]; 
+				    DC5.EFFICIENCY[7]; 
 				segments[tminID + ll].segID = tminID + ll;
 				gladbank[tminID + ll] = jj;
 				gladdetinbank[tminID + ll] = kk;
