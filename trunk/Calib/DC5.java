@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.2  2001/08/20 20:58:03  hammonds
+ * Changed starting minID from 1 to 0 in setMinID
+ *
  * Revision 1.1  2001/07/23 21:19:35  hammonds
  * Added to support newrun type scripts without iCame
  *
@@ -458,7 +461,7 @@ public void setDataSource( int[] dataSource ) {
 }
 
 public void setMinID() {
-    int lastRealID = 1;
+    int lastRealID = 0;
     minID[0] = 1;
     if ( nDet > 1 ) {
     for (int id = 1; id < nDet; id++ ) {
