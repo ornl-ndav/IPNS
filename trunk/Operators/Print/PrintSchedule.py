@@ -1,5 +1,6 @@
 from IPNS.Operators import *
 from IPNS.Runfile import Runfile
+from DataSetTools.util import SharedData
 
 class PrintSchedule(GenericOperator):
 
@@ -44,17 +45,17 @@ class PrintSchedule(GenericOperator):
             curRun = firstRun
         else:
             curRun = runNum
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            print ">>>>                                                   >>>"
-            print ">>>>                                                   >>>"
-            print ">>>>    Not enough info to find what came before this  >>>"
-            print ">>>>                                                   >>>"
-            print ">>>>                                                   >>>"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            SharedData.addmsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
+            SharedData.addmsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
+            SharedData.addmsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  )
+            SharedData.addmsg( ">>>>                                                   >>>")
+            SharedData.addmsg(">>>>                                                   >>>" )
+            SharedData.addmsg( ">>>>    Not enough info to find what came before this  >>>" )
+            SharedData.addmsg(">>>>                                                   >>>" )
+            SharedData.addmsg( ">>>>                                                   >>>")
+            SharedData.addmsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
+            SharedData.addmsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  )
+            SharedData.addmsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
         if curRun < 1000:
             sRun = "%04d"%(curRun)
         else:
@@ -70,18 +71,22 @@ class PrintSchedule(GenericOperator):
             userName = runfile.UserName()
             numPulses = runfile.NumOfPulses()
             runTitle = runfile.RunTitle()
-            print "********************************************"
-            print "Instrument: ", inst, "  Run #: ", curRun
-            print "User: ", userName
-            print "RunTitle:"
-            print runTitle
-            print "Presets: ", numCyclesPreset, " Cycles of ", numMonitorPreset
-            print numCyclesElapsed, " cycles completed"
-            print numMonitorElapsed, " monitored completed"
-            print "\nTotal Pulses Completed: :", numPulses
+            SharedData.addmsg( "********************************************")
+            temp = "Instrument: %s  Run #: %d"%(inst, curRun)
+            SharedData.addmsg(temp)
+            SharedData.addmsg("User: " + userName )
+            SharedData.addmsg("RunTitle:")
+            SharedData.addmsg( runTitle )
+            temp = "Presets: %d Cycles of %d"%(numCyclesPreset,numMonitorPreset)
+            SharedData.addmsg(temp )
+            SharedData.addmsg("%d cycles completed"%(numCyclesElapsed)  )
+            SharedData.addmsg( "%d  monitored completed"%(numMonitorElapsed))
+            SharedData.addmsg( "Total Pulses Completed: %d"%(numPulses) )
             nextRun = runfile.NextRun()
             lastRun = runfile.LastRun()
-            print "********************************************"
+            if lastRun == 0 and  nextRun == curRun:
+                lastRun = curRun
+            SharedData.addmsg( "********************************************")
             if curRun == lastRun:
                 done = 1
             else:
