@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.41  2003/08/12 04:38:03  hammonds
+ * Fix problem with SAND beam monitor position for mon 1.  A fiz needs to go into RunfileRetriever to take out the temporary fix.
+ *
  * Revision 6.40  2003/07/25 14:28:25  dennis
  * Commented out printing of Overflow information (lines 1513-1515).
  *
@@ -954,6 +957,9 @@ public class Runfile implements Cloneable {
 		    crateNum[ii] = 1;
 		    slotNum[ii] = 1;
 		    inputNum[ii] = ii;
+		    if ((ii == 1) && (detectorAngle[ii] == 0.000f)) {
+		      detectorAngle[ii] = 180.0f;
+		    }
 		    break;
 		}
 		case 13: {
