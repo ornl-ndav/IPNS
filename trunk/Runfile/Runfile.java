@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.1  2002/01/03 20:04:49  hammonds
+ * Instrument type has moved to the header.
+ *
  * Revision 6.0  2002/01/02 21:22:40  hammonds
  * Change to version 6.0
  *
@@ -2152,6 +2155,7 @@ public class Runfile implements Cloneable {
 	return this.header.lpsdClock;
     }
 
+
     /**
        This method retrieves the effective scattering angle for a given 
        segment.  For a detector that is not time foused this routine 
@@ -3647,7 +3651,7 @@ public class Runfile implements Cloneable {
     /** Returns Instrument Type
      */
     public int InstrumentType() {
-	return InstrumentType.getIPNSInstType( header.iName );
+	return ( header.instrumentType );
     }
 
     /**
