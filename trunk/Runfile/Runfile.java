@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.4  2000/02/18 03:41:05  hammonds
+ * Removed lpsd member variables whose classes have been removed from the package.
+ *
  * Revision 5.3  2000/02/17 21:20:41  hammonds
  * Minor bug fixes.
  *
@@ -69,11 +72,6 @@ public class Runfile implements Cloneable {
     /** Version Number */                       protected int versNum;
     /** run properties stored in message area */
                                                protected Properties properties;
-    /** lpsd Detector Map Table*/              protected LpsdMap[] lpsdMap;
-    /** lpsd Time Field Table */               protected LpsdTimeField[] 
-	                                                        lpsdTimeField;
-    /** lpsd ChannelStartTimeTable */          protected LpsdChannelStartTime 
-	                                                        lpsdCst;
     /** Array of lpsd angles */		        protected float[] lpsdAngle;
     /** Array of lpsd flight path lengths */	protected float[] 
 	                                                       lpsdFlightPath;
