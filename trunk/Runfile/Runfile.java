@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.16  2002/08/05 14:46:42  hammonds
+ * Changed SCD detector angle from 90 to -90 in V3 or earlier files
+ * Fixed problem loading POSY and PNE0 files
+ *
  * Revision 6.15  2002/07/11 18:15:17  hammonds
  * Fixed problem reading area detector data in old files.
  *
@@ -890,6 +894,7 @@ public class Runfile implements Cloneable {
 		    case 15: {
 			detectorType[ii] = 15;
 			psdOrder[ii] = 2;
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = 2;
 			break;
 		    }
@@ -905,6 +910,7 @@ public class Runfile implements Cloneable {
 		    case 16: {
 			detectorType[ii] = 16;
 			psdOrder[ii] = 2;
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }

@@ -12,6 +12,10 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.22  2002/08/05 14:50:52  hammonds
+ * Changed SCD detector angle from 90 to -90 in V3 or earlier files
+ * Fixed problem loading POSY and PNE0 files
+ *
  * Revision 5.21  2002/07/02 14:25:19  hammonds
  * Took out a  diagnostic print line.
  *
@@ -639,6 +643,9 @@ public static void main(String[] args) throws IOException{
 	    }
 	    else {
 		this.numOfElements = this.nDet;
+	    }
+	    if ( (this.iName).equalsIgnoreCase("scd0")) {
+		this.dta = -dta;
 	    }
 	}
 		
