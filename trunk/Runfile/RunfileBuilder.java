@@ -165,7 +165,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.numOfHistograms = numOfHistograms;
 	detectorMap = new DetectorMap[numOfHistograms * header.nDet + 1];
 	for ( int i = 0; i < detectorMap.length; i++ ) {
-	    detectorMap[i] = new DetectorMap();
+	    detectorMap[i] = new DetectorMap( header.iName );
 	}
 	timeField = new TimeField[1];
 	timeField[0] = new TimeField();
