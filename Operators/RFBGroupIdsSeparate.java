@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2001/11/19 22:45:02  hammonds
+ *  Take out debug prints.
+ *
  *  Revision 1.1  2001/11/07 19:24:30  hammonds
  *  Added for scripts.
  *
@@ -135,7 +138,7 @@ public RFBGroupIdsSeparate()
 	
 	Ids[ii] = (Integer)((Vector)(getParameter(3).getValue())).elementAt(ii);
 	ids[ii] = Ids[ii].intValue();
-	System.out.println(ids[ii]);
+	//	System.out.println(ids[ii]);
 
    }
 
