@@ -1,3 +1,4 @@
+
 package IPNS.Runfile;
 
 import java.io.*;
@@ -8,6 +9,9 @@ This class is inteded to construct the time fields to be written to a runfile.
 /*
  *
  *  $Log$
+ *  Revision 5.2  2002/09/18 18:05:05  hammonds
+ *  check mail log
+ *
  *  Revision 5.1  2002/08/21 17:35:54  hammonds
  *  Added logBinBit to be used for dt/t binning
  *
