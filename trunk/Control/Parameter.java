@@ -92,18 +92,35 @@ public class Parameter {
     }
 
     /**
+       Get the Parameter name
      */
     public String Name() {
 	return name;
     }
 
+    /** 
+	Set the parameter's name
+    */
+    public void setName( String pname ) {
+	name = pname;
+    }
+
     /**
+       Get the associated database signal name
      */
     public String DbSignal() {
 	return dbsignal;
     }
 
+    /** 
+	Set the associated database signal name
+    */
+    public void setDbSignal( String pname ) {
+	dbsignal = pname;
+    }
+
     /**
+       Get the value
      */
     public float Value() {
 	return value;
@@ -111,17 +128,40 @@ public class Parameter {
 
     /**
      */
+    public void setValue( float val ) {
+	value = val;
+    }
+
+    /** 
+	Set the signals value
+    */
+    public void setDbSignal( float pval ) {
+	value = pval;
+    }
+
+    /**
+       Return options for the record
+     */
     public String[] Options() {
 	return options;
     }
 
+    /** 
+	Set the optionStrings for value translations
+    */
+    public void setOptions( String[] popts ) {
+	options = popts;
+	if ( popts.length > 0) optionsAvailable = true;
+    }
     /**
+       Return true if options are available
      */
     public boolean OptionsAvailable() {
 	return optionsAvailable;
     }
 
     /**
+       
      */
     private String[] getCommaList(String options) {
 	String[] list = new String[0];
@@ -145,6 +185,10 @@ public class Parameter {
 	return list;
     }
 
-
+    /**
+     */
+    public int NumOptions(){
+	return options.length;
+    }
 
 }
