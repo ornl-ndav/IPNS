@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.3  2001/09/24 15:57:02  hammonds
+ * Changed so that the minID is always incremented by one for all detector IDs.  Previously, if a detector was of type "Not a detector" it would have a minID of -1.  This helps to track the ID from old run files.
+ *
  * Revision 1.2  2001/08/20 20:58:03  hammonds
  * Changed starting minID from 1 to 0 in setMinID
  *
@@ -466,13 +469,18 @@ public void setMinID() {
     if ( nDet > 1 ) {
     for (int id = 1; id < nDet; id++ ) {
 	if ( type[id] != 0 ) {
-	    minID[id] = minID[lastRealID] + 
-		numSegs1[lastRealID] * numSegs2[lastRealID];
-	   // System.out.println(id + "  " + minID[id]);
+	    if ( type[lastRealID] !=0 ) {
+		minID[id] = minID[lastRealID] + 
+		    numSegs1[lastRealID] * numSegs2[lastRealID];
+	    }
+	    else {
+		minID[id] = minID[lastRealID] + 1;
+	    }
 	    lastRealID = id;
 	}
 	else { 
-	    minID[id] = -1;
+	    minID[id] = minID[lastRealID] + 1;
+	    lastRealID = id;
 	}
     }
     }
