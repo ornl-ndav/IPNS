@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.4  2001/10/10 15:36:01  hammonds
+ * Changes in setType have been trying to get changes in detector type to trigger correct changes in the minIDs.
+ *
  * Revision 1.3  2001/09/24 15:57:02  hammonds
  * Changed so that the minID is always incremented by one for all detector IDs.  Previously, if a detector was of type "Not a detector" it would have a minID of -1.  This helps to track the ID from old run files.
  *
@@ -413,6 +416,19 @@ public void setRot2( float[] rot2 ) {
 
 public void setType( int[] type ) {
   this.type = type;
+  }
+
+public void setType( int type, int row ) {
+    System.out.println("Setting detector" + row + " to type " + DC5.TYPE_DESCRIPTION[type] );
+  this.type[row] = type;
+  this.length[row] = DC5.LENGTH[type];
+  this.width[row] = DC5.WIDTH[type];
+  this.depth[row] = DC5.DEPTH[type];
+  this.efficiency[row] = DC5.EFFICIENCY[type];
+  this.psdOrder[row] = DC5.PSD_DIMENSION[type];
+  this.numSegs1[row] = DC5.NUM_OF_SEGS_1[type];
+  this.numSegs2[row] = DC5.NUM_OF_SEGS_2[type];
+  this.setMinID();
   }
 
 public void setLength( float[] length ) {
