@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.30  2001/07/10 18:24:19  hammonds
+ * Changed SAD/SAND detector sizes from meters to centimeters.
+ *
  * Revision 5.29  2001/07/10 18:16:30  hammonds
  * Fixed problem with detector angle for area detector segments.
  *
@@ -167,10 +170,10 @@ public class Runfile implements Cloneable {
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
-		  12.7F, 3.81F, 12.7F, 30.0F, 0.20F, 0.40F, 0.40F};
+		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F};
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
-		 0.493F, 3.81F, 3.81F, 30.F, 0.20F, 0.40F, 0.40F };
+		 0.493F, 3.81F, 3.81F, 30.F, 20.0F, 40.0F, 40.0F };
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
 		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F};
