@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2002/02/23 14:00:20  hammonds
+ *  Added new import line to account for move of GenericBatch and GenericLoad operators.
+ *
  *  Revision 1.3  2001/12/03 17:32:31  chatterjee
  *  Uses two arrays of low and high angles to do the detector groupings
  *
@@ -57,6 +60,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**
