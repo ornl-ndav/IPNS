@@ -142,9 +142,9 @@ public class ParamEditor extends JFrame implements ActionListener{
 	}
 
     }
-
     public static void main(String[] args) {
 	ParamEditor mainFrame = new ParamEditor(); 
+	mainFrame.show();
     }
 
 }
