@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.32  2003/03/31 15:24:23  hammonds
+ * Fix some glad related errors in last check in.  Lack of sleep I guess.
+ *
  * Revision 6.31  2003/03/30 04:24:24  hammonds
  * Change to use new RandomAccessRunfile and RunfileInputStream Classes.  These classes were introduced to simplify the code somewhat.  Some of this simplification has been made, more is to come.
  * Also, new methods DetectorLength, DetectorWidth and DetectorDepth have been introduced to get these values for a detector.
@@ -1061,9 +1064,9 @@ public class Runfile implements Cloneable {
 	    detectorRot2 = new float[header.numOfElements +1];
 	    gladbank = new int[header.numOfElements + 1];
 	    gladdetinbank = new int[header.numOfElements + 1];
-	    detector.length = new float[numOfElements + 1];
-	    detector.width = new float[numOfElements + 1];
-	    detector.depth = new float[numOfElements + 1];
+	    detectorLength = new float[header.numOfElements + 1];
+	    detectorWidth = new float[header.numOfElements + 1];
+	    detectorDepth = new float[header.numOfElements + 1];
 	    int detNum = 0;
 	    int[] dets =new int[0];
 	    for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
@@ -1113,7 +1116,7 @@ public class Runfile implements Cloneable {
 				detectorRot1[tminID + ll] = 0.0f;
 				detectorRot2[tminID + ll] = 0.0f;
 				detectorLength[tminID] = DC5.LENGTH[7]/64; 
-				detectorWidth[tminID] = DC5.WIDTH7]; 
+				detectorWidth[tminID] = DC5.WIDTH[7]; 
 				detectorDepth[tminID] = DC5.DEPTH[7]; 
 				segments[tminID + ll] = new Segment();
 				segments[tminID + ll].detID = tminID + ll; 
