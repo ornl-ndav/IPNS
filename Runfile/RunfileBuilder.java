@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.44  2002/03/04 20:55:50  hammonds
+ * Fixed a problem with a write of rotation angle #2
+ *
  * Revision 5.43  2002/02/05 19:54:09  chatterjee
  * Added method  groupIdsBySegmentMap that makes separate subgroups by segment map
  *
@@ -1328,7 +1331,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         this.addFlightPath(dCalib.FlightPath());
         this.addDetectorHeight(dCalib.Height());
         this.addDetectorRot1(dCalib.Rot1());
-        this.addDetectorRot2(dCalib.Rot1());
+        this.addDetectorRot2(dCalib.Rot2());
         this.addDetectorType(dCalib.Type());
         this.addDetectorLength(dCalib.Length());
         this.addDetectorWidth(dCalib.Width());
