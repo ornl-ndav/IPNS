@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.18  2002/08/21 17:38:04  hammonds
+ * Changed code to use new logBinBit instead of wavelength bit for dt/t bin binning.
+ *
  * Revision 6.17  2002/08/20 20:15:45  hammonds
  * Added code to deal with dT/T binning.
  * Added reoutines IsTimeTypeConstStep to see if time fields have constant time step.
@@ -3561,9 +3564,8 @@ public class Runfile implements Cloneable {
 		max = max;
 	    }
 	    }
-	    if (  timeField[tfType].wavelengthBinBit == 0 ) {  // check for 
-		                                               //  const t
-		                                               //  binning
+	    if (  timeField[tfType].logBinBit == 0 ) { //  check for const t
+		                                       //  binning
 		for (int chan = 0; chan <= numberOfChannels; chan++) {
 		    channel[chan] = (float)( min + chan * step );
 		}
@@ -4374,7 +4376,9 @@ public class Runfile implements Cloneable {
 
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    int tftype = detectorMap[index].tfType;
-	    if ( timeField[tftype].wavelengthBinBit != 0 ) {
+	    if ( timeField[tftype].wavelengthBinBit != 0 ||
+		 timeField[tftype].energyBinBit != 0 ||
+		 timeField[tftype].logBinBit != 0 ) {
 		return false;
 	    }
 	    else { 
