@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.14  2004/02/10 03:21:48  hammonds
+ * Remove Comment.
+ *
  * Revision 1.13  2004/02/09 04:25:00  hammonds
  * Fix problem with setMinID() so that minIDs are updated correctly when prior or current type is 0
  *
@@ -460,7 +463,7 @@ public void setType( int[] type ) {
   }
 
 public void setType( int type, int row ) {
-    System.out.println("Setting detector" + row + " to type " + DC5.TYPE_DESCRIPTION[type] );
+  //    System.out.println("Setting detector" + row + " to type " + DC5.TYPE_DESCRIPTION[type] );
   this.type[row] = type;
   this.length[row] = DC5.LENGTH[type];
   this.width[row] = DC5.WIDTH[type];
