@@ -7,6 +7,6 @@ of a table in an IPNS Runfile.  Access is limited to members of the package.
 
 */
 class DiscLevel{
-public short lowerLevel;
-public short upperLevel;
+public int lowerLevel;
+public int upperLevel;
 }
