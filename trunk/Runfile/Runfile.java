@@ -15,13 +15,17 @@ element.  As a rule, if the array is indexed to detector or subgroup ID it is
 indexed starting at one.  If the array contains other types of data it is
 indexed starting at zero.
 
-@author  John P Hammonds
-@author  Richard J. Goyette
+@author  John P Hammonds (maintainer)
+@author  Richard J. Goyette (wrote initial code)
 @version 6.0
 */
 /*
  *
  * $Log$
+ * Revision 6.3  2002/02/12 19:46:10  hammonds
+ * Fixed offset for data reads for area detectors in Get1DSpectrum.
+ * Changed number of y channels in SCD from 87 to 85.  This hides data on the electronics.
+ *
  * Revision 6.2  2002/02/05 17:37:02  hammonds
  * Fixed spelling of deprecated
  * Fixed segID for area segments
@@ -260,7 +264,7 @@ public class Runfile implements Cloneable {
 	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1, 85, 64, 128, 128,
 			  256, 256 };
     public static final int[]
-	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 87, 64, 128, 128, 
+	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128, 
 			  1, 1 };
     public static final int[] SEGMENT_SELECT = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256 };
@@ -2714,13 +2718,13 @@ public class Runfile implements Cloneable {
 
 	    areaStartAddress = header.histStartAddress;
 	    sliceInterval = (header.totalChannels*2)/(header.numOfWavelengths);
-	    aindex = seg.column + (seg.row -1) * header.numOfX;
+	    aindex = seg.column  + (seg.row -1) * header.numOfX;
 
 	    
 	    data = new float[header.numOfWavelengths];
 	    for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
 		runfile.seek( areaStartAddress + ii * sliceInterval + 2 +
-			      (aindex -1)*2);
+			      (aindex )*2);
 		bdata = new byte[2];
 		int nbytes = runfile.read ( bdata, 0, 2 );
 		for ( int xx = 0; xx < 2; xx++ ) {
