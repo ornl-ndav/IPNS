@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.49  2003/03/04 15:58:30  hammonds
+ * Add method to add ancillary parameters by supplying a parameter array.
+ *
  * Revision 5.48  2003/02/11 20:07:20  hammonds
  * Fixed Problem with Time focusing calculation on Chopper focusing parameter.  Was using (distance**2 + (tube_length/2)**2)**0.5  for tube location.  Now using (distance**2 + height_above_plane**2)**0.5.
  *
@@ -2149,6 +2152,30 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	System.gc();
 	return (rval);
    }
+
+    /**
+       This method adds ancillary control parameters from a device file.
+     */
+    public int addAncillaryEquipment(String inName, float[] inParams) {
+	int rval = 0;
+	ParameterFile[] tparams = new ParameterFile[params.length + 1];
+	System.arraycopy(params, 0, tparams, 0, params.length );
+	tparams[params.length] = new ParameterFile(inName);
+	params = tparams;
+	int thisParam = params.length - 1;
+	Parameter[] userPars = params[thisParam].getUserParameters();
+	if (userPars.length != inParams.length ) {
+	    rval = -1;
+	    return (rval);
+	}
+	for (int ii=0; ii<inParams.length;ii++ ) {
+	    userPars[ii].setValue(inParams[ii]);
+	}
+	header.numOfControl++;	
+	
+	return (rval);
+      
+    }
 
     int ancFileSizeToRunfile( ParameterFile par ) {
 	int size = 0;
