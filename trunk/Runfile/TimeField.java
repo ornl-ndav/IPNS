@@ -73,7 +73,7 @@ class TimeField{
     protected  TimeField(RandomAccessFile runfile, int iType,
 			 Header header ) throws IOException{
 	long startingPosition;
-        int maskChanWord, minWord, rangeWord, widthWord;
+        long maskChanWord, minWord, rangeWord, widthWord, doubleWord;
 
 	startingPosition = runfile.getFilePointer();
 	runfile.seek(header.timeFieldTable.location + 
@@ -85,7 +85,10 @@ class TimeField{
 	    maskChanWord = header.readUnsignedInteger( runfile, 4);
 	    minWord = header.readUnsignedInteger( runfile, 4);
 	    rangeWord = header.readUnsignedInteger( runfile, 4);
+	    //	    System.out.println( "widthWord");
 	    widthWord = header.readUnsignedInteger( runfile, 4);
+	    
+	    //	    System.out.println( widthWord ); 
 	    if ( iName.equalsIgnoreCase( "glad" ) ||
 		 iName.equalsIgnoreCase( "lpsd" ) ) {
 		this.tMin = (double) minWord*header.lpsdClock;
@@ -97,7 +100,7 @@ class TimeField{
 		this.tMax = (double) rangeWord*header.standardClock;
 		this.tStep =(double) (widthWord & 0xffff)*header.standardClock;
 	    }
-	    this.tDoubleLength =  ((widthWord & 0xffff0000) >>16);
+	    this.tDoubleLength =  (int)(widthWord & 0xffff0000) >> 16;
 	    this.numOfChannels = (short)(maskChanWord & 0xffff);
 	    this.timeFocusBit = (short)((maskChanWord >> 31 ) &1);
 	    this.emissionDelayBit = (short)((maskChanWord >> 30 ) &1);
