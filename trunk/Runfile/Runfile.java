@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.29  2001/07/10 18:16:30  hammonds
+ * Fixed problem with detector angle for area detector segments.
+ *
  * Revision 5.28  2001/07/09 21:48:33  hammonds
  * Made fixes for area detector sizes and positions.
  *
@@ -436,6 +439,29 @@ public class Runfile implements Cloneable {
 	    runfile.seek(this.header.detectorType.location);
 	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
 
+	    /*	    
+		   if ( (this.header.iName).equalsIgnoreCase("glad")) {
+		for ( int ii = 0; ii <= header.numOfElements; ii++ ){
+		    if ( flightPath[ii] !=0.00f &&
+			 detectorAngle[ii] != 0.00f && 
+			 detectorHeight[ii] !=0.00f ) {
+			double cvdr = Math.PI/ 180.0;
+	 		double cvrd = 180.0/Math.PI;
+			float fp = flightPath[ii];
+			float zdet = detectorHeight[ii];
+			float ang1 = detectorAngle[ii];
+			float xdet = 
+			    (float)Math.cos( ang1 * cvdr) * fp;
+			float ydet =
+			    (float)
+			float dist = 
+			    (float)Math.sqrt( fp * fp - zdet * zdet );
+			detectorAngle[ii] = (float)(Math.acos(xdet/dist) * cvrd);
+		    }
+		}
+		
+	    }
+	    */
 	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
 		 (this.header.iName).equalsIgnoreCase("sad0") ||
 		 (this.header.iName).equalsIgnoreCase("sad1") ||
@@ -2057,7 +2083,7 @@ public class Runfile implements Cloneable {
 		(seg.column * ( header.xLeft -header.xRight) ) / header.numOfX;
 	    double fromCenter = fromLeft 
 		 + ( header.xDisplacement + header.xLeft );
-	    double offsetAngle = fromCenter / header.dta * ( 180 / Math.PI );
+	    double offsetAngle = fromCenter / header.dtd * ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	}
     }
@@ -2144,7 +2170,7 @@ public class Runfile implements Cloneable {
 		(seg.column * ( header.xLeft -header.xRight) ) / header.numOfX;
 	    double fromCenter = fromLeft 
 		 + ( header.xDisplacement + header.xLeft );
-	    double offsetAngle = fromCenter / header.dta * ( 180 / Math.PI );
+	    double offsetAngle = fromCenter / header.dtd * ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	}
     }
