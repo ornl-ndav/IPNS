@@ -44,7 +44,7 @@ class PrunHead{
         double temp;
         int itemp;
 
-        RandomAccessFile runfile = new RandomAccessFile(filename, "r");
+        RandomAccessRunfile runfile = new RandomAccessRunfile(filename, "r");
         Runfile run = new Runfile( filename );
 	int slashIndex = filename
 	    .lastIndexOf( System.getProperty( "file.separator"));

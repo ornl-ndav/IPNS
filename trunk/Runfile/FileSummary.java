@@ -15,6 +15,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.8  2003/03/30 04:07:59  hammonds
+ * Switch reading to use the new RunfileInputStream and RandomAccessRunfile so that changes can be made to offload the differences in data types.
+ *
  * Revision 1.7  2003/02/27 19:52:08  pfpeterson
  * Changed default directory to look in to be '.' rather than '..'
  *
@@ -64,8 +67,8 @@ public class FileSummary {
 		    try {
 			if ( dirList[ii].isFile() ){
 			    StringBuffer sb1 = new StringBuffer();
-			    RandomAccessFile runFile = 
-				new RandomAccessFile( dirList[ii].getPath(), 
+			    RandomAccessRunfile runFile = 
+				new RandomAccessRunfile( dirList[ii].getPath(), 
 						      "r" );
 			    Header head = new Header(runFile);
 			    
@@ -100,7 +103,7 @@ public class FileSummary {
 	else if ( dirMain.isFile() ) {
 	    try {
 		StringBuffer sb1 = new StringBuffer();
-		RandomAccessFile runFile = new RandomAccessFile(dirName, "r");
+		RandomAccessRunfile runFile = new RandomAccessRunfile(dirName, "r");
 		Header head = new Header(runFile);
 		
 		sb1.append( dirMain );

@@ -1,6 +1,8 @@
 package IPNS.Runfile;
 
-import java.io.*;
+//import java.io.*;
+//import java.io.RandomAccessFile;
+import java.io.IOException;
 
 /**
    This class is a utility class for the IPNS.Runfile package.  This class 
@@ -14,7 +16,7 @@ MapElement[][] map = new MapElement[0][0];
 	int i;
 	int numTimeTableEntries;
 
-        RandomAccessFile runfile = new RandomAccessFile(
+        RandomAccessRunfile runfile = new RandomAccessRunfile(
 							args[0], "r");
 	int slashIndex = args[0]
 	    .lastIndexOf( System.getProperty( "file.separator"));
@@ -38,7 +40,7 @@ MapElement[][] map = new MapElement[0][0];
     }
 
 
-    protected LpsdDetIdMap( RandomAccessFile runfile, Header header ) 
+    protected LpsdDetIdMap( RandomAccessRunfile runfile, Header header ) 
 	throws IOException {
 	
 
@@ -50,10 +52,10 @@ MapElement[][] map = new MapElement[0][0];
 	int ii;
 	MapElement[][] tempMap = new MapElement[0][0];
 	while ( mapIndex < header.PSD_IDMap.size/2 ) {
-	    bankNo = header.readUnsignedInteger( runfile, 2 );
-	    numDets = header.readUnsignedInteger( runfile, 2 );
+	    bankNo = runfile.readRunShort();
+	    numDets = runfile.readRunShort( );
 	    for (ii = 0; ii < 5; ii++ ) {
-		temp = header.readUnsignedInteger( runfile, 2);
+		temp = runfile.readRunShort();
 	    }
 	    mapIndex += 7;
 	    if ( bankNo > map.length - 1 ) {
@@ -64,18 +66,13 @@ MapElement[][] map = new MapElement[0][0];
 	    map[bankNo] = new MapElement[numDets];
 	    for ( ii = 0; ii < numDets; ii++ ) {
 		map[bankNo][ii] = new MapElement();
-		map[bankNo][ii].detID = header.readUnsignedInteger( runfile,
-								    2 );
-		map[bankNo][ii].crate = header.readUnsignedInteger( runfile,
-								    2 );
-		map[bankNo][ii].slot = header.readUnsignedInteger( runfile,
-								    2 );
-		map[bankNo][ii].input = header.readUnsignedInteger( runfile,
-								    2 );
-		map[bankNo][ii].minID = header.readUnsignedInteger( runfile,
-								    2 );
-		temp = header.readUnsignedInteger( runfile, 2);
-		temp = header.readUnsignedInteger( runfile, 2);
+		map[bankNo][ii].detID = runfile.readRunShort(  );
+		map[bankNo][ii].crate = runfile.readRunShort( );
+		map[bankNo][ii].slot = runfile.readRunShort();
+		map[bankNo][ii].input = runfile.readRunShort();
+		map[bankNo][ii].minID = runfile.readRunShort();
+		temp = runfile.readRunShort();
+		temp = runfile.readRunShort();
 		mapIndex += 7;
 	    }
 	}
