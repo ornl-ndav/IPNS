@@ -11,7 +11,7 @@ import java.lang.*;
 This class is intended to add a scrolling table which contains a listing of 
 detector parameters stored in the Runfile.
 @author John P. Hammonds, Intense Pulsed Neutron Source, Argonne National Lab
-@version 4.0
+@version 6.0
 */
 
 public class detParam extends JScrollPane {
