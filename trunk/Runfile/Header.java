@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.19  2002/01/03 19:48:40  hammonds
+ * Added instrument type to runfile header
+ *
  * Revision 5.18  2001/12/20 21:45:33  hammonds
  * Added change for setting number of detectors/segments for POSY1&2
  *
@@ -206,7 +209,7 @@ public class Header implements Cloneable {
     protected TableType inputNum = new TableType();
     protected TableType dataSource = new TableType();
     protected TableType minID = new TableType();
-
+    int instrumentType = 0;
     // --------------------------- readUnsignedInteger -------------------
 
     protected int readUnsignedInteger(RandomAccessFile inFile,
@@ -574,6 +577,8 @@ public static void main(String[] args) throws IOException{
 	System.out.println("minID:             " +  
 				header.minID.location +
 				", " + header.minID.size);
+	System.out.println("instrumentType:                " +
+			        header.instrumentType );
 
 	}
 
@@ -613,6 +618,10 @@ public static void main(String[] args) throws IOException{
 	    }
 	}
 		
+	if (versionNumber < 6 ) {
+	    instrumentType = 
+		InstrumentType.getIPNSInstType(this.iName);
+	}
     }
 
     protected Header(RandomAccessFile runfile) throws IOException{
@@ -903,7 +912,6 @@ public static void main(String[] args) throws IOException{
 		lpsdClock = ReadVAXReal4(runfile);
 		}
 
-
     }
 
     void LoadV5(RandomAccessFile runfile ) throws IOException {
@@ -1097,7 +1105,9 @@ public static void main(String[] args) throws IOException{
 		dataSource.size = runfile.readInt();
 		minID.location = runfile.readInt();
 		minID.size = runfile.readInt();
-		
+		if (versionNumber >= 6 ) {
+		    instrumentType = runfile.readInt();
+		}
     }
 
    protected int set( String element, double val  ) {
@@ -1218,6 +1228,7 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "lastRun") ||
 	    element.equalsIgnoreCase( "defaultRun") ||
 	    element.equalsIgnoreCase( "numOfElements") ||
+	    element.equalsIgnoreCase( "instrumentType") ||
 	    element.equalsIgnoreCase( "MagicNumber") ) &&
 		  (val >= -2147483648 && val <= 2147483647)) {
 	    set (element, (int) val);
@@ -1309,6 +1320,7 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "lastRun") ||
 	    element.equalsIgnoreCase( "defaultRun") ||
 	    element.equalsIgnoreCase( "numOfElements") ||
+	    element.equalsIgnoreCase( "instrumentType") ||
 	    element.equalsIgnoreCase( "MagicNumber")) &&
 		  (val > -2147483648 && val < 2147483647)) {
 	    set (element, (int) val);
@@ -1415,6 +1427,10 @@ public static void main(String[] args) throws IOException{
 	else if( element.equalsIgnoreCase( "MagicNumber") ) {
 	    MagicNumber = val;
 	}
+	else if( element.equalsIgnoreCase( "instrumentType") ) {
+	    instrumentType = val;
+	}
+
 	else if (element.equalsIgnoreCase( "sourceToSample") ||
 		     element.equalsIgnoreCase( "sourceToChopper") ||
 		     element.equalsIgnoreCase( "dta") ||
@@ -1653,6 +1669,7 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "lastRun") ||
 	    element.equalsIgnoreCase( "defaultRun") ||
 	    element.equalsIgnoreCase( "numOfElements") ||
+	    element.equalsIgnoreCase( "instrumentType") ||
 	    element.equalsIgnoreCase( "MagicNumber") ) {
 	    set (element, (int) val);
 	}
@@ -1874,6 +1891,7 @@ public static void main(String[] args) throws IOException{
 		runfile.writeInt( dataSource.size );
 		runfile.writeInt( minID.location );
 		runfile.writeInt( minID.size );
+		runfile.writeInt( instrumentType );
 		runfile.seek(1532);
 		runfile.writeInt( (int)0 );
 		
