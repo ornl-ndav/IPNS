@@ -4,6 +4,10 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.9  2001/04/03 20:47:15  hammonds
+ * added detector dataSource and minID tables.
+ * added writeIntTable and writeFloatTable to simplify writing out the run file.
+ *
  * Revision 5.8  2001/03/15 17:24:58  hammonds
  * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
  *
@@ -616,6 +620,18 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			 inputNum.length);
     }
 
+    public void addDetectorDataSource( int[] dataSource ) {
+	this.dataSource = new int[ dataSource.length +1 ];
+	System.arraycopy(dataSource, 0, this.dataSource, 1, 
+			 dataSource.length);
+    }
+
+    public void addDetectorMinID( int[] minID ) {
+	this.minID = new int[ minID.length +1 ];
+	System.arraycopy(minID, 0, this.minID, 1, 
+			 minID.length);
+    }
+
     public void addDiscriminatorLevels( int[] lld, int[] uld ) {
 	this.discriminator = new DiscLevel[ lld.length + 1 ];
 	for (int ii = 1; ii <= lld.length; ii++ ) {
@@ -881,6 +897,30 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    offsetToFree = offsetToFree + 
 		( inputNum.length - 1 ) * 4;
 	}
+	//  Write data Source for this detector
+	if( dataSource.length > 0 ) {
+	    runfile.seek( 816 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( (dataSource.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < dataSource.length; ii++ ) {
+		runfile.writeInt( dataSource[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( dataSource.length - 1 ) * 4;
+	}
+	//  Write input on slot # for this detector
+	if( minID.length > 0 ) {
+	    runfile.seek( 824 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( minID.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < minID.length; ii++ ) {
+		runfile.writeInt( minID[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( minID.length - 1 ) * 4;
+	}
 	//  Write detector Time Scaling factors 
 	if( timeScale.length > 1 ) {
 	    runfile.seek( 24 );
@@ -939,6 +979,52 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
     }
 
+    private int writeIntTable( RandomAccessFile runfile, int[] intList, 
+			       int offsetToFree, int headLoc ) 
+    throws IOException {
+	try {
+	    if( intList.length > 0 ) {
+		runfile.seek( headLoc );
+		runfile.writeInt( offsetToFree );
+		runfile.writeInt( ( intList.length - 1 ) * 4 );
+		runfile.seek( offsetToFree );
+		for( int ii = 1; ii < intList.length; ii++ ) {
+		    runfile.writeInt( intList[ii] );
+		}
+		offsetToFree = offsetToFree + 
+		    ( intList.length - 1 ) * 4;
+	    }
+	}
+	catch ( IOException ex ) {
+	    System.out.println("Error writing IntTable: " + runfileName );
+	    throw new IOException();
+	}
+	return offsetToFree;
+ 
+    }
+
+    private int writeFloatTable( RandomAccessFile runfile, float[] floatList, 
+			       int offsetToFree, int headLoc ) 
+	throws IOException{
+	try {
+	    if( floatList.length > 1 ) {
+		runfile.seek( headLoc );
+		runfile.writeInt( offsetToFree );
+		runfile.writeInt( ( floatList.length - 1 ) * 4 );
+		runfile.seek( offsetToFree );
+		for( int ii = 1; ii < floatList.length; ii++ ) {
+		    runfile.writeFloat( floatList[ii] );
+		}
+		offsetToFree = offsetToFree + 
+		    ( floatList.length - 1 ) * 4;
+	    }
+	}
+	catch ( IOException ex ) {
+	    System.out.println("Error writing FloatTable: " + runfileName );
+	    throw new IOException();
+	}
+	return offsetToFree;
+    }
     public void addSubgroup( int[] ids, float minVal, float maxVal, 
 			     float stepVal, int tDoubleLength, short nChanns, 
 			     short timeFocus, short emissionDelay, 
