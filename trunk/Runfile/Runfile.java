@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.9  2000/02/26 18:20:36  hammonds
+ * Changed Get1DSpectum to not change byte order for Version >= 5
+ *
  * Revision 5.8  2000/02/25 04:07:42  hammonds
  * Made changes to detector subgroups
  *
@@ -1411,25 +1414,33 @@ public class Runfile implements Cloneable {
 
 	runfile.seek(offset);
 	if (numOfTimeChannels !=0){
+	   
 	    if (this.header.versionNumber < 4){
 		wordLength = 2;
 	    }
 	    else{
 		wordLength = 4;
 	    }
-	    bdata = new byte[numOfTimeChannels * wordLength];
-	    int nbytes = runfile.read( bdata, 0, 
-				       numOfTimeChannels * wordLength);
-	    for (i = 0; i < numOfTimeChannels; i++){
-		for (int j = 0; j < wordLength; j++) {
-		    int byteIndex = i * wordLength + j;
-		    if ( bdata[byteIndex] < 0 ) {
-			data[i] += (bdata[byteIndex] + 256) * 
-			    Math.pow(256.0, j);
+	    if ( this.header.versionNumber < 5 ) {
+		bdata = new byte[numOfTimeChannels * wordLength];
+		int nbytes = runfile.read( bdata, 0, 
+					   numOfTimeChannels * wordLength);
+		for (i = 0; i < numOfTimeChannels; i++){
+		    for (int j = 0; j < wordLength; j++) {
+			int byteIndex = i * wordLength + j;
+			if ( bdata[byteIndex] < 0 ) {
+			    data[i] += (bdata[byteIndex] + 256) * 
+				Math.pow(256.0, j);
+			}
+			else {
+			    data[i] += bdata[byteIndex] * Math.pow(256.0, j);
+			}
 		    }
-		    else {
-			data[i] += bdata[byteIndex] * Math.pow(256.0, j);
-		    }
+		}
+	    }
+	    else {
+		for ( i = 0; i < numOfTimeChannels; i++ ) {
+		    data[i] = runfile.readInt();
 		}
 	    }
 	}
@@ -1713,8 +1724,13 @@ public class Runfile implements Cloneable {
 
 	case ('I'): {
 	    if ( timeField[tfType].timeFocusBit == 0 ) {  //Det not focused
-		us_correction = - (float)(header.hardTimeDelay * 
-					  header.standardClock) + timeToSample;
+		if ( header.versionNumber < 5 ) {
+		    us_correction = - (float)(header.hardTimeDelay * 
+					      header.standardClock) + timeToSample;
+		}
+		else {
+		    us_correction = 0;
+		}
 	    }
 	    else {						//Det focused
 		us_correction = timeToSample;
