@@ -40,7 +40,21 @@ class PrintSchedule(GenericOperator):
         fName = "%s/%s%s.run"%(dataDir,inst,sRun)
         runfile = Runfile(fName)
         firstRun = runfile.FirstRun()
-        curRun = firstRun
+        if firstRun != 0:
+            curRun = firstRun
+        else:
+            curRun = runNum
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>                                                   >>>"
+            print ">>>>                                                   >>>"
+            print ">>>>    Not enough info to find what came before this  >>>"
+            print ">>>>                                                   >>>"
+            print ">>>>                                                   >>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
         if curRun < 1000:
             sRun = "%04d"%(curRun)
         else:
