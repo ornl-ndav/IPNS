@@ -14,6 +14,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.25  2003/04/14 21:42:23  hammonds
+ * Fixed problem with #of segments for SCD.
+ *
  * Revision 5.24  2003/03/30 04:12:53  hammonds
  * Switch reading to use the new RunfileInputStream and RandomAccessRunfile so that changes can be made to offload the differences in data types.
  *
@@ -682,8 +685,7 @@ public static void main(String[] args) throws IOException{
 		}
 	        this.nDet = (short)numDets;
 	    }
-	    else if ( (this.iName).equalsIgnoreCase("scd0") ||
-		      (this.iName).equalsIgnoreCase("sad0") ||
+	    else if ( (this.iName).equalsIgnoreCase("sad0") ||
 		      (this.iName).equalsIgnoreCase("sad1") ||
 		      (this.iName).equalsIgnoreCase("posy") ||
 		      (this.iName).equalsIgnoreCase("pne0") ||
@@ -692,6 +694,10 @@ public static void main(String[] args) throws IOException{
 		this.numOfElements = this.nDet + this.numOfX * this.numOfY;
 		this.nDet = (short)(this.nDet + 1);
 	    }
+	    else if ( (this.iName).equalsIgnoreCase("scd0") ) {
+		this.numOfElements = this.nDet + 85 * 85;
+		this.nDet = (short)(this.nDet + 1);
+	    }	    
 	    else {
 		this.numOfElements = this.nDet;
 	    }
