@@ -1,8 +1,9 @@
 package IPNS.Runfile;
 
 import java.io.*;
-import java.lang.*;
-import java.util.*;
+//import java.lang.*;
+import java.util.Properties;
+import java.util.Enumeration;
 import IPNS.Control.*;
 import IPNS.Calib.*;
 
@@ -23,6 +24,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.24  2003/03/10 20:54:52  hammonds
+ * Clean up imports.
+ * Add methods to get Rotation angles.
+ *
  * Revision 6.23  2003/02/11 20:09:20  hammonds
  * Fixed Problem with Time focusing calculation on Chopper LPSDs.  A focused detector is only focused at one point.  The fix was made by changing the effective position of a pixel.
  *
@@ -499,8 +504,9 @@ public class Runfile implements Cloneable {
 	Runfile runFile = new Runfile(args[0]);
 	
 	System.out.println(runFile.UserName());
-	if (runFile.header.nDet > 0 ){
-	for (i=1; i <= runFile.header.nDet; i++){
+	/*	if (runFile.header.nDet > 0 ){
+
+	  for (i=1; i <= runFile.header.nDet; i++){
 	    System.out.println("id, theta, l, h, Type: " 
 			       + i + "  " 
 			       + (float)runFile.detectorAngle[i]
@@ -527,7 +533,7 @@ public class Runfile implements Cloneable {
 
 	float[] time = runFile.TimeChannelBoundaries( 1, 1 );
 	System.out.println( "Mon 1: " + time[0] + ", " + time[time.length-1]);
-	//	time = runFile.TimeChannelBoundaries( 2, 1 );
+	  */	//	time = runFile.TimeChannelBoundaries( 2, 1 );
 	//System.out.println( "Mon 2: " + time[0] + ", " + time[time.length-1]);
 	//time = runFile.TimeChannelBoundaries( 4, 1 );
 	//System.out.println( "Det 5: " + time[0] + ", " + time[time.length-1]);
@@ -2959,6 +2965,48 @@ public class Runfile implements Cloneable {
      */
     public int NumSegs2( Segment seg ) {
 	return this.numSegs2[seg.detID];
+    }
+
+    /**
+       This method retrieves the rotation angle of the detector into the 
+       scattering plane for an ID.  
+       @param detID The detector ID.
+       @return The described rotation for this detector.
+     */
+    public float DetRot1( int detID ) {
+	return this.detectorRot1[detID];
+    }
+
+    /**
+       This method retrieves the rotation angle of the detector into the 
+       scattering plane for the detector associated with seg.  
+       @param seg The detector segment.
+       @return The described rotation for this detector.
+     */
+    public float DetRot1( Segment seg ) {
+	return this.detectorRot1[seg.detID];
+    }
+
+    /**
+       This method retrieves the rotation angle of the detector about its 
+       center in a plane perpendicular to a vector pointing at the sample 
+       for an ID.  
+       @param detID The detector ID.
+       @return The described rotation for this detector.
+     */
+    public float DetRot2( int detID ) {
+	return this.detectorRot2[detID];
+    }
+
+    /**
+       This method retrieves the rotation angle of the detector about its 
+       center in a plane perpendicular to a vector pointing at the sample for 
+       the detector associated with seg.  
+       @param seg The detector segment.
+       @return The described rotation for this detector.
+     */
+    public float DetRot2( Segment seg ) {
+	return this.detectorRot2[seg.detID];
     }
 
     /**
