@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.14  2001/08/03 19:05:09  hammonds
+ * Added reading the number of elements in a file.
+ *
  * Revision 5.13  2001/07/24 16:04:08  hammonds
  * Changes in some of the set methods.
  *
@@ -1039,7 +1042,11 @@ public static void main(String[] args) throws IOException{
 		runfile.seek(632);
 		standardClock = (double)runfile.readFloat();
 		lpsdClock = (double)runfile.readFloat();
-		//		numOfLpsds = runfile.readInt();
+       		numOfElements = runfile.readInt();
+		if( numOfElements == 0 ) {
+		    System.out.println("no numOfElements");
+		    numOfElements = nDet;
+		}
 		runfile.seek(700);
 		detectorLength.location = runfile.readInt();
 		detectorLength.size = runfile.readInt();
@@ -1818,6 +1825,7 @@ public static void main(String[] args) throws IOException{
 		runfile.seek(632);
 		runfile.writeFloat( (float)standardClock );
 		runfile.writeFloat( (float)lpsdClock );
+		runfile.writeInt( numOfElements );
 		runfile.seek(700);
 		runfile.writeInt( detectorLength.location );
 		runfile.writeInt( detectorLength.size );
