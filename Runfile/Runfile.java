@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.28  2001/07/09 21:48:33  hammonds
+ * Made fixes for area detector sizes and positions.
+ *
  * Revision 5.27  2001/07/03 20:20:34  hammonds
  * Fixed array limit problem defining segmentMap for V5 files.
  *
@@ -161,13 +164,13 @@ public class Runfile implements Cloneable {
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
-		  12.7F, 3.81F, 12.7F, 0.30F, 0.20F, 0.40F, 0.40F};
+		  12.7F, 3.81F, 12.7F, 30.0F, 0.20F, 0.40F, 0.40F};
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
-		 0.493F, 3.81F, 3.81F, 0.30F, 0.20F, 0.40F, 0.40F };
+		 0.493F, 3.81F, 3.81F, 30.F, 0.20F, 0.40F, 0.40F };
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
-		 0.493F, 2.54F, 2,54F, 2.54F, 2.54F, 2.54F, 2.54F};
+		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F};
     public static final float[] 
 	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
 		 1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F};
@@ -457,9 +460,9 @@ public class Runfile implements Cloneable {
 		detectorType = tDetectorType;
 		detectorMap = tDetectorMap;
 		detectorAngle[detectorAngle.length - 1] = (float)header.dta;
-		flightPath[flightPath.length - 1] = (float)header.dtd;
+		flightPath[flightPath.length - 1] = (float)header.dtd/100.0f;
 		detectorHeight[detectorHeight.length - 1] = 
-		    (float)header.yDisplacement;
+		    (float)header.yDisplacement/100.0f;
 		detectorMap[detectorMap.length - 1] = new DetectorMap();
 		if ( (this.header.iName).equalsIgnoreCase("scd0") ){
 		    detectorType[ detectorType.length - 1 ] = 11;
@@ -702,12 +705,12 @@ public class Runfile implements Cloneable {
 				int index = ii + segX + segY *( header.numOfX);
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
-				segments[index].row = segX; 
-				segments[index].column = segY; 
+				segments[index].row = segX + 1; 
+				segments[index].column = segY + 1; 
 				segments[index].length = 
-				    LENGTH[detectorType[ii]/header.numOfY]; 
+				    LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
-				    WIDTH[detectorType[ii]/header.numOfX]; 
+				    WIDTH[detectorType[ii]]/header.numOfX; 
 				segments[index].depth = 
 				    DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
@@ -753,12 +756,12 @@ public class Runfile implements Cloneable {
 				int index = ii + segX + segY *( header.numOfY);
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
-				segments[index].row = segX; 
-				segments[index].column = segY; 
+				segments[index].row = segX+1; 
+				segments[index].column = segY+1; 
 				segments[index].length = 
-				    LENGTH[detectorType[ii]/header.numOfY]; 
+				    LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
-				    WIDTH[detectorType[ii]/header.numOfX]; 
+				    WIDTH[detectorType[ii]]/header.numOfX; 
 				segments[index].depth = 
 				    DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
@@ -804,12 +807,12 @@ public class Runfile implements Cloneable {
 				int index = ii + segX + segY *( header.numOfY);
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
-				segments[index].row = segX; 
-				segments[index].column = segY; 
+				segments[index].row = segX + 1; 
+				segments[index].column = segY + 1; 
 				segments[index].length = 
-				    LENGTH[detectorType[ii]/header.numOfY]; 
+				    LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
-				    WIDTH[detectorType[ii]/header.numOfX]; 
+				    WIDTH[detectorType[ii]]/header.numOfX; 
 				segments[index].depth = 
 				    DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
@@ -1384,7 +1387,7 @@ public class Runfile implements Cloneable {
 		for ( int segX = 0; segX < numSegs2[ii]; segX ++ ) {
 		    int segID = minID[ii] + segX + segY * numSegs2[ii];
 		    segments[segID] = 
-			new Segment( ii, segX, segY, 
+			new Segment( ii, segX +1 , segY + 1, 
 				     detectorLength[ii]/numSegs1[ii],
 				     detectorWidth[ii]/numSegs2[ii],
 				     detectorDepth[ii],
@@ -2051,7 +2054,7 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double fromLeft = 
-		(seg.row * ( header.xLeft -header.xRight) ) / header.numOfX;
+		(seg.column * ( header.xLeft -header.xRight) ) / header.numOfX;
 	    double fromCenter = fromLeft 
 		 + ( header.xDisplacement + header.xLeft );
 	    double offsetAngle = fromCenter / header.dta * ( 180 / Math.PI );
@@ -2137,7 +2140,12 @@ public class Runfile implements Cloneable {
 	    return this.detectorAngle[seg.detID];
 	}
 	else {
-	    return header.dta;
+	    double fromLeft = 
+		(seg.column * ( header.xLeft -header.xRight) ) / header.numOfX;
+	    double fromCenter = fromLeft 
+		 + ( header.xDisplacement + header.xLeft );
+	    double offsetAngle = fromCenter / header.dta * ( 180 / Math.PI );
+	    return header.dta + offsetAngle;
 	}
     }
 
@@ -2175,7 +2183,8 @@ public class Runfile implements Cloneable {
 	    return fp;
 	}
 	else {
-	    return header.dtd;
+	    return Math.sqrt(flightPath[detID]*flightPath[detID] 
+			     + RawDetectorHeight(seg)*RawDetectorHeight (seg));
 	}
     }
 
@@ -2205,10 +2214,10 @@ public class Runfile implements Cloneable {
 	    }
 	}
 	else {
-	    fp = flightPath[detID];
+	    fp = flightPath[detID];	
 	}
  
-	return fp;
+	    return fp;
     }
 
     /**
@@ -2223,8 +2232,9 @@ public class Runfile implements Cloneable {
 	    return this.flightPath[id];
 	}
 	else {
-	    return header.dtd;
-	}
+	    return Math.sqrt(flightPath[id]*flightPath[id] 
+			     + RawDetectorHeight(seg)*RawDetectorHeight (seg));
+	} 
     }
 
     /**
@@ -2261,7 +2271,7 @@ public class Runfile implements Cloneable {
 	else {
 	    double height = header.yDisplacement + header.yLower + 
 		(seg.row * (header.yUpper - header.yLower)) / header.numOfY;
-	    return height;
+	    return height/100.0f;
 	}
     }
 
@@ -2284,12 +2294,12 @@ public class Runfile implements Cloneable {
     public double RawDetectorHeight(Segment seg){
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	return this.detectorHeight[seg.detID];
+	    return this.detectorHeight[seg.detID];
 	}
 	else {
 	    double height = header.yDisplacement + header.yLower + 
 		(seg.row * (header.yUpper - header.yLower)) / header.numOfY;
-	    return height;
+	    return height/100.0f;
 	}
     }
 
@@ -2345,6 +2355,47 @@ public class Runfile implements Cloneable {
      */
     public int MinID( Segment seg ) {
 	return this.minID[seg.detID];
+    }
+
+    /**
+       This method retrieves the number of segments in the first dimension 
+       for an ID.  
+       @param detID The detector ID.
+       @return The number of segments in the first dimension.
+     */
+    public int NumSegs1( int detID ) {
+	return this.numSegs1[detID];
+    }
+
+    /**
+       This method retrieves the number of segments in the first dimension 
+       in the detector associated with seg.  
+       @param seg The detector segment.
+       @return The number of segments in the first dimension for this detector.
+     */
+    public int NumSegs1( Segment seg ) {
+	return this.numSegs1[seg.detID];
+    }
+
+    /**
+       This method retrieves the number of segments in the second dimension 
+       for an ID.  
+       @param detID The detector ID.
+       @return The number of segments in the second dimension.
+     */
+    public int NumSegs2( int detID ) {
+	return this.numSegs2[detID];
+    }
+
+    /**
+       This method retrieves the number of segments in the second dimension 
+       in the detector associated with seg.  
+       @param seg The detector segment.
+       @return The number of segments in the second dimension for this 
+       detector.
+     */
+    public int NumSegs2( Segment seg ) {
+	return this.numSegs2[seg.detID];
     }
 
     /**
@@ -3035,7 +3086,7 @@ public class Runfile implements Cloneable {
 	    float stepWave = (maxWave - minWave)/numWaves;
 
 	    float[] channel = new float[header.numOfWavelengths + 1];
-		for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
+		for ( int ii = 0; ii <= header.numOfWavelengths; ii++ ) {
 		    channel[ii] = minWave + ii* stepWave;
 		}
 	    return channel;
