@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.13  2004/02/09 04:25:00  hammonds
+ * Fix problem with setMinID() so that minIDs are updated correctly when prior or current type is 0
+ *
  * Revision 1.12  2003/12/12 18:07:22  hammonds
  * Added 15" LPSD for GPPD
  *
@@ -108,7 +111,7 @@ public class DC5 {
 	PSD_DIMENSION = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 
 			  1, 2, 1, 2, 1 };
     public static final int[]
-	NUM_OF_SEGS_1 = { 1, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
+	NUM_OF_SEGS_1 = { 1, 1, 1, 1, 1, 16, 1, 64, 1, 1, 1, 85, 64, 128, 128,
 			  256, 256, 8, 150, 74, 256, 64 };
     public static final int[]
 	NUM_OF_SEGS_2 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128,
@@ -518,26 +521,20 @@ public void setDataSource( int[] dataSource ) {
 }
 
 public void setMinID() {
-    int lastRealID = 0;
-    minID[0] = 1;
-    if ( nDet > 1 ) {
+  int lastRealID = 0;
+  minID[0] = 1;
+  if ( nDet > 1 ) {
     for (int id = 1; id < nDet; id++ ) {
-	if ( type[id] != 0 ) {
-	    if ( type[lastRealID] !=0 ) {
-		minID[id] = minID[lastRealID] + 
-		    numSegs1[lastRealID] * numSegs2[lastRealID];
-	    }
-	    else {
-		minID[id] = minID[lastRealID] + 1;
-	    }
-	    lastRealID = id;
-	}
-	else { 
-	    minID[id] = minID[lastRealID] + 1;
-	    lastRealID = id;
-	}
+      if ( type[lastRealID] !=0 ) {
+	minID[id] = minID[lastRealID] + 
+	  numSegs1[lastRealID] * numSegs2[lastRealID];
+      }
+      else {
+	minID[id] = minID[lastRealID] + 1;
+      }
+      lastRealID = id;
     }
-    }
+  }
 }
 public void setNDet(int nDet) {
   this.nDet =  nDet;
