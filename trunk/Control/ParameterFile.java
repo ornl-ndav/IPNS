@@ -1,6 +1,10 @@
 package IPNS.Control;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.RandomAccessFile;
+import java.util.Properties;
 
 public class ParameterFile {
     String deviceName = new String("Not Defined");

@@ -1,6 +1,8 @@
 package IPNS.Control;
-import java.util.*;
-import java.io.*;
+import java.util.Properties;
+import java.io.RandomAccessFile;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Parameter {
 
