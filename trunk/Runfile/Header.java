@@ -9,8 +9,21 @@ member variables is allowed only to members of this package.  It allows
 a logical separation for information in the two block run file header.
 
 */
+/*
+ *
+ * $Log$
+ * Revision 5.0  2000/01/10 22:39:48  hammonds
+ * Made update to allow this package to be used with the new newrun package.
+ * These updates were generally made to allow for better operation when creating
+ * a run via a default run do that parameters are fed out of Runfile properly and
+ * into RunfileBuilder properly.
+ * HeadText was modified to allow the displayed runfile to change without creating
+ * a new instance of the Text object.
+ *
+ *
+ */
 
-public class Header {
+public class Header implements Cloneable {
 protected TableType controlParameter = new TableType();
 protected TableType detectorMapTable = new TableType();
 protected TableType timeFieldTable = new TableType();
@@ -427,6 +440,16 @@ public static void main(String[] args) throws IOException{
 				header.lpsdClock );
 	System.out.println("numOfLpsds:           " + 
 				header.numOfLpsds );
+	System.out.println("detectorLength:       " + 
+				header.detectorLength.location +
+				", " + header.detectorLength.size);
+	System.out.println("detectorWidth:        " + 
+				header.detectorWidth.location +
+				", " + header.detectorWidth.size);
+	System.out.println("detectorDepth:        " +  
+				header.detectorDepth.location +
+				", " + header.detectorDepth.size);
+
 	System.out.println("iName:                " +
 			        header.iName );
 	}
@@ -493,7 +516,7 @@ public static void main(String[] args) throws IOException{
 
 	runfile.seek(68);
 	int vers = runfile.readInt();
-	System.out.println( "Version: " + vers );
+	//	System.out.println( "Version: " + vers );
 	
 	if ( vers > 16777215 ) {       // Version < 4 was little endian
 	    LoadV4(runfile);
@@ -569,7 +592,7 @@ public static void main(String[] args) throws IOException{
 	  for (i=0; i < 3; i++){
 		tempNextRun.append((char)runfile.readByte());
 		}
-	  System.out.println( "nextrun"+tempNextRun+"MMMM");
+	  //	  System.out.println( "nextrun"+tempNextRun+"MMMM");
 	  if ( tempNextRun.toString() != null )
 	  nextRun = (int)Integer.parseInt(tempNextRun.toString());
   	  }
@@ -900,6 +923,10 @@ public static void main(String[] args) throws IOException{
 		detectorWidth.size = runfile.readInt();
 		detectorDepth.location = runfile.readInt();
 		detectorDepth.size = runfile.readInt();
+		temp = new byte[4];
+		runfile.read(temp, 0, 4);
+		iName = new String(temp);
+		
     }
 
     public void Write( RandomAccessFile runfile ) {
@@ -1048,6 +1075,7 @@ public static void main(String[] args) throws IOException{
 		runfile.writeInt( detectorWidth.size );
 		runfile.writeInt( detectorDepth.location );
 		runfile.writeInt( detectorDepth.size );
+		runfile.writeBytes( iName.substring( 0, 4 ) );
 		runfile.seek(1532);
 		runfile.writeInt( (int)0 );
 		
@@ -1057,5 +1085,15 @@ public static void main(String[] args) throws IOException{
   	}
     }
 
+    public Object clone() {
+	try {
+	    Runfile copy = (Runfile)super.clone();
+
+	    return copy;
+
+	} catch (CloneNotSupportedException ex ) { 
+	    throw new Error ( "Error Cloning Header Object" );
+	}
+    }
 
 }

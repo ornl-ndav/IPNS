@@ -2,10 +2,7 @@ package IPNS.Runfile;
 
 import java.io.*;
 
-public class RunfileBuilder extends Runfile {
-    float[] detectorLength = new float[0];
-    float[] detectorWidth = new float[0];
-    float[] detectorDepth = new float[0];
+public class RunfileBuilder extends Runfile implements Cloneable{
 
     public RunfileBuilder() {
 	super( );
@@ -17,7 +14,16 @@ public class RunfileBuilder extends Runfile {
 	header.presetMonitorCounts = 108000;
 	header.numOfCyclesPreset = (short)720;
 	header.varToMonitor = 'p';
-
+	detectorAngle = new float[1];
+	flightPath = new float[1];
+	detectorHeight = new float[1];
+	detectorType = new short[1];
+	timeScale = new float[1];
+	timeShift = new float[1];
+	areaStartTime = new float[1];
+	timeDelay = new float[1];
+	timeField = new TimeField[1];
+	detectorMap = new DetectorMap[1];
     }
     
     public RunfileBuilder( String infileName ) throws IOException {
@@ -369,86 +375,104 @@ public class RunfileBuilder extends Runfile {
 	header.lpsdClock = lpsdClock;
     }
 
+    public void setIName ( String iName ) {
+	header.iName = iName;
+    }
+
     public void addDetectorAngle( double[] detectorAngle ){
-	this.detectorAngle = new float[detectorAngle.length];
-	for ( int ii = 0; ii < detectorAngle.length; ii++ ) {
-	    this.detectorAngle[ii] = (float)detectorAngle[ii];
+	this.detectorAngle = new float[detectorAngle.length + 1 ];
+	for ( int ii = 1; ii <= detectorAngle.length; ii++ ) {
+	    this.detectorAngle[ii] = (float)detectorAngle[ii - 1];
 	}
     }
 
     public void addDetectorAngle( float[] detectorAngle ){
-	this.detectorAngle = detectorAngle;
+	this.detectorAngle = new float[detectorAngle.length + 1 ];
+	System.arraycopy(detectorAngle, 0, this.detectorAngle, 1, 
+			 detectorAngle.length);
     }
 
     public void addFlightPath( double[] flightPath ) {
-	this.flightPath = new float[ flightPath.length ];
-	for ( int ii = 0; ii < flightPath.length; ii++ ) {
-	    this.flightPath[ii] = (float)flightPath[ii];
+	this.flightPath = new float[ flightPath.length + 1 ];
+	for ( int ii = 1; ii <= flightPath.length; ii++ ) {
+	    this.flightPath[ii] = (float)flightPath[ii - 1];
 	}
     }
 
     public void addFlightPath( float[] flightPath ) {
-	this.flightPath = flightPath;
+	this.flightPath = new float[ flightPath.length + 1 ];
+	System.arraycopy(flightPath, 0, this.flightPath, 1, 
+			 flightPath.length);
     }
 
     public void addDetectorHeight( double[] detectorHeight ) {
-	this.detectorHeight = new float[ detectorHeight.length ];
-	for ( int ii = 0; ii < detectorHeight.length; ii++ ) {
-	    this.detectorHeight[ii] = (float)detectorHeight[ii];
+	this.detectorHeight = new float[ detectorHeight.length + 1 ];
+	for ( int ii = 1; ii <= detectorHeight.length; ii++ ) {
+	    this.detectorHeight[ii] = (float)detectorHeight[ii - 1];
 	}
     }
 
     public void addDetectorHeight( float[] detectorHeight ) {
-	this.detectorHeight = detectorHeight;
-    }
-
-    public void addDetectorType( short[] detectorType ) {
-	this.detectorType = detectorType;
+	this.detectorHeight = new float[ detectorHeight.length + 1 ];
+	System.arraycopy(detectorHeight, 0, this.detectorHeight, 1, 
+			 detectorHeight.length);
     }
 
     public void addDetectorType( int[] detectorType ) {
-	this.detectorType = new short[ detectorType.length ];
-	for ( int ii = 0; ii < detectorType.length; ii++ ) {
-	    this.detectorType[ii] = (short)detectorType[ii];
+	this.detectorType = new short[ detectorType.length +1 ];
+	for ( int ii = 1; ii <= detectorType.length; ii++ ) {
+	    this.detectorType[ii] = (short)detectorType[ii - 1];
 	}
     }
 
+    public void addDetectorType( short[] detectorType ) {
+	this.detectorType = new short[ detectorType.length +1 ];
+	System.arraycopy(detectorType, 0, this.detectorType, 1, 
+			 detectorType.length);
+    }
+
     public void addDetectorLength( double[] detectorLength ) {
-	this.detectorLength = new float[ detectorLength.length ];
-	for ( int ii = 0; ii < detectorLength.length; ii++ ) {
-	    this.detectorLength[ii] = (float)detectorLength[ii];
+	this.detectorLength = new float[ detectorLength.length + 1 ];
+	for ( int ii = 1; ii <= detectorLength.length; ii++ ) {
+	    this.detectorLength[ii] = (float)detectorLength[ii - 1];
 	}
     }
     
     public void addDetectorLength( float[] detectorLength ) {
-	this.detectorLength = detectorLength;
+	this.detectorLength = new float[ detectorLength.length + 1 ];
+	System.arraycopy(detectorLength, 0, this.detectorLength, 1, 
+			 detectorLength.length);
     }
     
     public void addDetectorWidth( double[] detectorWidth ) {
-	this.detectorWidth = new float[ detectorWidth.length ];
-	for ( int ii = 0; ii < detectorWidth.length; ii++ ) {
-	    this.detectorWidth[ii] = (float)detectorWidth[ii];
+	this.detectorWidth = new float[ detectorWidth.length + 1 ];
+	for ( int ii = 1; ii <= detectorWidth.length; ii++ ) {
+	    this.detectorWidth[ii] = (float)detectorWidth[ii - 1];
 	}
     }
 
     public void addDetectorWidth( float[] detectorWidth ) {
-	this.detectorWidth = detectorWidth;
+	this.detectorWidth = new float[ detectorWidth.length + 1 ];
+	System.arraycopy(detectorWidth, 0, this.detectorWidth, 1, 
+			 detectorWidth.length);
     }
 
     public void addDetectorDepth( double[] detectorDepth ) {
-	this.detectorDepth = new float[ detectorDepth.length ];
-	for ( int ii = 0; ii < detectorDepth.length; ii++ ) {
-	    this.detectorDepth[ii] = (float)detectorDepth[ii];
+	this.detectorDepth = new float[ detectorDepth.length + 1 ];
+	for ( int ii = 1; ii <= detectorDepth.length; ii++ ) {
+	    this.detectorDepth[ii] = (float)detectorDepth[ii - 1];
 	}
     }
 
     public void addDetectorDepth( float[] detectorDepth ) {
-	this.detectorDepth = detectorDepth;
+	this.detectorDepth = new float[ detectorDepth.length + 1 ];
+	System.arraycopy(detectorDepth, 0, this.detectorDepth, 1, 
+			 detectorDepth.length);
     }
 
     public void Write () {
 	RandomAccessFile runfile;
-	int offsetToFree = header.offsetToFree;
+	 int offsetToFree = header.numOfHeadBlocks * 512;
 
 	try {
 	runfile = new RandomAccessFile (runfileName, "rw" );
@@ -458,85 +482,84 @@ public class RunfileBuilder extends Runfile {
 	if (detectorAngle.length > 0 ){
 	    runfile.seek( 72 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( detectorAngle.length * 4 );
+	    runfile.writeInt( ( detectorAngle.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for ( int ii = 0; ii < detectorAngle.length; ii++ ) {
+	    for ( int ii = 1; ii < detectorAngle.length; ii++ ) {
 		runfile.writeFloat( detectorAngle[ii] );
 	    }
-	    offsetToFree = offsetToFree + detectorAngle.length * 4;
+	    offsetToFree = offsetToFree + (detectorAngle.length - 1) * 4;
 	}
 	//Write Flight Path Lengths
 	if ( flightPath.length > 0 ) {
 	    runfile.seek( 80 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( flightPath.length * 4 );
+	    runfile.writeInt( ( flightPath.length - 1 )* 4 );
 	    runfile.seek( offsetToFree );
-	    for ( int ii = 0; ii < flightPath.length; ii++ ) {
+	    for ( int ii = 1; ii < flightPath.length; ii++ ) {
 		runfile.writeFloat( flightPath[ii] );
 	    }
-	    offsetToFree = offsetToFree + flightPath.length * 4;
+	    offsetToFree = offsetToFree + ( flightPath.length - 1 ) * 4;
 	}
 	//Write detector heights
 	if (detectorHeight.length > 0 ) {
 	    runfile.seek( 88 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( detectorHeight.length * 4 );
+ 	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( detectorHeight.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for ( int ii = 0; ii < detectorHeight.length; ii++ ) {
+	    for ( int ii = 1; ii < detectorHeight.length; ii++ ) {
 		runfile.writeFloat( detectorHeight[ii] );
 	    }
-	    offsetToFree = offsetToFree + detectorHeight.length * 4;
+	    offsetToFree = offsetToFree + ( detectorHeight.length - 1 ) * 4;
 	}
 	//Write detector type
 	if ( detectorType.length > 0 ) {
 	    runfile.seek( 96 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( detectorType.length * 2 );
+	    runfile.writeInt( ( detectorType.length - 1 )* 2 );
 	    runfile.seek( offsetToFree );
-	    for ( int ii = 0; ii < detectorType.length; ii++ ) {
+	    for ( int ii = 1; ii < detectorType.length; ii++ ) {
 		runfile.writeShort( detectorType[ii] );
 	    }
-	    offsetToFree = offsetToFree + detectorType.length * 2;
+	    offsetToFree = offsetToFree + ( detectorType.length - 1 )* 2;
 	}
 	//Write detector length
 	if( detectorLength.length > 0 ) { 
 	    runfile.seek( 700 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( detectorLength.length * 4 );
+	    runfile.writeInt( ( detectorLength.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for( int ii = 0; ii < detectorLength.length; ii++ ) {
+	    for( int ii = 1; ii < detectorLength.length; ii++ ) {
 		runfile.writeFloat( detectorLength[ii] );
 	    }
-	    offsetToFree = offsetToFree + detectorLength.length * 4;
+	    offsetToFree = offsetToFree + ( detectorLength.length -  1 ) * 4;
 	}
 	// Write detector widths
 	if( detectorWidth.length > 0 ) {
 	    runfile.seek( 708 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( detectorWidth.length * 4 );
+	    runfile.writeInt( ( detectorWidth.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for( int ii = 0; ii < detectorWidth.length; ii++ ) {
+	    for( int ii = 1; ii < detectorWidth.length; ii++ ) {
 		runfile.writeFloat( detectorWidth[ii] );
 	    }
-	    offsetToFree = offsetToFree + detectorWidth.length * 4;
+	    offsetToFree = offsetToFree + ( detectorWidth.length - 1 ) * 4;
 	}
 	//  Write detector Depths
 	if( detectorDepth.length > 0 ) {
 	    runfile.seek( 716 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( detectorDepth.length * 4 );
+	    runfile.writeInt( ( detectorDepth.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for( int ii = 0; ii < detectorDepth.length; ii++ ) {
+	    for( int ii = 1; ii < detectorDepth.length; ii++ ) {
 		runfile.writeFloat( detectorDepth[ii] );
 	    }
-	    offsetToFree = offsetToFree + detectorDepth.length * 4;
+	    offsetToFree = offsetToFree + ( detectorDepth.length - 1 ) * 4;
 	}
-
 	//  Write detector Maps
 	if( detectorMap.length > 0 ) {
 	    runfile.seek( 8 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( (detectorMap.length - 1) * 4 );
+	    runfile.writeInt(  ( detectorMap.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
 	    for( int ii = 1; ii < detectorMap.length; ii++ ) {
 		detectorMap[ii].Write( runfile );
@@ -548,7 +571,7 @@ public class RunfileBuilder extends Runfile {
 	if( timeField.length > 0 ) {
 	    runfile.seek( 16 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( (timeField.length - 1) * 16 );
+	    runfile.writeInt( ( timeField.length - 1) * 16 );
 	    runfile.seek( offsetToFree );
 	    for( int ii = 1; ii < timeField.length; ii++ ) {
 		timeField[ii].Write( runfile );
@@ -642,6 +665,18 @@ public class RunfileBuilder extends Runfile {
 	    detectorMap[index].tfType = matchingTimeField;
 	    detectorMap[index].address = header.channels1D * 4;
 	    header.channels1D = header.channels1D + nChanns + 1;
+	}
+    }
+
+
+    public Object clone() {
+	try {
+	    RunfileBuilder copy = (RunfileBuilder)super.clone();
+
+	    return copy;
+
+	} catch (CloneNotSupportedException ex ) { 
+	    throw new Error ( "Error Cloning RunfileBuilder Object" );
 	}
     }
 

@@ -16,10 +16,23 @@ indexed starting at zero.
 
 @author  John P Hammonds
 @author  Richard J. Goyette
-@version 4.0beta5
+@version 5.0beta
 */
+/*
+ *
+ * $Log$
+ * Revision 5.0  2000/01/10 22:39:48  hammonds
+ * Made update to allow this package to be used with the new newrun package.
+ * These updates were generally made to allow for better operation when creating
+ * a run via a default run do that parameters are fed out of Runfile properly and
+ * into RunfileBuilder properly.
+ * HeadText was modified to allow the displayed runfile to change without creating
+ * a new instance of the Text object.
+ *
+ *
+ */
 
-public class Runfile {
+public class Runfile implements Cloneable {
     /** Flag to indicate if file is left open */ boolean leaveOpen;
     /** The file name associated with this Runfile object. */
     protected String runfileName;
@@ -57,6 +70,9 @@ public class Runfile {
 	                                                       lpsdFlightPath;
     /** Array of detector heights */		protected float[] lpsdHeight;
     /** Array of detector types */		protected short[] lpsdType;
+    float[] detectorLength = new float[0];
+    float[] detectorWidth = new float[0];
+    float[] detectorDepth = new float[0];
 
 
 // --------------------------- readUnsignedInteger -------------------
@@ -398,6 +414,16 @@ public class Runfile {
     void LoadV5( RandomAccessFile runfile ) throws IOException {
 	int i;
 	if ( header.nDet > 0 ) {
+	    detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
+					 + 1];
+	    for (i=1; i <= this.header.detectorMapTable.size/4; i++){
+		detectorMap[i] = new DetectorMap(runfile, i, header);
+	    }
+
+	    timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
+	    for (i=1; i <= this.header.timeFieldTable.size/16; i++){
+		timeField[i] = new TimeField(runfile, i, header);
+	    }
 	    runfile.seek(this.header.detectorAngle.location);
 	    detectorAngle = new float[header.detectorAngle.size / 4 + 1];
 	    for ( i = 1; i <= header.detectorAngle.size / 4; i++ ) {
@@ -421,6 +447,24 @@ public class Runfile {
 	    for ( i = 1; i <= header.detectorType.size / 2; i++ ) {
 		detectorType[i] = runfile.readShort();
 	    }
+	    runfile.seek(this.header.detectorHeight.location);
+	    detectorLength = new float[header.detectorLength.size / 4 + 1];
+	    for ( i = 1; i <= header.detectorLength.size / 4; i++ ) {
+		detectorLength[i] = runfile.readFloat();
+	    }
+
+	    runfile.seek(this.header.detectorWidth.location);
+	    detectorWidth = new float[header.detectorWidth.size / 4 + 1];
+	    for ( i = 1; i <= header.detectorWidth.size / 4; i++ ) {
+		detectorWidth[i] = runfile.readFloat();
+	    }
+
+	    runfile.seek(this.header.detectorDepth.location);
+	    detectorDepth = new float[header.detectorDepth.size / 4 + 1];
+	    for ( i = 1; i <= header.detectorDepth.size / 4; i++ ) {
+		detectorDepth[i] = runfile.readFloat();
+	    }
+
 	}
 	if ( header.numOfLpsds > 0 ) {
 
@@ -1963,5 +2007,16 @@ public class Runfile {
 					      int hist ) throws LpsdNotFound {
 	int lpsdId = LpsdMapToId( bank, det, element, hist );
 	return LpsdTimeChannelBoundaries( lpsdId, hist );
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+	try {
+	    Runfile copy = (Runfile)super.clone();
+
+	    return copy;
+
+	} catch (CloneNotSupportedException ex ) { 
+	    throw new CloneNotSupportedException ( "Error Cloning Runfile Object" );
+	}
     }
 }
