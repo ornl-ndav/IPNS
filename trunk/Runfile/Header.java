@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.11  2001/07/20 21:41:01  hammonds
+ * Fixed some problems with setting usermname and runtitle
+ *
  * Revision 5.10  2001/07/20 21:34:30  hammonds
  * Made changes to default username and runtitle so that everything writes OK without other setups.
  *
@@ -1636,10 +1639,14 @@ public static void main(String[] args) throws IOException{
     protected int set( String element, String val  ) {
 	int errval = 0;
 	if ( element.equalsIgnoreCase( "userName") ) {
-	    userName = val;
+	    StringBuffer tempBuff = new StringBuffer( val );
+	    tempBuff.setLength(20);
+	    userName = new String(tempBuff);
 	}
 	else if ( element.equalsIgnoreCase( "runTitle") ) {
-	    runTitle = val;
+	    StringBuffer tempBuff = new StringBuffer( val );
+	    tempBuff.setLength(80);
+	    runTitle = new String(tempBuff);
 	}
 	else if ( element.equalsIgnoreCase( "startDate") ) {
 	    startDate = val;
@@ -1654,7 +1661,9 @@ public static void main(String[] args) throws IOException{
 	    endTime = val;
 	}
 	else if ( element.equalsIgnoreCase( "iName") ) {
-	    iName = val;
+	    StringBuffer tempBuff = new StringBuffer( val );
+	    tempBuff.setLength(4);
+	    iName = new String(tempBuff);
 	}
 	else{
 	    System.out.println( "Cannot set " + element + " as string" );
