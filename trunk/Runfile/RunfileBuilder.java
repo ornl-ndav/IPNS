@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.27  2001/11/02 19:10:54  hammonds
+ * Initialize timeScale if time focusing is used.
+ *
  * Revision 5.26  2001/11/02 16:34:06  hammonds
  * Make ModifyHeaderElements return an int to be used with operators.
  *
@@ -1464,10 +1467,14 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	if (InstrumentType.getIPNSInstType( header.iName ) == 
 	    InstrumentType.TOF_DG_SPECTROMETER ) {
 	    pseudo = 'I';
+	    if ( timeScale.length != (header.nDet + 1)  ) 
+		timeScale = new float[header.nDet +1 ];
 	}
 	else if ( InstrumentType.getIPNSInstType( header.iName ) == 
 	    InstrumentType.TOF_DIFFRACTOMETER ) {
 	    pseudo = 'D';
+	    if ( timeScale.length != (header.nDet + 1)  ) 
+		timeScale = new float[header.nDet +1 ];
 	}
 	header.pseudoTimeUnit = pseudo;
 	
