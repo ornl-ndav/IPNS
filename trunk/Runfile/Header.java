@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.15  2001/10/31 22:03:01  hammonds
+ * Added a rewrite method to allow modifications to header parameters.
+ *
  * Revision 5.14  2001/08/03 19:05:09  hammonds
  * Added reading the number of elements in a file.
  *
@@ -1866,9 +1869,23 @@ public static void main(String[] args) throws IOException{
 		
 	}
 	catch (IOException ex) {
+	    System.out.println( "Trouble writing runfile header" );
+	    ex.printStackTrace();
   	}
     }
 
+    public void reWrite( String runfileName) {
+	try {
+	RandomAccessFile runfile;
+	runfile = new RandomAccessFile (runfileName, "rw" );
+	Write( runfile );
+	runfile.close();
+	}
+	catch ( IOException ex ) {
+	    System.out.println( "Trouble rewriting runfile header" );
+	    ex.printStackTrace();
+	}
+    }
     public Object clone() {
 	try {
 	    Header copy = (Header)super.clone();
