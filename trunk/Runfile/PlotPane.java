@@ -1,5 +1,6 @@
 package IPNS.Runfile;
 
+import java.util.*;
 import javax.swing.*;
 import webproject.*;
 import webproject.dataset.*;
@@ -96,32 +97,58 @@ public void run(){
      float[] x_values;
 
      runFile.LeaveOpen();
-     //     for (int id = 1; id <= runFile.NumDet(); id++) {
-     for (int id = runFile.MinSubgroupID(1); id <= runFile.MaxSubgroupID( 1 ); id++) {
-       progressMonitor.setProgress(id);
-       progressMonitor.setNote("Detector " + id );
-       //       if ( runFile.IsBinned( id, 1 ) ) {
-           float min = (float)runFile.MinBinned(id);
+     System.out.println( (new Date()).toString() );
+     if ( runFile.header.numOfWavelengths == 0 ) {
+	 System.out.println( "  run has no area detectors" );
+	 for (int id = runFile.MinSubgroupID(1); 
+	      id <= runFile.MaxSubgroupID( 1 ); id++) {
+	     progressMonitor.setProgress(id);
+	     progressMonitor.setNote("Detector " + id );
+	     float min = (float)runFile.MinBinned(id);
+	     
+	     float max = (float)runFile.MaxBinned(id);
+	     x_values = runFile.TimeChannelBoundaries( id );
+	     x_scale = new UniformXScale(min, max,
+					 runFile.NumChannelsBinned( id ) );
+	     
+	     y_values = runFile.Get1DSpectrum( id );
+	     
+	     
+	     spectrum = new Data(x_scale, y_values, id);
+	     data_set.addData_entry ( spectrum );
+	 }
+     }
+     else {
+	 System.out.println( "  run has area detectors" );
+	 int numX = runFile.header.numOfX;
+	 int numY = runFile.header.numOfY;
 
-           float max = (float)runFile.MaxBinned(id);
-	   x_values = runFile.TimeChannelBoundaries( id );
-      	   x_scale = new UniformXScale(min,max,runFile.NumChannelsBinned( id ) );
-//	   x_scale = new VariableXScale( x_values );
+	 float[][] slice = new float[1][1];
+	 float[][] sliceSum = new float[numX][numY];
 
-       	   y_values = runFile.Get1DSpectrum( id );
-
-
-           spectrum = new Data(x_scale, y_values, id);
-	   data_set.addData_entry ( spectrum );
-	   //           }
-       }
+	 for ( int sliceNum = 1; sliceNum <= runFile.header.numOfWavelengths; 
+	       sliceNum++ ) {
+	     slice = runFile.AreaTimeSlice( sliceNum );
+	     for ( int ix = 0; ix < numX; ix++ ) {
+		 for ( int iy = 0; iy < numY; iy ++ ) {
+		     sliceSum[ix][iy] += slice[ix][iy];
+ 		 }
+	     }
+	 }
+	 x_scale = new UniformXScale( 1, numX, numX );
+	 for ( int ii = 0; ii < numY; ii++ ) {
+	     spectrum = new Data ( x_scale, sliceSum[ii], ii);
+	     data_set.addData_entry ( spectrum );
+	 }
+     }
+     System.out.println( (new Date()).toString() );
      runFile.Close();
      ImageView image_view = new ImageView(data_set);
      plotPane.setViewportView( image_view );
-        }
-   catch (IOException e) {
-	}
    }
-
+   catch (IOException e) {
+   }
+}
+    
 }
 
