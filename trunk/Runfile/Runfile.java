@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.23  2003/02/11 20:09:20  hammonds
+ * Fixed Problem with Time focusing calculation on Chopper LPSDs.  A focused detector is only focused at one point.  The fix was made by changing the effective position of a pixel.
+ *
  * Revision 6.22  2002/12/11 21:43:33  hammonds
  * Change how chi, phi & omega are defined.
  *
@@ -2646,6 +2649,24 @@ public class Runfile implements Cloneable {
 		(header.pseudoTimeUnit == 'I')) { 
 		if (flightPath[detID] > 3.0 ) {
 		    fp = 4.0;
+		    float twoDCorr = 1.00f;
+		    if ( numSegs1[detID] > 1 ) {
+			if (header.iName.equalsIgnoreCase("hrcs") && 
+			    header.runNum < 3384 ){
+			    twoDCorr = (float)
+				RawFlightPath(seg)/(float)
+				Math.sqrt(Math.pow(flightPath[detID], 2.0) +
+					  Math.pow(detectorLength[detID]/200.0, 2.0));
+			}
+			else {
+
+			    twoDCorr = (float)RawFlightPath(seg)/(float)flightPath[detID];
+			    System.out.println("twoDCorr in if" + twoDCorr );
+			}
+		    }
+		    System.out.println("twoDCorr out of if" + twoDCorr );
+		    fp = fp * twoDCorr;
+
 		}
 		else {
 		    fp = 2.5;
@@ -3643,6 +3664,7 @@ public class Runfile implements Cloneable {
 		}
 		else {						//Det focused
 		    us_correction = timeToSample;
+
 		}
 		min = min + us_correction;
 		max = max + us_correction;
