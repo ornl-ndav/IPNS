@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2002/02/23 13:53:00  hammonds
+ *  Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
+ *
  *  Revision 1.3  2001/11/01 20:03:14  chatterjee
  *  Takes empty string for path of the Params fileand uses default file.
  *
@@ -48,6 +51,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

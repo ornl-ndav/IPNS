@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2002/02/23 13:53:32  hammonds
+ *  Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
+ *
  *  Revision 1.2  2002/01/08 20:15:36  hammonds
  *  Fixed problem setting iName
  *
@@ -49,6 +52,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

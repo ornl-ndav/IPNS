@@ -31,6 +31,9 @@
  * Modified:
  *
  * $Log$
+ * Revision 1.2  2002/02/23 13:53:48  hammonds
+ * Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
+ *
  * Revision 1.1  2001/11/27 19:12:49  hammonds
  * First Checkin
  *
@@ -39,6 +42,7 @@
 package IPNS.Operators;
 
 import DataSetTools.operator.*;
+import DataSetTools.operator.Generic.Load.*;
 import DataSetTools.util.*;
 import DataSetTools.dataset.*;
 import DataSetTools.viewer.*;
