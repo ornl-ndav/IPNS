@@ -22,7 +22,7 @@ class TimeField{
     short energyBinBit;
     short wavelengthBinBit;
     short pulseHeightBit;
-    short gBit;
+    short logBinBit;
     short hBit;
     boolean used;
     String iName;
@@ -52,7 +52,7 @@ class TimeField{
 	System.out.println("Number of Time Field entries in the table: " +
 			   numTimeTableEntries);
         System.out.println("              tMin   tMax    tStep   tLngth "
-                           +"chnNum              used");
+                           +"chnNum                 used");
 	TimeField[] timeField = new TimeField[numTimeTableEntries+1];
 	for (i=1; i <= numTimeTableEntries; i++) {
 	    timeField[i]  = new TimeField(runfile, i, header);
@@ -73,6 +73,7 @@ class TimeField{
 				+ timeField[i].energyBinBit + " " 
 				+ timeField[i].wavelengthBinBit + " "
 				+ timeField[i].pulseHeightBit + "  "
+				+ timeField[i].logBinBit + "  "
 				+ timeField[i].used );
 	}
 	runfile.close();
@@ -126,6 +127,7 @@ class TimeField{
 	    this.energyBinBit = (short)((maskChanWord >> 28 ) &1);
 	    this.wavelengthBinBit = (short)((maskChanWord >> 27 ) &1);
 	    this.pulseHeightBit = (short)((maskChanWord >> 26 ) &1);
+	    this.logBinBit = (short)((maskChanWord >> 25 ) &1);
 	    
 	}
 
@@ -161,6 +163,7 @@ class TimeField{
 	    ( (energyBinBit << 28)        & 0x10000000 ) |
 	    ( (wavelengthBinBit << 27)    & 0x08000000 ) |
 	    ( (pulseHeightBit << 26)      & 0x04000000 ) |
+	    ( (logBinBit << 25)           & 0x02000000 ) |
 	    ( numOfChannels               & 0x0000ffff );
 
 	runfile.writeInt( flagword );
@@ -183,6 +186,7 @@ class TimeField{
 	     this.energyBinBit == FieldToCompare.energyBinBit &&
 	     this.wavelengthBinBit == FieldToCompare.wavelengthBinBit &&
 	     this.pulseHeightBit == FieldToCompare.pulseHeightBit &&
+	     this.logBinBit == FieldToCompare.logBinBit &&
 	     this.numOfChannels == FieldToCompare.numOfChannels &&
 	     this.tMin == FieldToCompare.tMin &&
 	     this.tMax == FieldToCompare.tMax &&

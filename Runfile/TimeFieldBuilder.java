@@ -8,6 +8,9 @@ This class is inteded to construct the time fields to be written to a runfile.
 /*
  *
  *  $Log$
+ *  Revision 5.1  2002/08/21 17:35:54  hammonds
+ *  Added logBinBit to be used for dt/t binning
+ *
  *  Revision 5.0  2000/01/07 22:45:30  hammonds
  *  Changed Version Number
  *
@@ -22,6 +25,7 @@ public static final int NORMAL_BIN = 0;
 public static final int TIME_FOCUS = 2;
 public static final int ENERGY_BIN = 4;
 public static final int WAVELENGTH_BIN = 8;
+public static final int LOG_BIN = 16;
  
     public TimeFieldBuilder() {
         tMin= 500.0;
@@ -63,7 +67,8 @@ public static final int WAVELENGTH_BIN = 8;
     }
 
     public int BinMode() {
-	return 2 * timeFocusBit + 4 * energyBinBit + 8 * wavelengthBinBit;
+	return 2 * timeFocusBit + 4 * energyBinBit + 8 * wavelengthBinBit * 
+	    16 * logBinBit;
     }
 
     public void setTMin(double tMin) {
@@ -96,24 +101,35 @@ public static final int WAVELENGTH_BIN = 8;
 	    timeFocusBit = 0;
 	    energyBinBit = 0;
 	    wavelengthBinBit = 0;
+	    logBinBit = 0;
 	    break;
 	}
 	case (TIME_FOCUS): {
 	    timeFocusBit = 1;
 	    energyBinBit = 0;
 	    wavelengthBinBit = 0;
+	    logBinBit = 0;
 	    break;
 	}
 	case (ENERGY_BIN): {
 	    timeFocusBit = 0;
 	    energyBinBit = 1;
 	    wavelengthBinBit = 0;
+	    logBinBit = 0;
 	    break;
 	}
 	case (WAVELENGTH_BIN): {
 	    timeFocusBit = 0;
 	    energyBinBit = 0;
-	    wavelengthBinBit = 1;
+	    wavelengthBinBit = 0;
+	    logBinBit = 0;
+	    break;
+	}
+	case (LOG_BIN): {
+	    timeFocusBit = 0;
+	    energyBinBit = 0;
+	    wavelengthBinBit = 0;
+	    logBinBit = 1;
 	    break;
 	}
 	    
