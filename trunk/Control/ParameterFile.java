@@ -2,7 +2,7 @@ package IPNS.Control;
 import java.io.*;
 import java.util.*;
 
-class ParameterFile {
+public class ParameterFile {
     String deviceName = new String("Not Defined");
     String controllerName = new String("Not Defined");
     String fileName = new String("noname.anc");

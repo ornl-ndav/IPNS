@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-class ParamEditor extends JFrame implements ActionListener{
+public class ParamEditor extends JFrame implements ActionListener{
     JTabbedPane tabby = new JTabbedPane();
     int numRows;
     ParameterFile pFile; 

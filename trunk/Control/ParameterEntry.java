@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 
-class ParameterEntry extends JPanel implements ActionListener {
+public class ParameterEntry extends JPanel implements ActionListener {
     Parameter param = new Parameter();
     JLabel paramLabel = new JLabel();
     JTextField paramValEntry = new JTextField();
