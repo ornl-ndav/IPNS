@@ -4,10 +4,16 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 import IPNS.Calib.*;
-
+import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.22  2001/10/10 15:33:52  hammonds
+ * Modifications to start/endDateAndTimeToCurrent to correct some formatting problems.
+ * Add getDefDiscFileName, getDefDCalibFileName, getDefParamFileName
+ * Add headerSetFromParams, headerSetFromDCalib, headerSetFromDiscFile with no arguments which take values from the system default files.
+ * First level add of control parameters.
+ *
  * Revision 5.21  2001/10/08 19:30:32  hammonds
  * Change how segments are specified since the segment IDs have been changed.  minIDs are now assigned even if the detector type is 0.
  *
@@ -80,8 +86,11 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.headerSet( "totalChannels", 70000);
 	newRF.headerSet( "energyIn", 5.0);
  	newRF.startDateAndTimeToCurrent();
-	newRF.headerSetFromParams( "/home/hammonds/inst/hrcs__V5.par");
-	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0120.dc5");
+	newRF.headerSetFromParams();
+	newRF.headerSetFromDCalib( );
+	newRF.headerSetFromDiscFile();
+	newRF.headerSetFromDiscFile( );
+
 	newRF.headerSet( "clockPeriod", 5.0);
 	newRF.headerSet( "numOfHistograms", (short)1);
 	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 1);
@@ -124,6 +133,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	minSubgroupID = new int[0];
 	maxSubgroupID = new int[0];
 	discriminator = new DiscLevel[0];
+	params = new ParameterFile[0];
     }
     
     public RunfileBuilder( String infileName ) throws IOException {
@@ -1081,7 +1091,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
     /**
        This method sets a value in the runfile header. 
-       @param rfb the runfile to modify
        @param element The String code for the element to be modified
        @param val The value to be placed in the field.
        @return A return error code
@@ -1119,7 +1128,16 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     /**
        This method will set values in the runfile header that are normally 
        from the instrument parameter file.
-       @param rfb the runfile to modify
+       Calibration file is the default
+    */
+    public int headerSetFromParams(){
+	int rval = headerSetFromParams(getDefParamFileName());
+	return (rval);
+    }
+
+    /**
+       This method will set values in the runfile header that are normally 
+       from the instrument parameter file.
        @param paramfilename = filename from which parameters should be taken
        @return a return error code
     */
@@ -1179,10 +1197,21 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     }
 
     
+
     /**
        This method will set values in the runfile header that are normally 
        from the detector calibration table.
-       @param rfb the runfile to modify
+       Calibration file name is the instrument default.
+       @return a return error code
+    */
+    public int headerSetFromDCalib(){
+	int rval = headerSetFromDCalib(getDefDCalibFileName());
+	return (rval);
+    }
+    
+    /**
+       This method will set values in the runfile header that are normally 
+       from the detector calibration table.
        @param paramfilename = filename from which calibration data should be 
        taken.
        @return a return error code
@@ -1249,6 +1278,34 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     }
 
     /**
+     This method sets discriminator values int the Runfile.
+     The file is assumed to be the default file.
+     */
+    public int headerSetFromDiscFile(){
+	int rval = headerSetFromDiscFile(getDefDiscFileName());
+	return rval;
+    }
+
+    /**
+     This method sets discriminator values int the Runfile 
+     */
+    public int headerSetFromDiscFile(String filename){
+	DS5 disc = new DS5();
+	int rval = 0;
+        try {
+            disc = 
+		new DS5(filename);
+        }
+        catch (IOException ex) {
+            System.out.println(" Trouble opening discriminator file");
+	    rval = 1;
+	    return (rval);
+        }
+        addDiscriminatorLevels(disc.Lld(), disc.Uld());
+	return (rval);
+    }
+
+    /**
        This method will set start date and time  in the runfile header to the 
        current time and date.
        @return a return error code
@@ -1261,8 +1318,17 @@ public class RunfileBuilder extends Runfile implements Cloneable{
             new Date())).toUpperCase();
         String time = timeFormat.format(
             new Date());
-	String fixedDate = new String(date.substring(4,6) + "-" + date.substring(0,3)
-			       + "-" + date.substring(9,11) );
+	String fixedDate = new String();
+	if (date.length() == 12 ) {
+	    fixedDate = new String(date.substring(4,6) + "-" 
+				   + date.substring(0,3)
+				   + "-" + date.substring(10,12) );
+	}
+	else {
+	    fixedDate = new String("0" +date.substring(4,5) + "-" 
+				   + date.substring(0,3)
+				   + "-" + date.substring(9,11) );
+	}
       	System.out.println( "Date: " + date + "   " + fixedDate );
       	System.out.println( "Time: " + time );
 	header.startDate = fixedDate;
@@ -1628,4 +1694,109 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
     }
 
+    /**
+       This method returns the instrument default discriminator file 
+       name.
+    */
+    public String getDefDiscFileName() {
+	Properties iDat = new Properties();
+	String instDir = new String();
+	String filename = new String();
+        String home = System.getProperty("user.home");
+        String fileSep = System.getProperty("file.separator");
+        String datFileName = new String(home + fileSep + "inst" + fileSep + 
+					header.iName + ".dat");
+        iDat = new Properties();
+        try {
+            FileInputStream datFile = new FileInputStream(datFileName);
+            iDat.load(datFile);
+            instDir = iDat.getProperty("instDir");
+        }
+        catch (IOException e) {
+            System.out.println("Can't open file " + datFileName);
+            System.exit(0);
+        }
+	filename = new String (iDat.getProperty("instDir") + 
+			       System.getProperty("file.separator") +
+			       iDat.getProperty("iName") + ".ds5");
+	return ( filename );
+    }
+
+    /**
+       This method returns the instrument default discriminator file 
+       name.
+    */
+    public String getDefParamFileName() {
+	Properties iDat = new Properties();
+	String instDir = new String();
+	String filename = new String();
+        String home = System.getProperty("user.home");
+        String fileSep = System.getProperty("file.separator");
+        String datFileName = new String(home + fileSep + "inst" + fileSep + 
+					header.iName + ".dat");
+        iDat = new Properties();
+        try {
+            FileInputStream datFile = new FileInputStream(datFileName);
+            iDat.load(datFile);
+            instDir = iDat.getProperty("instDir");
+        }
+        catch (IOException e) {
+            System.out.println("Can't open file " + datFileName);
+            System.exit(0);
+        }
+	filename = new String (instDir + fileSep + header.iName + 
+			       "__V5.par");
+	return ( filename );
+    }
+
+    /**
+       This method returns the instrument default detector calibration file 
+       name.
+    */
+    public String getDefDCalibFileName() {
+	Properties iDat = new Properties();
+	Properties params = new Properties();
+	String instDir = new String();
+	String filename = new String();
+        String home = System.getProperty("user.home");
+        String fileSep = System.getProperty("file.separator");
+        String datFileName = new String(home + fileSep + "inst" + fileSep + 
+					header.iName + ".dat");
+        iDat = new Properties();
+        try {
+            FileInputStream datFile = new FileInputStream(datFileName);
+            iDat.load(datFile);
+            instDir = iDat.getProperty("instDir");
+        }
+        catch (IOException e) {
+            System.out.println("Can't open file " + datFileName);
+            System.exit(0);
+        }
+        String paramFileName = new String(instDir + fileSep + header.iName + 
+					  "__V5.par");
+        try {
+            FileInputStream paramFile = new FileInputStream(paramFileName);
+            params = new Properties();
+            params.load(paramFile);
+        }
+        catch (IOException e) {
+            System.out.println("Can't open file " + paramFileName);
+            System.exit(0);
+        }
+	int CalNum = Integer.parseInt(params.getProperty("DetectorCal"));
+	filename = new String ((iDat.getProperty("instDir") + 
+				    System.getProperty("file.separator") + 
+				    iDat.getProperty("iName") +
+		              new DecimalFormat("0000").format((long)CalNum) + 
+				    ".dc5"));
+	return ( filename );
+    }
+
+    public void addAncillaryEquipment(String inName) {
+	ParameterFile[] tparams = new ParameterFile[params.length + 1];
+	System.arraycopy(params, 0, tparams, 0, params.length );
+	tparams[params.length] = new ParameterFile(inName);
+	params = tparams;
+
+    }
 }
