@@ -41,7 +41,21 @@ class PrintControl(GenericOperator):
         fName = "%s/%s%s.run"%(dataDir,inst,sRun)
         runfile = Runfile(fName)
         firstRun = runfile.FirstRun()
-        curRun = firstRun
+        if firstRun != 0:
+            curRun = firstRun
+        else:
+            curRun = runNum
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>                                                   >>>"
+            print ">>>>                                                   >>>"
+            print ">>>>    Not enough info to find what came before this  >>>"
+            print ">>>>                                                   >>>"
+            print ">>>>                                                   >>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
         if curRun < 1000:
             sRun = "%04d"%(curRun)
         else:
@@ -82,6 +96,20 @@ class PrintControl(GenericOperator):
     def getCategoryList(self):
         cat = ["Operator","DAS","Print"]
         return cat
+
+    def getDocumentration(self):
+        docs = StringBuffer()
+        docs.append("@overview This Operator is intended for use by the ")
+        docs.append("instrument account.  This operator assumes that there ")
+        docs.append("is a file xxxx.dat (xxxx is the instrument prefix) ")
+        docs.append("which contains a line such as dataDir=/home/xxxx/data")
+        docs.append(" that gives the location of runfiles.  This operator ")
+        docs.append("looks at the firstRun element in the header of the ")
+        docs.append("specified run file.  It then starts at firstRun and ")
+        docs.append("steps through each run in the sequence (looking at each ")
+        docs.append("nextRun) and prints out the control paramenters for ")
+        docs.append("run.")
+
 
     def __init__(self):
         Operator.__init__(self,"Print Control")
