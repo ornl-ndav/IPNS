@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.39  2001/10/08 19:25:32  hammonds
+ * Condense assignment of values for length, width, ... for old runfiles.
+ *
  * Revision 5.38  2001/08/27 16:10:29  hammonds
  * Fix in reading the minID array from the runfile.  Still read the number of detectors instead of number of elements.
  *
@@ -561,22 +564,6 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-		    segments[ii] = new Segment();
-		    segments[ii].detID = ii; 
-		    segments[ii].row = 1; 
-		    segments[ii].column = 1; 
-		    segments[ii].length = LENGTH[detectorType[ii]]; 
-		    segments[ii].width = WIDTH[detectorType[ii]]; 
-		    segments[ii].depth = DEPTH[detectorType[ii]]; 
-		    segments[ii].efficiency = 
-			EFFICIENCY[detectorType[ii]]; 
-		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
 		    switch (detectorType[ii]){
@@ -589,22 +576,6 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-		    segments[ii] = new Segment();
-		    segments[ii].detID = ii; 
-		    segments[ii].row = 1; 
-		    segments[ii].column = 1; 
-		    segments[ii].length = LENGTH[detectorType[ii]]; 
-		    segments[ii].width = WIDTH[detectorType[ii]]; 
-		    segments[ii].depth = DEPTH[detectorType[ii]]; 
-		    segments[ii].efficiency = 
-			EFFICIENCY[detectorType[ii]]; 
-		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "sepd" ) ) {
 		    switch (detectorType[ii]){
@@ -617,22 +588,6 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-		    segments[ii] = new Segment();
-		    segments[ii].detID = ii; 
-		    segments[ii].row = 1; 
-		    segments[ii].column = 1; 
-		    segments[ii].length = LENGTH[detectorType[ii]]; 
-		    segments[ii].width = WIDTH[detectorType[ii]]; 
-		    segments[ii].depth = DEPTH[detectorType[ii]]; 
-		    segments[ii].efficiency = 
-			EFFICIENCY[detectorType[ii]]; 
-		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "qens" ) ) {
 		    switch (detectorType[ii]){
@@ -645,22 +600,6 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-		    segments[ii] = new Segment();
-		    segments[ii].detID = ii; 
-		    segments[ii].row = 1; 
-		    segments[ii].column = 1; 
-		    segments[ii].length = LENGTH[detectorType[ii]]; 
-		    segments[ii].width = WIDTH[detectorType[ii]]; 
-		    segments[ii].depth = DEPTH[detectorType[ii]]; 
-		    segments[ii].efficiency = 
-			EFFICIENCY[detectorType[ii]]; 
-		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "hipd" ) ) {
 		    switch (detectorType[ii]){
@@ -673,22 +612,6 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-		    segments[ii] = new Segment();
-		    segments[ii].detID = ii; 
-		    segments[ii].row = 1; 
-		    segments[ii].column = 1; 
-		    segments[ii].length = LENGTH[detectorType[ii]]; 
-		    segments[ii].width = WIDTH[detectorType[ii]]; 
-		    segments[ii].depth = DEPTH[detectorType[ii]]; 
-		    segments[ii].efficiency = 
-			EFFICIENCY[detectorType[ii]]; 
-		    segments[ii].segID = ii;
 		}
 		else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
 		    switch (detectorType[ii]){
@@ -701,6 +624,14 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
+		}
+		if (header.iName.equalsIgnoreCase( "hrcs" ) ||
+		    header.iName.equalsIgnoreCase( "lrcs" )||
+		    header.iName.equalsIgnoreCase( "gppd" )||
+		    header.iName.equalsIgnoreCase( "sepd" )||
+		    header.iName.equalsIgnoreCase( "qens" )||
+		    header.iName.equalsIgnoreCase( "hipd" )||
+		    header.iName.equalsIgnoreCase( "chex" ) ){
 		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
 		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
 		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
@@ -725,8 +656,7 @@ public class Runfile implements Cloneable {
 			detectorType[ii] = 1;
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
 			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
 			segments[ii] = new Segment();
@@ -1493,10 +1423,13 @@ public class Runfile implements Cloneable {
 	bArrayIS = new ByteArrayInputStream( bArray );
 	dataStream = new DataInputStream( bArrayIS );
 	if ( header.minID.size > 0 ) {
+	    boolean ifLess = false;
 	    minID = new int[header.minID.size / 4 + 1];
 	    for ( i = 1; i <= header.minID.size / 4; i++ ) {
 		minID[i] = dataStream.readInt();
+		if (minID[i] < i ) ifLess = true;
 	    }
+	    if ( ifLess ) setMinID();  // Fix for early, unused entries
 	}
 	else {
 	    minID = new int[header.numOfElements + 1];
@@ -3820,4 +3753,59 @@ public class Runfile implements Cloneable {
 	return slice;
     }
 
+   /**
+       Returns the hardware crate number of the TOF module for this segment.
+       @param seg - detector segment.
+       @return int crate #.
+   */
+   public int CrateNum( Segment seg ) {
+       int id = seg.detID;
+       return crateNum[id];
+   }
+   /**
+       Returns the hardware slot number ( in a crate) of the TOF module 
+       for this segment.
+       @param seg - detector segment.
+       @return int slot #.
+   */
+   public int SlotNum( Segment seg ) {
+       int id = seg.detID;
+       return slotNum[id];
+   }
+   /**
+       Returns the hardware input number (in a slot) of the TOF module for 
+       this segment.
+       @param seg - detector segment.
+       @return int input  #.
+   */
+    public int InputNum( Segment seg ) {
+       int id = seg.detID;
+       return inputNum[id];
+   }
+ 
+private void setMinID() {
+    int lastRealID = 1;
+    minID[1] = 1;
+    if ( header.nDet > 1 ) {
+    for (int id = 2; id <= header.nDet; id++ ) {
+	if ( detectorType[id] != 0 ) {
+	    if ( detectorType[lastRealID] !=0 ) {
+		minID[id] = minID[lastRealID] + 
+		    numSegs1[lastRealID] * numSegs2[lastRealID];
+	    }
+	    else {
+		minID[id] = minID[lastRealID] + 1;
+	    }
+	    lastRealID = id;
+	}
+	else { 
+	    minID[id] = minID[lastRealID] + 1;
+	    lastRealID = id;
+	}
+    }
+    }
 }
+
+}
+
+   
