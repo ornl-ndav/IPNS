@@ -3,11 +3,16 @@ package IPNS.Runfile;
 import java.io.*;
 import java.util.*;
 import java.text.*;
+import javax.swing.*;
 import IPNS.Calib.*;
 import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.23  2001/10/11 15:16:40  hammonds
+ * Fixed problems with groupAllSeperate routine.  It was having problems when detectors were not valid detectors.
+ * Also some work on Ancillary Equipment.
+ *
  * Revision 5.22  2001/10/10 15:33:52  hammonds
  * Modifications to start/endDateAndTimeToCurrent to correct some formatting problems.
  * Add getDefDiscFileName, getDefDCalibFileName, getDefParamFileName
@@ -79,7 +84,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	String filename = args[0];
 	RunfileBuilder newRF = new RunfileBuilder();
         newRF.setFileName(filename);
-	newRF.headerSet( "iName", "test");
+	newRF.headerSet( "iName", "hrcs");
 	newRF.headerSet( "userName", "hammonds");
 	newRF.headerSet( "runTitle", "RunfileBuilder test from main");
 	newRF.headerSet( "versionNumber", 6);
@@ -89,7 +94,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.headerSetFromParams();
 	newRF.headerSetFromDCalib( );
 	newRF.headerSetFromDiscFile();
-	newRF.headerSetFromDiscFile( );
 
 	newRF.headerSet( "clockPeriod", 5.0);
 	newRF.headerSet( "numOfHistograms", (short)1);
@@ -102,8 +106,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	newRF.addWavelengthTimeField( 1.0f, 6.0f, 10.0f, 5);
        	newRF.groupAllSeparate(1, 1);
 	newRF.endDateAndTimeToCurrent();
-
+	newRF.addAncillaryEquipment("/home/hammonds/inst/anc/Lakeshore330.dat");
+	System.out.println("here");
 	newRF.Write();
+	System.exit(0);
     }
     public RunfileBuilder() {
 	super( );
@@ -794,8 +800,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    for ( int kk = 0; kk < header.numOfHistograms; kk++ ){
 		for ( int ii = minSubgroupID[kk+ 1]; 
 		      ii <= maxSubgroupID[kk + 1]; ii++ ) {
-		    for (int jj = 0; jj < subgroupMap[ii].length; jj++ ){
- 			IDList[kk][subgroupMap[ii][jj] -1] = ii;
+		    if (subgroupMap[ii] != null ) {
+			for (int jj = 0; jj < subgroupMap[ii].length; jj++ ){
+			    IDList[kk][subgroupMap[ii][jj] -1] = ii;
+			}
 		    }
 		}
 	    }
@@ -1655,27 +1663,43 @@ public class RunfileBuilder extends Runfile implements Cloneable{
      */
     public int groupAllSeparate(int tf, int hist) {
 	int rval = 0;
+	int numBogusSegs = 0;
 	if ( !timeField[tf].isUsed() ) {
 	    System.out.println( "Error in groupAllSeparate: Time Field " + 
 				tf + " is not valid.");
 	}
-       	int[][] tempMap = new int[subgroupMap.length + header.numOfElements][];
+	for (int ii = 1; ii <= header.numOfElements; ii++ ) {
+	    int index = (hist - 1) * (header.numOfElements + 1 ) + ii;
+	    if (segments[index] == null ){
+		numBogusSegs++;
+	    }
+	}
+       	int[][] tempMap = 
+	    new int[subgroupMap.length + header.numOfElements- numBogusSegs][];
        	System.arraycopy( subgroupMap, 0, tempMap, 0, subgroupMap.length);
+
+	numBogusSegs = 0;
 	for (int ii = 1; ii <= header.numOfElements; ii++ ) {
 	    int index = (hist - 1) * (header.numOfElements + 1 ) + ii;
 	    if (segments[index] != null ){
-	    int segID = segments[index].segID;
-	    if (minSubgroupID[hist ] > segID || minSubgroupID[hist] == 0 ) 
-		minSubgroupID[hist] = segID;
-	    if (maxSubgroupID[hist] < ii ) maxSubgroupID[hist] = segID;
-	    tempMap[subgroupMap.length +ii -1] = new int[1];
-	    tempMap[subgroupMap.length +ii -1][0] = segID;
-	     
-	    detectorMap[index].tfType= tf;
-	    detectorMap[index].address = header.channels1D;
-	    header.channels1D += timeField[tf].numOfChannels;
-	    
-	    }	    
+		int segID = segments[index].segID;
+		if (minSubgroupID[hist ] > segID || minSubgroupID[hist] == 0 ) 
+		    minSubgroupID[hist] = segID-numBogusSegs;
+		if (maxSubgroupID[hist] < ii ) maxSubgroupID[hist] = segID - numBogusSegs;
+		tempMap[subgroupMap.length +ii -1 - numBogusSegs] = new int[1];
+		tempMap[subgroupMap.length +ii -1 - numBogusSegs][0] = segID;
+		
+		detectorMap[index].tfType= tf;
+		detectorMap[index].address = header.channels1D;
+		header.channels1D += timeField[tf].numOfChannels;
+ 		
+	    }
+	    else {
+		numBogusSegs++;
+		//		tempMap[subgroupMap.length +ii -1] = new int[0];
+		//		tempMap[subgroupMap.length +ii -1][0] = segID;
+		
+	    }
 	}
        	subgroupMap = tempMap;
 	System.out.println("minSubgroupID[" + hist + "], maxSubgroupID[" +
@@ -1792,11 +1816,33 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	return ( filename );
     }
 
-    public void addAncillaryEquipment(String inName) {
+    public int addAncillaryEquipment(String inName) {
+	int rval = 0;
 	ParameterFile[] tparams = new ParameterFile[params.length + 1];
 	System.arraycopy(params, 0, tparams, 0, params.length );
 	tparams[params.length] = new ParameterFile(inName);
 	params = tparams;
-
-    }
+	int thisParam = params.length - 1;
+	JOptionPane mainframe = new JOptionPane(new ParamPane(new String("User"), 
+					 params[thisParam].getDeviceName(), 
+					 params[thisParam].getUserParameters(),
+					 params[thisParam].getUserParameters().
+					 length ) );
+	String[] options = new String[1];
+	options[0] = new String("OK");
+	mainframe.setOptions(options);
+	/*mainframe.getContentPane().add( this, );*/
+	//	mainframe.pack();
+	//mainframe.show();
+	JDialog dialog = mainframe.createDialog(JOptionPane.getRootFrame(),new String("Enter User Parameters"));
+	dialog.show();
+	//	Object value = mainframe.getValue();
+	//	if ( value == null ) {}
+	header.numOfControl += 1;   
+	//	mainframe = null;
+	dialog.dispose();
+	//	value = null;
+	System.gc();
+	return (rval);
+   }
 }
