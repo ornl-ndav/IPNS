@@ -32,7 +32,7 @@ public class ParameterFile {
 				propsFile.close();
 		  }
 		  catch (IOException ex) {
-				System.out.println("File not found");
+				System.out.println("\007   \007   \007   \007 File not found");
 		  }
 		  fileName = inName;
 		  readPropsFile(props);
@@ -351,7 +351,7 @@ public class ParameterFile {
 				propsFile.close();
 		  }
 		  catch (IOException ex) {
-				System.out.println("File not found");
+				System.out.println("/007  /007  /007 /007File not found");
 		  }
 		  ParameterFile par = new ParameterFile(props);
 		  par.printDevice();
