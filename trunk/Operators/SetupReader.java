@@ -29,6 +29,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2004/03/28 22:28:36  hammonds
+ *  Changes for operators moved to gov from ISAW
+ *
  *  Revision 1.1  2002/10/15 16:46:12  chatterjee
  *  Reads an ascii file and sets up IPNS runs.
  *
@@ -39,7 +42,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
-import  DataSetTools.util.*;
+import  gov.anl.ipns.Util.File.*;
 import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 /**
