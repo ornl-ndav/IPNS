@@ -11,6 +11,10 @@ import javax.swing.*;
  */
 /*
  * $Log$
+ * Revision 1.2  2003/02/13 17:08:16  hammonds
+ * Added setFilename method.
+ * Added method to set values with no user input.
+ *
  * Revision 1.1  2002/12/17 01:40:30  hammonds
  * initial Add
  *
@@ -28,7 +32,7 @@ public class AncFile {
     public AncFile( String fileName) {
 	try {
 	
-	    RandomAccessFile ancFile = new RandomAccessFile(filename, "r");
+	    RandomAccessFile ancFile = new RandomAccessFile(fileName, "r");
 	    numOfControl = ancFile.readInt();
 	    paramFile = new ParameterFile[numOfControl];
 	    for (int ii=0; ii < numOfControl; ii++ ) {
@@ -36,9 +40,18 @@ public class AncFile {
 	    }
 	}
 	catch (IOException ex) {
-	    System.out.println("Trouble loading ancfile, " + filename);
+	    System.out.println("Trouble loading ancfile, " + fileName);
 	}
     }
+
+    /** 
+	Set the filename for the created file
+    */
+    public void setFileName( String name ) {
+	filename = name;
+    }
+
+
     /**
        This method adds ancillary control parameters from a device file.
      */
@@ -71,6 +84,29 @@ public class AncFile {
    }
 
     /**
+       This method adds ancillary control parameters from a device file.
+     */
+    public int addAncillaryEquipment(String inName, float[] inParams) {
+	int rval = 0;
+	ParameterFile[] tparams = new ParameterFile[paramFile.length + 1];
+	System.arraycopy(paramFile, 0, tparams, 0, paramFile.length );
+	tparams[paramFile.length] = new ParameterFile(inName);
+	paramFile = tparams;
+	int thisParam = paramFile.length - 1;
+	Parameter[] userPars = paramFile[thisParam].getUserParameters();
+	if (userPars.length != inParams.length ) {
+	    rval = -1;
+	    return (rval);
+	}
+	for (int ii=0; ii<inParams.length;ii++ ) {
+	    userPars[ii].setValue(inParams[ii]);
+	}
+	numOfControl++;	
+	
+	return (rval);
+   }
+
+    /**
        Set filename for output.
      */
     public void setFilename( String  name) {
@@ -83,18 +119,19 @@ public class AncFile {
     public String getFilename() {
 	return(filename);
     }
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
     /**
        Write output file for this device.
      */
     public void Write() throws IOException {
-	RandomAccessFile ancFile = new RandomAccessFile(filename, "w");
+	RandomAccessFile ancFile = new RandomAccessFile(filename, "rw");
 	try {
 	    
 	    ancFile.writeInt(numOfControl);
 	    for (int kk=0; kk < numOfControl; kk++ ) {
 		paramFile[kk].Write(ancFile);
 	    }
+	    ancFile.close();
 	    return;
 	}
 	catch ( IOException ex ) {
@@ -103,6 +140,7 @@ public class AncFile {
 	    ex.printStackTrace();
 	    throw new IOException();
 	}
+	
     }
 
     /**
