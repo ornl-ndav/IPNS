@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.18  2001/12/20 21:45:33  hammonds
+ * Added change for setting number of detectors/segments for POSY1&2
+ *
  * Revision 5.17  2001/11/26 15:19:29  hammonds
  * Added printStackTrace in caught exceptions.
  *
@@ -598,6 +601,8 @@ public static void main(String[] args) throws IOException{
 	    else if ( (this.iName).equalsIgnoreCase("scd0") ||
 		      (this.iName).equalsIgnoreCase("sad0") ||
 		      (this.iName).equalsIgnoreCase("sad1") ||
+		      (this.iName).equalsIgnoreCase("posy") ||
+		      (this.iName).equalsIgnoreCase("pne0") ||
 		      (this.iName).equalsIgnoreCase("sand") )
 	    {
 		this.numOfElements = this.nDet + this.numOfX * this.numOfY;
