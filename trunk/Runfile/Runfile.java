@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.6  2000/02/23 04:52:50  hammonds
+ * Made changes to fix problems with setting up a run from a default run.  Subgroup Map was not being read and there was a problem with disc levels.
+ *
  * Revision 5.5  2000/02/22 04:10:40  hammonds
  * Have deleted obsolete lpsd code.
  *
@@ -268,9 +271,7 @@ public class Runfile implements Cloneable {
        Default Constructor with empty Runfile.
     */
     public Runfile() {
-	System.out.println("now");
 	header = new Header();
-	System.out.println("now");
     }
 
     /**
@@ -658,11 +659,26 @@ public class Runfile implements Cloneable {
 
 	runfile.seek(this.header.discSettings.location);
 	discriminator = new DiscLevel[this.header.discSettings.size/8 + 1];
-	for (i = 1; i <= this.header.nDet; i++) {
+	for (i = 1; i <= this.header.discSettings.size/8; i++) {
 	    discriminator[i] = new DiscLevel();
 	    discriminator[i].lowerLevel = runfile.readInt();
 	    discriminator[i].upperLevel = runfile.readInt();
 	    }
+
+	runfile.seek(this.header.detectorSGMap.location );
+	subgroupMap = 
+	    new int[this.header.numOfHistograms][this.header.nDet];
+	for ( i = 0; i < this.header.numOfHistograms; i++ ) {
+	    for (int jj = 0; jj < this.header.nDet; jj++ ) {
+		subgroupMap[i][jj] = runfile.readInt();
+	    }
+	}
+
+	runfile.seek(this.header.timeScaleTable.location);
+	timeScale = new float[this.header.timeScaleTable.size/4 + 1];
+	for (i = 1; i <= this.header.timeScaleTable.size/4; i++) {
+	    timeScale[i] = runfile.readFloat();
+	}
     }
 
     /**
