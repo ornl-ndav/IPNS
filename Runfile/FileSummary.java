@@ -15,6 +15,13 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.5  2002/12/13 02:59:16  hammonds
+ * Added better error checking.  Used to catch an error and then bomb.  Now an error with a runfile is caught and reported and it goes on.
+ *
+ * Added support for using a file argument.
+ *
+ * If argument does not match a valid file or directory, this is also reported.
+ *
  * Revision 1.4  2002/07/10 14:31:05  hammonds
  * Changed to get info from Header object directly.  Before info was pulled from Runfile object which gets more from file.
  *
@@ -40,44 +47,79 @@ public class FileSummary {
     public FileSummary( String dirName )throws IOException {
 	summaryContents = new StringBuffer();
 	summaryContents.append("Summary of " + dirName +"\n");
-	try {
-	    File dirMain = new File (dirName);
+	File dirMain = new File("");
 
-  
-	File[] dirList = dirMain.listFiles( new RunFileNameFilter() );
-	dirList = sortFiles(dirList);
-	if ( dirList != null ) {
-	    for (int ii = 0; ii < dirList.length; ii++ ){
-		//     		System.out.println( dirList[ii].getPath()  );
-		if ( dirList[ii].isFile() ){
-		    StringBuffer sb1 = new StringBuffer();
-		    RandomAccessFile runFile = 
-			new RandomAccessFile( dirList[ii].getPath(), "r" );
-		    Header head = new Header(runFile);
-								    
-		    // Runfile rfile = new Runfile ( dirList[ii].getPath() );
-		    sb1.append( dirList[ii].getName() );
-		    while ( sb1.length() < 18 )
-			sb1.append(" ");
-		    sb1.append( head.userName.trim() );
-		    while ( sb1.length() < 42 )
-		        sb1.append(" ");
-		    sb1.append( head.runTitle );
-		    sb1.append( "\n" );
-		    summaryContents.append( sb1.toString() );
-		    runFile.close();
+	dirMain = new File (dirName);
+	if ( dirMain.isDirectory()) {
+	    File[] dirList = dirMain.listFiles( new RunFileNameFilter() );
+	    if ( dirList != null && dirList.length != 0) {
+		dirList = sortFiles(dirList);
+		for (int ii = 0; ii < dirList.length; ii++ ){
+		    try {
+			if ( dirList[ii].isFile() ){
+			    StringBuffer sb1 = new StringBuffer();
+			    RandomAccessFile runFile = 
+				new RandomAccessFile( dirList[ii].getPath(), 
+						      "r" );
+			    Header head = new Header(runFile);
+			    
+			    sb1.append( dirList[ii].getName() );
+			    while ( sb1.length() < 18 )
+				sb1.append(" ");
+			    sb1.append( head.userName.trim() );
+			    while ( sb1.length() < 42 )
+				sb1.append(" ");
+			    sb1.append( head.runTitle );
+			    sb1.append( "\n" );
+			    summaryContents.append( sb1.toString() );
+			    head = null;
+			    runFile.close();
+			}
+			else if (dirList[ii].isDirectory() ){ }
+			
+		    }
+		    
+		    catch ( IOException ex ) {	    
+			System.out.println( "error with file " + 
+					    dirList[ii].getPath() );
+			summaryContents.append( new String( "*******ERROR " +
+							    "with file " +
+							    dirList[ii].getPath())
+						);
+		    }
 		}
-		else if (dirList[ii].isDirectory() ){ }
+	    }
+	    else {
+		System.out.println( "No run files found");
+	    }
+	}
+	else if ( dirMain.isFile() ) {
+	    try {
+		StringBuffer sb1 = new StringBuffer();
+		RandomAccessFile runFile = new RandomAccessFile(dirName, "r");
+		Header head = new Header(runFile);
 		
+		sb1.append( dirMain );
+		while ( sb1.length() < 18 )
+		    sb1.append(" ");
+		sb1.append( head.userName.trim() );
+		while ( sb1.length() < 42 )
+		    sb1.append(" ");
+		sb1.append( head.runTitle );
+		sb1.append( "\n" );
+		summaryContents.append( sb1.toString() );
+		head = null;
+		runFile.close();
+		
+	    }
+	    catch (IOException ex) {
+		summaryContents.append( "****ERROR: " + dirName + 
+					" does not appear to be a valid "+
+					"runfile" );
 	    }
 	}
 	else {
-	    System.out.println( "No run files found");
-	}
-	}
-	
-	catch ( IOException ex ) {	    System.out.println( "error with directory " + dirName );
-	    return;
+	    System.out.println( dirName + " is not a valid file or directory");
 	}
     }
     
