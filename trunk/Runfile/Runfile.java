@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.42  2003/08/27 02:24:09  hammonds
+ * Fix problem identifying area detector as beam monitor in new SAND files.
+ *
  * Revision 6.41  2003/08/12 04:38:03  hammonds
  * Fix problem with SAND beam monitor position for mon 1.  A fiz needs to go into RunfileRetriever to take out the temporary fix.
  *
@@ -3929,6 +3932,10 @@ public class Runfile implements Cloneable {
 		   return true;
 	       }
 	       else return false;
+	   }
+	   else if ( detectorType[id]==12 || detectorType[id]==13||
+		     detectorType[id]==14 || detectorType[id]==20 ) {
+	     return false;
 	   }
 	   else return true;
        }
