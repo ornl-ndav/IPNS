@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.34  2001/07/13 20:35:59  hammonds
+ * Fixed Problems with glad detectors all having positove angle.
+ *
  * Revision 5.33  2001/07/12 21:31:48  hammonds
  * Now reading area detector data.
  *
@@ -210,7 +213,7 @@ public class Runfile implements Cloneable {
 						    "OrdellaBeam Monitor",
 						    "SCD Anger Camera",
 						    "Ordella 2210 SAD 20cm",
-						    "Ordella 2400 SbAND 40cm",
+						    "Ordella 2400 SAND 40cm",
 						    "Ordella 2410 SAND 40cm"
     
     };
@@ -431,6 +434,8 @@ public class Runfile implements Cloneable {
 
     void LoadV4( RandomAccessFile runfile ) throws IOException {
 	int i;
+	int[] gladbank = new int[0];
+	int[] gladdetinbank = new int[0];
 	/*
 	if ( header.nDet > 0 ) {
 	*/
@@ -461,62 +466,6 @@ public class Runfile implements Cloneable {
 
 	   	    
 	    
-	    if ( (this.header.iName).equalsIgnoreCase("glad")) {
-		for ( int ii = 0; ii <= header.numOfElements; ii++ ){
-		    if ( flightPath[ii] !=0.00f &&
-			 detectorAngle[ii] != 0.00f && 
-			 detectorHeight[ii] !=0.00f ) {
-			double cvdr = Math.PI/ 180.0;
-	 		double cvrd = 180.0/Math.PI;
-			float fp = flightPath[ii];
-			float zdet = detectorHeight[ii];
-			float ang1 = detectorAngle[ii];
-			double xdet= 0.0;
-			double ydetz= 0.0;
-			double ydet = 0.0;
-			double dist = 0.0;
-			try {
-			    xdet = Math.cos( ang1 * cvdr) * fp;
-			    ydetz = Math.sin(ang1 * cvdr) * fp;
-			    if ( Math.abs(ydetz * ydetz - zdet * zdet) < 0.001 && 
-				 ydetz * ydetz< zdet*zdet){
-				ydet = 0.0;
-			    }
-			    else {
-			    ydet = 
-				Math.sqrt( ydetz * ydetz - zdet * zdet );
-			    }
-			    dist = 
-				Math.sqrt( fp * fp - zdet * zdet );
-			}
-			catch ( Exception ex ) {
-			    ex.printStackTrace();
-			}
-			double ang2;
-			if ( xdet < ydet ) {
-			    ang2 =
-				(Math.acos(xdet/dist) * cvrd);
-			}
-			else {
-			    ang2 = 
-				(Math.asin(ydet/dist) * cvrd );
-			}
-			if ( ang2 == Double.NaN ) {
-			    System.out.println ( ii + "detAngle set to 0 ");
-			    detectorAngle[ii] = 0.0f;
-			}
-			else {
-			    detectorAngle[ii] = (float)ang2;
-			}
-			/*
-		    System.out.println( ii + "  " + ang1 + "   "  +
-					xdet + "   "  + ydet + "   " + ang2 
-					+ "  " + dist + "   " +ydetz+ "   " +zdet); 
-			*/
-		    }
-		}
-		
-	    }
 	        
 	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
 		 (this.header.iName).equalsIgnoreCase("sad0") ||
@@ -918,6 +867,8 @@ public class Runfile implements Cloneable {
 		inputNum = new int[header.numOfElements + 1];
 		dataSource = new int[header.numOfElements + 1];
 		minID = new int[header.numOfElements + 1];
+		gladbank = new int[header.numOfElements + 1];
+		gladdetinbank = new int[header.numOfElements + 1];
 		int detNum = 0;
 		for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
 		    int[] dets= lpsdIDMap.DetsInBank(jj);
@@ -934,6 +885,9 @@ public class Runfile implements Cloneable {
 				psdOrder[tminID] = 1;
 				numSegs1[tminID] = 1;
 				numSegs2[tminID] = 1;
+				crateNum[tminID] = tcrate;
+				slotNum[tminID] = tslot;
+				inputNum[tminID] = tinput;
 				segments[tminID] = new Segment();
 				segments[tminID].detID = tminID; 
 				segments[tminID].row = 1;
@@ -942,6 +896,8 @@ public class Runfile implements Cloneable {
 				segments[tminID].width = WIDTH[1]; 
 				segments[tminID].depth = DEPTH[1]; 
 				segments[tminID].efficiency = EFFICIENCY[1]; 
+				gladbank[tminID] = 0;
+				gladdetinbank[tminID] = kk;
 			    }
 			    else {
 				for ( int ll = 0; ll < 64; ll++ ) {
@@ -966,6 +922,8 @@ public class Runfile implements Cloneable {
 					DEPTH[7]; 
 				    segments[tminID + ll].efficiency = 
 					EFFICIENCY[7]; 
+				    gladbank[tminID + ll] = jj;
+				    gladdetinbank[tminID + ll] = kk;
 				}
 				    }
 			}
@@ -1144,6 +1102,62 @@ public class Runfile implements Cloneable {
 	for (i = 1; i <= this.header.timeScaleTable.size/2; i++) {
 	    timeScale[i] = (float)(1 + timeScaleTemp[i]/ Math.pow( 2, 15));
 	}
+
+	// Correct GLAD detector angles to be in plane angles
+	if ( (this.header.iName).equalsIgnoreCase("glad")) {
+	    for ( int ii = 0; ii <= header.numOfElements; ii++ ){
+		if ( flightPath[ii] !=0.00f &&
+		     detectorAngle[ii] != 0.00f && 
+		     detectorHeight[ii] !=0.00f ) {
+		    double cvdr = Math.PI/ 180.0;
+		    double cvrd = 180.0/Math.PI;
+		    float fp = flightPath[ii];
+		    float zdet = detectorHeight[ii];
+		    float ang1 = detectorAngle[ii];
+		    double xdet= 0.0;
+		    double ydetz= 0.0;
+		    double ydet = 0.0;
+		    double dist = 0.0;
+		    xdet = Math.cos( ang1 * cvdr) * fp;
+		    ydetz = Math.sin(ang1 * cvdr) * fp;
+		    if ( Math.abs(ydetz * ydetz - zdet * zdet) < 0.001 && 
+			 ydetz * ydetz< zdet*zdet){
+			ydet = 0.0;
+		    }
+		    else {
+			ydet = 
+			    Math.sqrt( ydetz * ydetz - zdet * zdet );
+		    }
+		    dist = 
+			Math.sqrt( fp * fp - zdet * zdet );
+		    double ang2;
+		    if ( xdet < ydet ) {
+			ang2 =
+			    (Math.acos(xdet/dist) * cvrd);
+		    }
+		    else {
+			ang2 = 
+			    (Math.asin(ydet/dist) * cvrd );
+		    }
+		    if ( ang2 == Double.NaN ) {
+			System.out.println ( ii + "detAngle set to 0 ");
+			detectorAngle[ii] = 0.0f;
+		    }
+		    else {
+			detectorAngle[ii] = (float)ang2;
+		    }
+		    if (gladbank[ii] > 6 ) {
+			detectorAngle[ii] = -1.0f * detectorAngle[ii];
+		    }
+		    else if (gladbank[ii] == 6 && gladdetinbank[ii] > 14 ) {
+			detectorAngle[ii] = -1.0f * detectorAngle[ii];
+		    }
+		}
+	    }
+	    
+	}
+
+	//End fixing Glad detector angles
 
 	properties = new Properties();
 	runfile.seek( this.header.messageRegion.location );
@@ -3429,9 +3443,17 @@ public class Runfile implements Cloneable {
    */
    public boolean IsIDBeamMonitor( int id ) {
 	if (detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
-	detectorAngle[id] == -180.0 ) 
-	   return true;
-	else
+	    detectorAngle[id] == -180.0 ) { 
+	    if ( header.iName.equalsIgnoreCase( "glad" )
+		 && header.versionNumber < 4 ) {
+		if ( crateNum[id] == 1 && slotNum[id] == 20 ) {
+		    return true;
+		}
+		else return false;
+	    }
+	    else return true;
+	}
+	else 
 	   return false;
 	}
    
@@ -3443,8 +3465,16 @@ public class Runfile implements Cloneable {
    public boolean IsIDBeamMonitor( Segment seg ) {
        int id = seg.detID;
        if (detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
-	   detectorAngle[id] == -180.0 ) 
-	   return true;
+	   detectorAngle[id] == -180.0 ) {
+	   if ( header.iName.equalsIgnoreCase( "glad" )
+		&& header.versionNumber < 4 ) {
+	       if ( crateNum[id] == 1 && slotNum[id] == 20 ) {
+		   return true;
+	       }
+	       else return false;
+	   }
+	   else return true;
+       }
        else
 	   return false;
    }
@@ -3456,13 +3486,11 @@ public class Runfile implements Cloneable {
    */
    public boolean IsSubgroupBeamMonitor( int sg ) {
 
-       if ( !(header.iName).equalsIgnoreCase("glad"))
 	if ( header.versionNumber < 5 && 
 	     psdOrder[segmentMap[sg][0].detID] > 1 ) return false;
 	for ( int ii = 0; ii < subgroupMap[sg].length; ii++ ) {
-	    int id = subgroupMap[sg][ii];
-	    if (detectorAngle[id] == 0 || detectorAngle[id] == 180 ||
-		detectorAngle[id] == -180 ) 
+	    Segment seg = segmentMap[sg][ii];
+	    if ( IsIDBeamMonitor(seg))  
 	       return true;
             }
 	    return false;
