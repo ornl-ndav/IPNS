@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.6  2000/02/29 01:37:48  hammonds
+ * Fixed problem with writing time scale.
+ *
  * Revision 5.5  2000/02/25 04:08:34  hammonds
  * Made changes to detector subgroups
  *
@@ -824,7 +827,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    runfile.writeInt( offsetToFree );
 	    runfile.writeInt( ( timeScale.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < timeScale.length; ii++ ) {
+	    for( int ii = 1; ii <= timeScale.length; ii++ ) {
 		runfile.writeFloat( timeScale[ii] );
 	    }
 	    offsetToFree = offsetToFree + 
