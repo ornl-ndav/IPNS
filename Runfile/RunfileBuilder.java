@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.36  2001/11/28 19:08:41  hammonds
+ * Fixed problem with Start addresses for detectors.
+ *
  * Revision 5.35  2001/11/28 16:31:49  hammonds
  * Fixed problem with final data size.
  *
@@ -1784,7 +1787,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		
 		detectorMap[index].tfType= tf;
 		detectorMap[index].address = header.channels1D;
-		header.channels1D += timeField[tf].numOfChannels * 4;
+		header.channels1D += timeField[tf].numOfChannels * 4 + 4;
  		
 	    }
 	    else {
@@ -1881,7 +1884,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			    detectorMap[index].tfType= tf;
 			    detectorMap[index].address = header.channels1D;
 			    header.channels1D += timeField[tf].numOfChannels *
-				4;
+				4 + 4;
 			    subgroupMap = tempMap;
 			    if (minSubgroupID[hist ] > (subgroupMap.length -1)
 				|| minSubgroupID[hist] == 0 ) 
