@@ -142,7 +142,12 @@ class TimeField{
 	used = false;
     }
     protected int NumOfChannels(){
-	return (int)((tMax-tMin)/tStep);
+	if ( wavelengthBinBit != 0 ) {
+	    return (int)(( 1/tStep) * Math.log( (double)(tMax/tMin))+2 );
+	}
+	else {
+	    return (int)((tMax-tMin)/tStep);
+	}
     }
 
     protected void Write ( RandomAccessFile runfile ) throws IOException {
