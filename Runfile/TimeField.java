@@ -26,6 +26,7 @@ class TimeField{
     short hBit;
     boolean used;
     String iName;
+    int versionNumber;
     /**
        This function provides a test method for this class' functionality.  It
        will provide a sampling of the information that is retrieved as a new 
@@ -80,7 +81,7 @@ class TimeField{
 	runfile.seek(header.timeFieldTable.location + 
 		     (iType - 1) * 16);
 	iName = new String( header.iName );
-	
+	versionNumber = header.versionNumber;
 
 	if ( header.versionNumber <= 4 ) {
 	    maskChanWord = header.readUnsignedInteger( runfile, 4);
@@ -90,8 +91,8 @@ class TimeField{
 	    widthWord = header.readUnsignedInteger( runfile, 4);
 	    
 	    //	    System.out.println( widthWord ); 
-	    if ( iName.equalsIgnoreCase( "glad" ) ||
-		 iName.equalsIgnoreCase( "lpsd" ) ) {
+	    if ( (iName.equalsIgnoreCase( "glad" ) ||
+		 iName.equalsIgnoreCase( "lpsd" ) ) &&  versionNumber < 5 ) {
 		this.tMin = (double) minWord*header.lpsdClock;
 		this.tMax = (double) rangeWord*header.lpsdClock;
 		this.tStep =(double) (widthWord & 0xffff)*header.lpsdClock;
