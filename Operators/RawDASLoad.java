@@ -31,6 +31,9 @@
  * Modified:
  *
  * $Log$
+ * Revision 1.6  2004/03/28 22:28:35  hammonds
+ * Changes for operators moved to gov from ISAW
+ *
  * Revision 1.5  2003/03/12 03:29:52  hammonds
  * Cleanup imports.
  *
@@ -53,7 +56,7 @@ package IPNS.Operators;
 import DataSetTools.operator.Operator;
 import DataSetTools.operator.Parameter;
 import DataSetTools.operator.Generic.Load.GenericLoad;
-import DataSetTools.util.ErrorString;
+import gov.anl.ipns.Util.SpecialStrings.ErrorString;
 import DataSetTools.dataset.DataSet;
 import DataSetTools.dataset.Data;
 import DataSetTools.dataset.DataSetFactory;

@@ -32,6 +32,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2004/03/28 22:28:53  hammonds
+ *  Changes for operators moved to gov from ISAW
+ *
  *  Revision 1.1  2003/09/06 04:24:05  hammonds
  *  First in.  Diagnostic for SAND.
  *
@@ -46,7 +49,7 @@ import DataSetTools.operator.Parameter;
 import DataSetTools.operator.Generic.Batch.GenericBatch;
 import DataSetTools.parameter.IntegerPG;
 import DataSetTools.parameter.LoadFilePG;
-import DataSetTools.util.LoadFileString;
+import gov.anl.ipns.Util.SpecialStrings.LoadFileString;
 import IPNS.Runfile.Runfile;
 
 
