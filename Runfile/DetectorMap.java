@@ -88,6 +88,10 @@ class DetectorMap{
     protected DetectorMap() {
     }
 
+    protected DetectorMap(String iName) {
+	this.iName = new String( iName );
+    }
+
     protected void Write ( RandomAccessFile runfile ) throws IOException {
 	int tfEntry;
 	if ( !iName.equalsIgnoreCase("glad") &&
