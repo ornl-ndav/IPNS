@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.7  2000/03/11 03:07:43  hammonds
+ * Fixed small problem with TimeScales.
+ *
  * Revision 5.6  2000/02/29 01:37:48  hammonds
  * Fixed problem with writing time scale.
  *
@@ -827,7 +830,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    runfile.writeInt( offsetToFree );
 	    runfile.writeInt( ( timeScale.length - 1 ) * 4 );
 	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii <= timeScale.length; ii++ ) {
+	    for( int ii = 1; ii < timeScale.length; ii++ ) {
 		runfile.writeFloat( timeScale[ii] );
 	    }
 	    offsetToFree = offsetToFree + 
@@ -951,12 +954,18 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    case ('I'): {
 		if ( timeScale.length != (header.nDet + 1)  ) 
 		    timeScale = new float[header.nDet +1 ];
+		float refLength = 0.0f;
 		if ( header.iName.equalsIgnoreCase("hrcs")) {
-		    timeScale[ids[jj]] = 4.0f/flightPath[ids[jj]];
+		    refLength = 4.0f;
 		}
 		else if (header.iName.equals("lrcs")) {
-		    timeScale[ids[jj]] = 2.5f/flightPath[ids[jj]];
+		    refLength = 2.5f;
 		}
+		    timeScale[ids[jj]] = (float)(refLength/
+			Math.sqrt(
+				  Math.pow(flightPath[ids[jj]], 2.0) 
+				 + Math.pow( detectorLength[ids[jj]]/200, 2.0 ))
+						 );
 		break;
 	    }
 	    default: {
