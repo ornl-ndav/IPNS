@@ -25,6 +25,11 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.47  2004/04/19 15:33:50  hammonds
+ * Make efficiency change suggested by Dennis for loading subroup/segment map table.
+ * Change to reading older SAD runfiles to place beam monitor at 180 degrees.
+ * This is similar to a change made to reading old SAND runfiles.
+ *
  * Revision 6.46  2004/04/16 15:18:19  hammonds
  * Fix problem TimeField Type.  NEver got properly converted to Segments.
  *
@@ -929,6 +934,9 @@ public class Runfile implements Cloneable {
 		    crateNum[ii] = 1;
 		    slotNum[ii] = 1;
 		    inputNum[ii] = ii;
+		    if ((ii == 1) && (detectorAngle[ii] == 0.000f)) {
+		      detectorAngle[ii] = 180.0f;
+		    }
 		    break;
 		}
 		case 2: {
@@ -1761,6 +1769,7 @@ public class Runfile implements Cloneable {
 	segmentMap =
 	    new Segment[maxSubgroupID[this.header.numOfHistograms]+ 1][];
 	//	Segment[] segList = j
+/* 
 	for ( i = 1 ; i <= maxSubgroupID[this.header.numOfHistograms]; i++ ) {
 	    int[] idList = new int[0];
 	    Segment[] segList = new Segment[0];
@@ -1782,6 +1791,49 @@ public class Runfile implements Cloneable {
 	    subgroupMap[i] = idList;
 	    segmentMap[i] = segList;
 	}
+*/
+                                // first count how many times an id occurs in
+                                // the IDMap
+      int id_count[] = new int [maxSubgroupID[this.header.numOfHistograms]+1];
+
+      for ( int id = 0; id < id_count.length; id++ )
+          id_count[id] = 0;                   // zero out all of the counters
+
+                                              // step across the IDMap once
+                                              // incrementing the counters
+      for ( int jj = 0; jj < this.header.numOfHistograms; jj++ )
+        for ( int kk = 0; kk < this.header.numOfElements; kk++ )
+        {
+          i = IDMap[jj][kk];
+          if ( i > 0 )
+            id_count[i]++;
+        }
+                                            // now allocate proper size arrays
+      for ( i = 1 ; i <= maxSubgroupID[this.header.numOfHistograms]; i++ )
+      {
+        subgroupMap[i] = new int[ id_count[i] ];
+        segmentMap [i] = new Segment[ id_count[i] ];
+      }
+                                          // set up a list of next free index
+                                          // for each id and start index at 0
+      int next_index[] = new int [ id_count.length ];
+      for ( int id = 0; id < next_index.length; id++ )
+        next_index[id] = 0;
+                                          // step across the array once more
+                                          // adding the group_id and segment
+                                          // to the right list
+      for ( int jj = 0; jj < this.header.numOfHistograms; jj++ )
+        for ( int kk = 0; kk < this.header.numOfElements; kk++ )
+        {
+           i = IDMap[jj][kk];
+           if ( i > 0 )                     // save in next free spot in list
+           {
+             subgroupMap[i][ next_index[i] ] = kk + 1;
+             segmentMap [i][ next_index[i] ] = segments[ kk + 1 ];
+             next_index[i]++;
+           }
+        }
+
 
 	runfile.seek(this.header.timeScaleTable.location);
 	bArray = new byte[ this.header.timeScaleTable.size ];
