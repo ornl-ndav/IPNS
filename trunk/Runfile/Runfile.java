@@ -17,11 +17,15 @@ indexed starting at zero.
 
 @author  John P Hammonds
 @author  Richard J. Goyette
-@version 5.0beta
+@version 5.1
 */
 /*
  *
  * $Log$
+ * Revision 5.23  2001/06/27 20:45:23  hammonds
+ * Added code for adding segment information to expand the use of this package for use with area detectors.
+ * Added a number of new detector types including area detectors used on SAD, SAND and SCD.
+ *
  * Revision 5.22  2001/04/09 18:45:20  hammonds
  * Added functions for dataSource and minID.
  *
@@ -115,6 +119,7 @@ public class Runfile implements Cloneable {
     /** Maximum Subgroup ID in a histogram */    int[] maxSubgroupID;
     /** Minimum Subgroup ID in a histogram */    int[] minSubgroupID;
     /** Subgroup Map Table */			int[][] subgroupMap;
+    /** Segment Map Table */                      Segment[][] segmentMap;
     /** Version Number */                       protected int versNum;
     /** run properties stored in message area */
                                                protected Properties properties;
@@ -123,6 +128,7 @@ public class Runfile implements Cloneable {
 	                                                       lpsdFlightPath;
     /** Array of detector heights */		protected float[] lpsdHeight;
     /** Array of detector types */		protected short[] lpsdType;
+    /** Array of detector Segments */           protected Segment[] segments;
     float[] detectorLength = new float[0];
     float[] detectorWidth = new float[0];
     float[] detectorDepth = new float[0];
@@ -141,22 +147,22 @@ public class Runfile implements Cloneable {
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
-		  12.7F, 3.81F, 12.7F};
+		  12.7F, 3.81F, 12.7F, 0.30F, 0.20F, 0.40F, 0.40F};
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
-		 0.493F, 3.81F, 3.81F };
+		 0.493F, 3.81F, 3.81F, 0.30F, 0.20F, 0.40F, 0.40F };
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
-		 0.493F, 2.54F, 2.54F};
+		 0.493F, 2.54F, 2,54F, 2.54F, 2.54F, 2.54F, 2.54F};
     public static final float[] 
 	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
-		 1.00F, 0.001F, 0.001F};
+		 1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F};
     public static final int[]
-	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2 };
     public static final int[]
-	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1 };
+	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1, 85, 64, 128, 128 };
     public static final int[]
-	NUM_OF_SEGS_2 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 87, 64, 128, 128 };
     public static final int[] SEGMENT_SELECT = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256 };
     public static final String[] TYPE_DESCRIPTION ={"Not a detector",
@@ -169,7 +175,12 @@ public class Runfile implements Cloneable {
 						    "0.5\" x 15\" LPSD",
 						    "0.25\" x 5\"",
 						    "1.5\" pancake monitor",
-						    "Ordela Beam Monitor"
+						    "OrdellaBeam Monitor",
+						    "SCD Anger Camera",
+						    "Ordella 2210 SAD 20cm",
+						    "Ordella 2400 SbAND 40cm",
+						    "Ordella 2410 SAND 40cm"
+    
     };
     static double MEV_FROM_VEL = 
 	PhysicalConstants.meV_FROM_m_PER_microsec_CONST;
@@ -297,24 +308,16 @@ public class Runfile implements Cloneable {
 	System.out.println(runFile.UserName());
 	if (runFile.header.nDet > 0 ){
 	for (i=1; i <= runFile.header.nDet; i++){
-	    System.out.println("theta, l, h, iType: " 
+	    System.out.println("id, theta, l, h, Type: " 
+			       + i + "  " 
 			       + (float)runFile.detectorAngle[i]
 			       + " " + (float)runFile.flightPath[i] + " "
 			       + (float)runFile.detectorHeight[i] + " "
 			       + runFile.detectorType[i] + " " 
-			       + runFile.IsPulseHeight(i));
+			       + runFile.IsPulseHeight(i,1));
 	}
-	float data[];
-	data = runFile.Get1DSpectrum(1, 1);
-	float[]  energies = runFile.TimeChannelBoundaries( 100, 1);
-
-	float[] time = runFile.TimeChannelBoundaries( 1, 1 );
-	System.out.println( "Mon 1: " + time[0]);
-	time = runFile.TimeChannelBoundaries( 2, 1 );
-	System.out.println( "Mon 2: " + time[0]);
-	time = runFile.TimeChannelBoundaries( 17, 1 );
-	System.out.println( "Det 17: " + time[0]);
-
+		System.out.println(  runFile.MinSubgroupID(1) + "  " +
+				     runFile.MaxSubgroupID(runFile.NumOfHistograms() ));
 	for (i = runFile.MinSubgroupID(1); i <= runFile.MaxSubgroupID(runFile.NumOfHistograms())
 		 ; i++){
 	    System.out.print( i + " - ");
@@ -326,6 +329,17 @@ public class Runfile implements Cloneable {
 	}
 	}
 	System.out.println( runFile.NumElements() );
+	float data[];
+	data = runFile.Get1DSpectrum(1, 1);
+	float[]  energies = runFile.TimeChannelBoundaries( 3, 1);
+
+	float[] time = runFile.TimeChannelBoundaries( 1, 1 );
+	System.out.println( "Mon 1: " + time[0] + ", " + time[time.length-1]);
+	//	time = runFile.TimeChannelBoundaries( 2, 1 );
+	//System.out.println( "Mon 2: " + time[0] + ", " + time[time.length-1]);
+	time = runFile.TimeChannelBoundaries( 4, 1 );
+	System.out.println( "Det 5: " + time[0] + ", " + time[time.length-1]);
+
 	for ( Enumeration propNames= runFile.propertyNames(); 
 	      propNames.hasMoreElements();  ) {
 	    String key = (String)propNames.nextElement();
@@ -405,18 +419,63 @@ public class Runfile implements Cloneable {
 	    runfile.seek(this.header.detectorType.location);
 	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
 
-	    lpsdIDMap = new LpsdDetIdMap( runfile, header );
-	    float[] detectorLength = new float[header.nDet + 1];
-	    float[] detectorWidth = new float[header.nDet + 1];
-	    float[] detectorDepth = new float[header.nDet + 1];
-	    float[] detectorEfficiency = new float[header.nDet + 1];
-	    int[] psdOrder = new int[header.nDet + 1];
-	    int[] numSegs1 = new int[header.nDet + 1];
-	    int[] numSegs2 = new int[header.nDet + 1];
-	    int[] crateNum = new int[header.nDet + 1];
-	    int[] slotNum = new int[header.nDet + 1];
-	    int[] inputNum = new int[header.nDet + 1];
+	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
+		 (this.header.iName).equalsIgnoreCase("sad0") ||
+		 (this.header.iName).equalsIgnoreCase("sad1") ||
+		 (this.header.iName).equalsIgnoreCase("sand") ) {
+		float[] tDetectorAngle = new float[ detectorAngle.length + 1];
+		float[] tFlightPath = new float[ flightPath.length + 1];
+		float[] tDetectorHeight = new float[ detectorHeight.length+ 1];
+		short[] tDetectorType = new short[ detectorType.length + 1];
+		DetectorMap[] tDetectorMap = new DetectorMap[detectorMap.length + 1];
+		System.arraycopy(detectorAngle, 0 , tDetectorAngle, 0, 
+				 detectorAngle.length );
+		System.arraycopy(flightPath, 0 , tFlightPath, 0, 
+				 flightPath.length );
+		System.arraycopy(detectorHeight, 0 , tDetectorHeight, 0, 
+				 detectorHeight.length );
+		System.arraycopy(detectorType, 0 , tDetectorType, 0,				 detectorType.length );
+		System.arraycopy(detectorMap, 0 , tDetectorMap, 0, 
+				 detectorMap.length );
+		detectorAngle = tDetectorAngle;
+		flightPath = tFlightPath;
+	 	detectorHeight = tDetectorHeight;
+		detectorType = tDetectorType;
+		detectorMap = tDetectorMap;
+		detectorAngle[detectorAngle.length - 1] = (float)header.dta;
+		flightPath[flightPath.length - 1] = (float)header.dtd;
+		detectorHeight[detectorHeight.length - 1] = 
+		    (float)header.yDisplacement;
+		detectorMap[detectorMap.length - 1] = new DetectorMap();
+		if ( (this.header.iName).equalsIgnoreCase("scd0") ){
+		    detectorType[ detectorType.length - 1 ] = 11;
+		}
+		else if ( (this.header.iName).equalsIgnoreCase("sad0") ||
+			  (this.header.iName).equalsIgnoreCase("sad1")){
+		    detectorType[ detectorType.length - 1 ] = 12;
 
+		}
+		else if ( (this.header.iName).equalsIgnoreCase("sand") ){
+		    detectorType[ detectorType.length - 1 ] = 13;
+
+		}
+
+	    }
+
+	    lpsdIDMap = new LpsdDetIdMap( runfile, header );
+	    detectorLength = new float[header.nDet + 1];
+	    detectorWidth = new float[header.nDet + 1];
+	    detectorDepth = new float[header.nDet + 1];
+	    detectorEfficiency = new float[header.nDet + 1];
+	    psdOrder = new int[header.nDet + 1];
+	    numSegs1 = new int[header.nDet + 1];
+	    numSegs2 = new int[header.nDet + 1];
+	    crateNum = new int[header.nDet + 1];
+	    slotNum = new int[header.nDet + 1];
+	    inputNum = new int[header.nDet + 1];
+	    dataSource = new int[header.nDet + 1];
+	    minID = new int[header.nDet + 1];
+	    segments = new Segment[header.numOfElements + 1];
 	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
 		if ( detectorAngle[ii] == 0.0F &&
 		     flightPath[ii] == 0.0F &&
@@ -428,129 +487,386 @@ public class Runfile implements Cloneable {
 		    case 0: {
 			if ( ii < 3 )
 			detectorType[ii] = 1;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 2;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 3;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 3: {
 			detectorType[ii] = 4;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
+		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii] = new Segment();
+		    segments[ii].detID = ii; 
+		    segments[ii].row = 1; 
+		    segments[ii].column = 1; 
+		    segments[ii].length = LENGTH[detectorType[ii]]; 
+		    segments[ii].width = WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].efficiency = 
+			EFFICIENCY[detectorType[ii]]; 
 		}
 		else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
 		    switch (detectorType[ii]){
 		    case 1: {
  			detectorType[ii] = 9;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 6;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
+		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii].detID = ii; 
+		    segments[ii].row = 1; 
+		    segments[ii].column = 1; 
+		    segments[ii].length = LENGTH[detectorType[ii]]; 
+		    segments[ii].width = WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].efficiency = 
+			EFFICIENCY[detectorType[ii]]; 
 		}
 		else if ( header.iName.equalsIgnoreCase( "sepd" ) ) {
 		    switch (detectorType[ii]){
 		    case 1: {
 			detectorType[ii] = 6;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 9;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
+		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii].detID = ii; 
+		    segments[ii].row = 1; 
+		    segments[ii].column = 1; 
+		    segments[ii].length = LENGTH[detectorType[ii]]; 
+		    segments[ii].width = WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].efficiency = 
+			EFFICIENCY[detectorType[ii]]; 
 		}
 		else if ( header.iName.equalsIgnoreCase( "qens" ) ) {
 		    switch (detectorType[ii]){
 		    case 0: {
 			detectorType[ii] = 8;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 10;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
+		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii].detID = ii; 
+		    segments[ii].row = 1; 
+		    segments[ii].column = 1; 
+		    segments[ii].length = LENGTH[detectorType[ii]]; 
+		    segments[ii].width = WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].efficiency = 
+			EFFICIENCY[detectorType[ii]]; 
 		}
 		else if ( header.iName.equalsIgnoreCase( "hipd" ) ) {
 		    switch (detectorType[ii]){
 		    case 0: {
 			detectorType[ii] = 9;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 6;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			segments[ii].detID = ii; 
+			segments[ii].row = 1; 
+			segments[ii].column = 1; 
+			segments[ii].length = LENGTH[detectorType[ii]]; 
+			segments[ii].width = WIDTH[detectorType[ii]]; 
+			segments[ii].depth = DEPTH[detectorType[ii]]; 
+			segments[ii].efficiency = 
+			    EFFICIENCY[detectorType[ii]]; 
 		}
 		else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
 		    switch (detectorType[ii]){
 		    case 0: {
 			detectorType[ii] = 6;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 10;
-			psdOrder[ii] = 1;
-			numSegs1[ii] = 1;
+			break;
+		    }
+		    }
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			segments[ii].detID = ii; 
+			segments[ii].row = 1; 
+			segments[ii].column = 1; 
+			segments[ii].length = LENGTH[detectorType[ii]]; 
+			segments[ii].width = WIDTH[detectorType[ii]]; 
+			segments[ii].depth = DEPTH[detectorType[ii]]; 
+			segments[ii].efficiency = 
+			    EFFICIENCY[detectorType[ii]]; 
+		}
+		if ( header.iName.equalsIgnoreCase( "scd0") ) {
+		    switch (detectorType[ii]){
+		    case 1:{
+			detectorType[ii] = 1;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			segments[ii] = new Segment();
+			segments[ii].detID = ii; 
+			segments[ii].row = 1; 
+			segments[ii].column = 1; 
+			segments[ii].length = LENGTH[detectorType[ii]]; 
+			segments[ii].width = WIDTH[detectorType[ii]]; 
+			segments[ii].depth = DEPTH[detectorType[ii]]; 
+			segments[ii].efficiency = 
+			    EFFICIENCY[detectorType[ii]]; 
+			break;
+		    }
+		    case 11: {
+			detectorType[ii] = 11;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			for ( int segY = 0; segY < header.numOfY; segY++) {
+			    for ( int segX = 0; segX < header.numOfX; segX++) {
+				int index = ii + segX + segY *( header.numOfX);
+				System.out.println("index: " + index );
+				segments[index] = new Segment();
+				segments[index].detID = ii; 
+				segments[index].row = segX; 
+				segments[index].column = segY; 
+				segments[index].length = 
+				    LENGTH[detectorType[ii]/header.numOfY]; 
+				segments[index].width = 
+				    WIDTH[detectorType[ii]/header.numOfX]; 
+				segments[index].depth = 
+				    DEPTH[detectorType[ii]]; 
+				segments[index].efficiency = 
+				    EFFICIENCY[detectorType[ii]]; 
+			    }
+			}
+			break;		    }
+		    }
+		    
+		}
+		if ( header.iName.equalsIgnoreCase( "sad0") ||
+		     header.iName.equalsIgnoreCase( "sad1") ) {
+		    switch (detectorType[ii]){
+		    case 1: {
+			detectorType[ii] = 9;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			segments[ii] = new Segment();
+			segments[ii].detID = ii; 
+			segments[ii].row = 1; 
+			segments[ii].column = 1; 
+			segments[ii].length = LENGTH[detectorType[ii]]; 
+			segments[ii].width = WIDTH[detectorType[ii]]; 
+			segments[ii].depth = DEPTH[detectorType[ii]]; 
+			segments[ii].efficiency = 
+			    EFFICIENCY[detectorType[ii]]; 
+			break;
+		    }
+		    case 12: {
+			detectorType[ii] = 12;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			for ( int segY = 0; segY < header.numOfY; segY++) {
+			    for ( int segX = 0; segX < header.numOfX; segX++) {
+				int index = ii + segX + segY *( header.numOfY);
+				segments[index] = new Segment();
+				segments[index].detID = ii; 
+				segments[index].row = segX; 
+				segments[index].column = segY; 
+				segments[index].length = 
+				    LENGTH[detectorType[ii]/header.numOfY]; 
+				segments[index].width = 
+				    WIDTH[detectorType[ii]/header.numOfX]; 
+				segments[index].depth = 
+				    DEPTH[detectorType[ii]]; 
+				segments[index].efficiency = 
+				    EFFICIENCY[detectorType[ii]]; 
+			    }
+			}
 			break;
 		    }
 		    }
 		}
-		if ( header.iName.equalsIgnoreCase( "glad" ) || 
-		     header.iName.equalsIgnoreCase( "lpsd" ) ) {
-		    int detNum = 0;
-		    for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
-			for ( int kk = 0; kk < lpsdIDMap.DetsInBank(jj).length;
-			      kk++ ) {
-			    psdOrder[detNum] = 1;
-			    numSegs1[detNum] = 64;
-			    
+		if ( header.iName.equalsIgnoreCase( "sand") ){
+		    switch (detectorType[ii]){
+		    case 0: 
+		    case 1: {
+			detectorType[ii] = 9;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			segments[ii] = new Segment();
+			segments[ii].detID = ii; 
+			segments[ii].row = 1; 
+			segments[ii].column = 1; 
+			segments[ii].length = LENGTH[detectorType[ii]]; 
+			segments[ii].width = WIDTH[detectorType[ii]]; 
+			segments[ii].depth = DEPTH[detectorType[ii]]; 
+			segments[ii].efficiency = 
+			    EFFICIENCY[detectorType[ii]]; 
+			break;
+		    }
+		    case 13: {
+			detectorType[ii] = 13;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			for ( int segY = 0; segY < header.numOfY; segY++) {
+			    for ( int segX = 0; segX < header.numOfX; segX++) {
+				int index = ii + segX + segY *( header.numOfY);
+				segments[index] = new Segment();
+				segments[index].detID = ii; 
+				segments[index].row = segX; 
+				segments[index].column = segY; 
+				segments[index].length = 
+				    LENGTH[detectorType[ii]/header.numOfY]; 
+				segments[index].width = 
+				    WIDTH[detectorType[ii]/header.numOfX]; 
+				segments[index].depth = 
+				    DEPTH[detectorType[ii]]; 
+				segments[index].efficiency = 
+				    EFFICIENCY[detectorType[ii]]; 
+			    }
+			}
+			break;
+		    }
+		    }
+		}
+
+
+	    }
+	    if ( header.iName.equalsIgnoreCase( "glad" ) || 
+		 header.iName.equalsIgnoreCase( "lpsd" ) ) {
+		psdOrder = new int[header.numOfElements + 1];
+		numSegs1 = new int[header.numOfElements + 1];
+		numSegs2 = new int[header.numOfElements + 1];
+		crateNum = new int[header.numOfElements + 1];
+		slotNum = new int[header.numOfElements + 1];
+		inputNum = new int[header.numOfElements + 1];
+		dataSource = new int[header.numOfElements + 1];
+		minID = new int[header.numOfElements + 1];
+		int detNum = 0;
+		for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
+		    int[] dets= lpsdIDMap.DetsInBank(jj);
+		    for ( int kk = 0; kk < dets.length;
+			  kk++ ) {
+			detNum++;
+			int tminID = lpsdIDMap.MinIdForDet(jj,dets[kk]);
+			int tcrate = lpsdIDMap.CrateForDet(jj,dets[kk]);
+			int tslot = lpsdIDMap.SlotForDet(jj,dets[kk]);	
+			int tinput = lpsdIDMap.InputForDet(jj,dets[kk]);
+			if ( tminID != 0 && tcrate != 0 && tslot != 0 &&
+			     tinput != 0 ) {
+			    if ( jj == 0 ) {
+				psdOrder[tminID] = 1;
+				numSegs1[tminID] = 1;
+				numSegs2[tminID] = 1;
+				segments[tminID] = new Segment();
+				segments[tminID].detID = detNum; 
+				segments[tminID].row = 1;
+ 				segments[tminID].column = 1; 
+				segments[tminID].length = LENGTH[1]; 
+				segments[tminID].width = WIDTH[1]; 
+				segments[tminID].depth = DEPTH[1]; 
+				segments[tminID].efficiency = EFFICIENCY[1]; 
+			    }
+			    else {
+				for ( int ll = 0; ll < 64; ll++ ) {
+				    psdOrder[tminID + ll] = 1;
+				    numSegs1[tminID + ll] = 1;
+				    numSegs2[tminID + ll] = 1;
+				    crateNum[tminID + ll] = tcrate;
+				    slotNum[tminID + ll] = tslot;
+				    inputNum[tminID + ll] = tinput;
+				    psdOrder[tminID + ll] = 1;
+				    numSegs1[tminID + ll] = 1;
+				    numSegs2[tminID + ll] = 1;
+				    segments[tminID + ll] = new Segment();
+				    segments[tminID + ll].detID = detNum; 
+				    segments[tminID + ll].row = ll; 
+				    segments[tminID + ll].column = 1; 
+				    segments[tminID + ll].length = 
+					LENGTH[7]/ 64; 
+				    segments[tminID + ll].width = 
+					WIDTH[7]; 
+				    segments[tminID + ll].depth = 
+					DEPTH[7]; 
+				    segments[tminID + ll].efficiency = 
+					EFFICIENCY[7]; 
+				}
+				    }
 			}
 		    }
 		}
-		detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-		detectorEfficiency[ii] = Runfile.EFFICIENCY[detectorType[ii]];
-		psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 	    }
 	    if (header.versionNumber > 3) {
 		runfile.seek(this.header.discSettings.location);
@@ -565,9 +881,10 @@ public class Runfile implements Cloneable {
 	    }
 
 	    this.leaveOpen = false;
-	    subgroupIDList = new int[ header.numOfElements * header.numOfHistograms + 
-				    1 ];
+	    subgroupIDList = 
+		new int[ header.numOfElements * header.numOfHistograms + 1 ];
 	    subgroupMap = new int[1][1];
+	    segmentMap = new Segment[1][1];
 	    for (i=0; i < subgroupIDList.length; i++ )
 		subgroupIDList[i] = -1;
 	    int group = 0;
@@ -575,35 +892,140 @@ public class Runfile implements Cloneable {
 	    minSubgroupID = new int[ header.numOfHistograms + 1 ];
 	    for (int nHist = 1; nHist <= header.numOfHistograms; nHist++) {
 		minSubgroupID[nHist] = group + 1;
-		for (int nDet = 1; nDet <= header.numOfElements; nDet++ ) {
-		    int index = ( (nHist -1) * header.numOfElements ) + nDet;
-		    int tfType = detectorMap[index].tfType;
-		    if ((subgroupIDList[index] == -1) && (tfType != 0)) {
-			group++;
-			subgroupIDList[index] = group;
-			int[][] tempMap = new int[group + 1][];
-			System.arraycopy(subgroupMap, 0, tempMap, 0, 
-					 subgroupMap.length);
-			int[] idList = {0, nDet};
-			for (int k = nDet+1; k <= header.numOfElements; k++) {
-			    int index2 = ( (nHist -1) * header.numOfElements )
-				+ k;
-			    int tfType2 = detectorMap[index2].tfType;
-			    if ( ( detectorMap[index2].address == 
-				   detectorMap[index].address) &&
-				 (tfType2 != 0) ){
-				subgroupIDList[index2] = group;
-				int[] tempList = new int[ idList.length + 1];
-				System.arraycopy(idList, 0, tempList, 0, 
-						 idList.length);
- 				idList = tempList;
-				idList[idList.length - 1] = k;
+		if((!(this.header.iName).equalsIgnoreCase("scd0")&&
+		    !(this.header.iName).equalsIgnoreCase("sad0")&&
+		    !(this.header.iName).equalsIgnoreCase("sad1")&&
+		    !(this.header.iName).equalsIgnoreCase("sand")) ){
+		    for (int nDet = 1; nDet <= header.numOfElements; nDet++ ) {
+			int index = ( (nHist -1) * header.numOfElements ) + nDet;
+			int tfType = detectorMap[index].tfType;
+			if ((subgroupIDList[index] == -1) && (tfType != 0)) {
+			    group++;
+			    subgroupIDList[index] = group;
+			    int[][] tempMap = new int[group + 1][];
+			    System.arraycopy(subgroupMap, 0, tempMap, 0, 
+					     subgroupMap.length);
+			    int[] idList = {0, nDet};
+			    Segment[][] tsegMap = new Segment[group + 1][];
+			    System.arraycopy(segmentMap, 0 , tsegMap, 0,
+					     segmentMap.length );
+			    Segment[] segList = {segments[nDet]};
+			    for (int k = nDet+1; k <= header.numOfElements
+				     ; k++) {
+				
+				int index2 = 
+				    ( (nHist -1) * header.numOfElements ) + k;
+				int tfType2 = detectorMap[index2].tfType;
+				if ( ( detectorMap[index2].address == 
+				       detectorMap[index].address) &&
+				     (tfType2 != 0) ){
+				    subgroupIDList[index2] = group;
+				    int[] tempList = new int[ idList.length + 1];
+				    System.arraycopy(idList, 0, tempList, 0, 
+						     idList.length);
+				    idList = tempList;
+				    idList[idList.length - 1] = k;
+				    Segment[] tsegList = 
+					new Segment[segList.length + 1];
+				    System.arraycopy( segList, 0, tsegList,
+						      0, segList.length);
+				    segList = tsegList;
+				    segList[segList.length - 1] = 
+					segments[k];
+				    
+				}
+			    }
+			    subgroupMap = tempMap;
+			    subgroupMap[group] = new int[idList.length - 1];
+			    System.arraycopy(idList, 1, subgroupMap[group], 0, 
+					     idList.length-1);
+			    segmentMap = tsegMap;
+			    segmentMap[group] = segList;
+			}
+		    }
+		}
+		else {
+		    for (int nDet = 1; nDet <= header.nDet; nDet++ ) {
+			if (nDet < header.nDet ) {
+			    int index = ( (nHist -1) * header.numOfElements ) + nDet;
+			    int tfType = detectorMap[index].tfType;
+			    if ((subgroupIDList[index] == -1) && (tfType != 0)) {
+				group++;
+				subgroupIDList[index] = group;
+
+				int[][] tempMap = new int[group + 1][];
+				System.arraycopy(subgroupMap, 0, tempMap, 0, 
+						 subgroupMap.length);
+				int[] idList = {0,nDet};
+				Segment[][] tsegMap = new Segment[group + 1][];
+				System.arraycopy(segmentMap, 0 , tsegMap, 0,
+						 segmentMap.length );
+				Segment[] segList = {segments[nDet]};
+				for (int k = nDet+1; k <= header.nDet; k++) {
+				    if ( k < header.nDet ) {
+				    int index2 = 
+					((nHist -1)*header.numOfElements ) + k;
+				    int tfType2 = detectorMap[index2].tfType;
+				    if ( ( detectorMap[index2].address == 
+					   detectorMap[index].address) &&
+					 (tfType2 != 0) ){
+					subgroupIDList[index2] = group;
+					int[] tempList=
+					    new int[idList.length+1];
+					System.arraycopy(idList, 0, tempList, 
+							 0, idList.length);
+					idList = tempList;
+					idList[idList.length - 1] = k;
+					Segment[] tsegList = 
+					    new Segment[segList.length + 1];
+					System.arraycopy( segList, 0, tsegList,
+							  0, segList.length);
+					segList = tsegList;
+					segList[segList.length - 1] = 
+					    segments[k];
+				    
+				    }
+				    }
+				}
+				subgroupMap = tempMap;
+				subgroupMap[group] = new int[idList.length - 1];
+				System.arraycopy(idList, 1, subgroupMap[group], 0, 
+						 idList.length-1);
+				segmentMap = tsegMap;
+				segmentMap[group] = segList;
 			    }
 			}
-			subgroupMap = tempMap;
-			subgroupMap[group] = new int[idList.length - 1];
-			System.arraycopy(idList, 1, subgroupMap[group], 0, 
-					 idList.length-1);
+			     else { 
+				System .out.println("Adding groups for Area "+
+						    "elements " + group + 
+						    " already." );
+				int segX = numSegs1[nDet];
+				int segY = numSegs2[nDet];
+				int [][] tempMap = new int[group +
+							   (segX*segY) + 1][];
+				Segment[][] tsegmentMap = 
+				    new Segment[group + (segX*segY) + 1][1];
+				System.arraycopy( subgroupMap, 0,
+						  tempMap, 0,
+						  subgroupMap.length );
+				System.arraycopy( segmentMap, 0,
+						  tsegmentMap, 0,
+						  segmentMap.length );
+				subgroupMap = tempMap;
+				segmentMap = tsegmentMap;
+				 for ( int ny = 0; ny < segY; ny++ ) {
+				    for ( int nx=0; nx < segX; nx++ ) {
+					 int aindex = nx + ny*(segX);
+					 int[] idList = { nDet,nx, ny};
+					 subgroupMap[group + aindex + 1] = 
+					      new int[2]; 
+					 subgroupMap[group+aindex+1][0] = nDet;
+					 segmentMap[group+aindex+1][0] = 
+					     segments[header.nDet - 1+ aindex];
+					 }
+				    }
+				group = group + segX * segY;
+			     }
 		    }
 		}
  		maxSubgroupID[nHist] = group;
@@ -887,6 +1309,9 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    dataSource = new int[header.nDet + 1];
+	    for ( i = 1; i <= header.nDet; i++ ) {
+		minID[i] = 0;
+	    }
 	}
 	bArrayIS.close();
 	dataStream.close();
@@ -904,6 +1329,9 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    minID = new int[header.nDet + 1];
+	    for ( i = 1; i <= header.nDet; i++ ) {
+		minID[i] = i;
+	    }
 	}
 	bArrayIS.close();
 	dataStream.close();
@@ -922,11 +1350,36 @@ public class Runfile implements Cloneable {
 	bArrayIS.close();
 	dataStream.close();
 
+	segments = new Segment[1];
+	segments[0] = new Segment();
+	for (int ii = 1; ii <= header.nDet; ii++ ) {
+	    int segs = minID[ii] + numSegs1[ii] * numSegs2[ii];
+	    if ( segments.length < ( segs + 1 ) ){
+		Segment [] tsegments =new Segment[segs + 1];
+		System.arraycopy( segments, 0 , tsegments, 0, 
+				  segments.length);
+		segments = tsegments;
+	    }
+	    for ( int segY = 0; segY <= numSegs1[ii]; segY ++ ) {
+		for ( int segX = 0; segX <= numSegs2[ii]; segX ++ ) {
+		    int segID = minID[ii] + segX + segY * numSegs2[ii];
+		    segments[segID] = 
+			new Segment( ii, segX, segY, 
+				     detectorLength[ii]/numSegs1[ii],
+				     detectorWidth[ii]/numSegs2[ii],
+				     detectorDepth[ii],
+				     detectorEfficiency[ii]
+				     );
+		    
+		}
+	    }
+	}
 	runfile.seek(this.header.detectorSGMap.location );
 	int [][] IDMap = 
 	    new int[this.header.numOfHistograms][this.header.nDet];
 	subgroupIDList = 
 	    new int[this.header.nDet *this.header.numOfHistograms +1];
+	
 	minSubgroupID = new int[this.header.numOfHistograms + 1];
 	maxSubgroupID = new int[this.header.numOfHistograms + 1];
 	for ( i = 0; i < this.header.numOfHistograms; i++ ) {
@@ -936,7 +1389,8 @@ public class Runfile implements Cloneable {
 		if ( IDMap[i][jj] > maxSubgroupID[i + 1]){
 		    maxSubgroupID[i + 1] = IDMap[i][jj];
 		}
-		if ( (IDMap[i][jj] < minSubgroupID[i + 1] && IDMap[i][jj] > 0 ) 
+		if ( (IDMap[i][jj] < minSubgroupID[i + 1] 
+		      && IDMap[i][jj] > 0 ) 
 		     || minSubgroupID[i + 1] == 0 ) {
 		    minSubgroupID[i+1] = IDMap[i][jj];
 		}
@@ -944,8 +1398,11 @@ public class Runfile implements Cloneable {
 	}
 	subgroupMap = 
 	    new int[maxSubgroupID[this.header.numOfHistograms]+ 1][];
+	segmentMap =
+	    new Segment[maxSubgroupID[this.header.numOfHistograms]+ 1][];
 	for ( i = 1 ; i <= maxSubgroupID[this.header.numOfHistograms]; i++ ) {
 	    int[] idList = new int[0];
+	    Segment[] segList = new Segment[0];
 	    for ( int jj = 0; jj < this.header.numOfHistograms; jj++ ) {
 		for ( int kk = 0; kk < this.header.nDet; kk++ ) {
 		    if ( IDMap[jj][kk] == i ) {
@@ -953,10 +1410,14 @@ public class Runfile implements Cloneable {
 			System.arraycopy( idList, 0, temp, 0, idList.length );
 			temp[idList.length] = kk + 1;
  			idList = temp;
+			Segment[] tseg = new Segment[ segList.length + 1];
+			tseg[segList.length] = segments[ minID[kk + 1]];
+			segList = tseg;
 		    } 
 		}
 	    }
 	    subgroupMap[i] = idList;
+	    segmentMap[i] = segList;
 	}
 
 	runfile.seek(this.header.timeScaleTable.location);
@@ -1671,12 +2132,26 @@ public class Runfile implements Cloneable {
 	    return null;
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
-	for (int i = 1; i <= header.numOfHistograms; i++) {
-	    if ( subgroup <= MaxSubgroupID(i) 
-		 && subgroup >= MinSubgroupID(i)) hist =  i;
-	}
+	if ( !((psdOrder[segmentMap[subgroup][0].detID] == 2) && (header.versionNumber < 5 )) ) {
+	    for (int i = 1; i <= header.numOfHistograms; i++) {
+		if ( subgroup <= MaxSubgroupID(i) 
+		     && subgroup >= MinSubgroupID(i)) hist =  i;
+	    }
 	    
-	return Get1DSpectrum(id, hist);
+	    return Get1DSpectrum(id, hist);
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    int numWaves = header.numOfWavelengths;
+	    float stepWave = (maxWave - minWave)/numWaves;
+
+	    float[] data = new float[header.numOfWavelengths];
+		for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
+		    data[ii] = ii* stepWave * segmentMap[subgroup][0].row * segmentMap[subgroup][0].column;
+		}
+	    return data;
+	}
     }
 
     /**
@@ -1699,33 +2174,41 @@ public class Runfile implements Cloneable {
 	    System.out.println("GetSpectrum1D opening file");
 	    runfile = new RandomAccessFile(runfileName, "r");
 	}
-	index = detID + (hist-1) * this.header.nDet;
-	tfType = this.detectorMap[index].tfType;
-	numOfTimeChannels = this.timeField[tfType].NumOfChannels();
-	data = new float[numOfTimeChannels];
-	if (header.numOfWavelengths > 0) {
-	    offset = this.detectorMap[index].address 
-		+ this.header.totalChannels * 2 
-		+ this.header.histStartAddress + 4;
-	}
-	else {
-	    offset = this.detectorMap[index].address + 
-		this.header.histStartAddress + 4;
-	}
 
-	runfile.seek(offset);
-	if (numOfTimeChannels !=0){
-	   
-	    if (this.header.versionNumber < 4){
-		wordLength = 2;
+	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
+	    index = detID + (hist-1) * this.header.nDet;
+	    if (detectorMap[index].tfType == 0 ) {
+		System.out.println( "invalid id in Get1DSpectrum(id,hist), " +
+				    "returning null");
+		return null;
 	    }
-	    else{
-		wordLength = 4;
+	
+	    tfType = this.detectorMap[index].tfType;
+	    numOfTimeChannels = this.timeField[tfType].NumOfChannels();
+	    data = new float[numOfTimeChannels];
+	    if (header.numOfWavelengths > 0) {
+		offset = this.detectorMap[index].address 
+		    + this.header.totalChannels * 2 
+		    + this.header.histStartAddress + 4;
 	    }
-	    if ( this.header.versionNumber < 5 ) {
-		bdata = new byte[numOfTimeChannels * wordLength];
-		int nbytes = runfile.read( bdata, 0, 
-					   numOfTimeChannels * wordLength);
+	    else {
+		offset = this.detectorMap[index].address + 
+		    this.header.histStartAddress + 4;
+	    }
+	    
+	    runfile.seek(offset);
+	    if (numOfTimeChannels !=0){
+		
+		if (this.header.versionNumber < 4){
+		    wordLength = 2;
+		}
+		else{
+		    wordLength = 4;
+		}
+		if ( this.header.versionNumber < 5 ) {
+		    bdata = new byte[numOfTimeChannels * wordLength];
+		    int nbytes = runfile.read( bdata, 0, 
+					       numOfTimeChannels * wordLength);
 		for (i = 0; i < numOfTimeChannels; i++){
 		    for (int j = 0; j < wordLength; j++) {
 			int byteIndex = i * wordLength + j;
@@ -1738,7 +2221,7 @@ public class Runfile implements Cloneable {
 			}
 		    }
 		}
-	    }
+		}
 	    else {
 		byte[] bArray = new byte[ 4 * numOfTimeChannels ];
 		runfile.read( bArray );
@@ -1756,6 +2239,19 @@ public class Runfile implements Cloneable {
 	    runfile.close();
 	}
 	return data; 
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    int numWaves = header.numOfWavelengths;
+	    float stepWave = (maxWave - minWave)/numWaves;
+
+	    data = new float[header.numOfWavelengths];;
+		for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
+		    data[ii] = ii* stepWave *detID ;
+		}
+	    return data;
+	}
     }
 
     /**
@@ -1770,12 +2266,17 @@ public class Runfile implements Cloneable {
 	    return -1;
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
-	for (int i = 1; i <= header.numOfHistograms; i++) {
-	    if ( subgroup <= MaxSubgroupID(i) 
-		 && subgroup >= MinSubgroupID(i)) hist =  i;
-	}
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    for (int i = 1; i <= header.numOfHistograms; i++) {
+		if ( subgroup <= MaxSubgroupID(i) 
+		     && subgroup >= MinSubgroupID(i)) hist =  i;
+	    }
 	    
-	return Get1DSum(id, hist);
+	    return Get1DSum(id, hist);
+	}
+	else {
+	    return 2.0f;
+	}
     }
 
     /**
@@ -1797,49 +2298,55 @@ public class Runfile implements Cloneable {
 	if ( leaveOpen == false){
 	    runfile = new RandomAccessFile(runfileName, "r");
 	}
-	index = detID + (hist-1) * this.header.nDet;
-	tfType =  this.detectorMap[index].tfType;
-	numOfTimeChannels = this.timeField[tfType].NumOfChannels();
-	data = -1;
-	if (header.numOfWavelengths > 0) {
-	    offset = this.detectorMap[index].address 
-		+ this.header.totalChannels * 2 
-		+ this.header.histStartAddress;
-	}
-	else {
-	    offset = this.detectorMap[index].address + 
-		this.header.histStartAddress;
-	}
 
-	runfile.seek(offset);
-	if (this.header.versionNumber <= 4) {
-	    if (numOfTimeChannels !=0){
-		data = 0;
-		wordLength = 4;
-		
-		bdata = new byte[wordLength];
-		int nbytes = runfile.read( bdata, 0, 
-					   wordLength);
-		for (int j = 0; j < wordLength; j++) {
-		    int byteIndex = j;
-		    if ( bdata[byteIndex] < 0 ) {
-			data  += (bdata[byteIndex] + 256) * 
-			    Math.pow(256.0, j);
-		    }
-		    else {
-			data += bdata[byteIndex] * Math.pow(256.0, j);
+	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
+	    index = detID + (hist-1) * this.header.nDet;
+	    tfType =  this.detectorMap[index].tfType;
+	    numOfTimeChannels = this.timeField[tfType].NumOfChannels();
+	    data = -1;
+	    if (header.numOfWavelengths > 0) {
+		offset = this.detectorMap[index].address 
+		    + this.header.totalChannels * 2 
+		    + this.header.histStartAddress;
+	    }
+	    else {
+		offset = this.detectorMap[index].address + 
+		    this.header.histStartAddress;
+	    }
+	    
+	    runfile.seek(offset);
+	    if (this.header.versionNumber <= 4) {
+		if (numOfTimeChannels !=0){
+		    data = 0;
+		    wordLength = 4;
+		    
+		    bdata = new byte[wordLength];
+		    int nbytes = runfile.read( bdata, 0, 
+					       wordLength);
+		    for (int j = 0; j < wordLength; j++) {
+			int byteIndex = j;
+			if ( bdata[byteIndex] < 0 ) {
+			    data  += (bdata[byteIndex] + 256) * 
+				Math.pow(256.0, j);
+			}
+			else {
+			    data += bdata[byteIndex] * Math.pow(256.0, j);
+			}
 		    }
 		}
 	    }
+	    else {
+		int idata = runfile.readInt();
+		data = (float)idata;
+	    }
+	    if (!leaveOpen ){
+		runfile.close();
+	    }
+	    return data; 
 	}
 	else {
-	    int idata = runfile.readInt();
-	    data = (float)idata;
+	    return 2.0f;
 	}
-	if (!leaveOpen ){
-	    runfile.close();
-	}
-	return data; 
     }
 
     /**
@@ -1871,12 +2378,17 @@ public class Runfile implements Cloneable {
 	    return -1;
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
-	for (int i = 1; i <= header.numOfHistograms; i++) {
-	    if ( subgroup <= MaxSubgroupID(i) 
-		 && subgroup >= MinSubgroupID(i)) hist =  i;
-	}
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    for (int i = 1; i <= header.numOfHistograms; i++) {
+		if ( subgroup <= MaxSubgroupID(i) 
+		     && subgroup >= MinSubgroupID(i)) hist =  i;
+	    }
 	    
-	return NumChannelsBinned(id, hist);
+	    return NumChannelsBinned(id, hist);
+	}
+	else {
+	    return header.numOfWavelengths;
+	}
     }
 
     /**
@@ -1886,10 +2398,16 @@ public class Runfile implements Cloneable {
        @return Number of channels binned.
     */
     public int NumChannelsBinned( int id, int hist )  {
-	int index = ( hist - 1 ) * header.nDet + id;
-	int tfType = detectorMap[index].tfType;
-	int nch = (int)(timeField[tfType].NumOfChannels());
-	return nch;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    int index = ( hist - 1 ) * header.nDet + id;
+	    int tfType = detectorMap[index].tfType;
+	    int nch = (int)(timeField[tfType].NumOfChannels());
+	    return nch;
+	}
+	else {
+	    return header.numOfWavelengths;
+	}
+
     }
 
     /**
@@ -1903,12 +2421,19 @@ public class Runfile implements Cloneable {
 	    return -9999;
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	for (int i = 1; i <= header.numOfHistograms; i++) {
 	    if ( subgroup <= MaxSubgroupID(i) 
 		 && subgroup >= MinSubgroupID(i)) hist =  i;
 	}
 	    
 	return MinBinned(id, hist);
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    return minWave;
+	}
     }
 
     /**
@@ -1918,9 +2443,16 @@ public class Runfile implements Cloneable {
        @return Raw minumum time in the time field table.
     */
     public double MinBinned( int id, int hist ) {
-	int index = ( hist - 1 ) * header.nDet + id;
-	int tfType = detectorMap[index].tfType;
-	return timeField[tfType].tMin;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    int index = ( hist - 1 ) * header.nDet + id;
+	    int tfType = detectorMap[index].tfType;
+	    return timeField[tfType].tMin;
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    return minWave;
+	}
     }
    
     /**
@@ -1934,12 +2466,19 @@ public class Runfile implements Cloneable {
 	    return -9999.;
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
-	for (int i = 1; i <= header.numOfHistograms; i++) {
-	    if ( subgroup <= MaxSubgroupID(i) 
-		 && subgroup >= MinSubgroupID(i)) hist =  i;
-	}
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    for (int i = 1; i <= header.numOfHistograms; i++) {
+		if ( subgroup <= MaxSubgroupID(i) 
+		     && subgroup >= MinSubgroupID(i)) hist =  i;
+	    }
 	    
-	return MaxBinned(id, hist);
+	    return MaxBinned(id, hist);
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    return maxWave;
+	}
     }
 
     /**
@@ -1950,9 +2489,16 @@ public class Runfile implements Cloneable {
     */
 
     public double MaxBinned( int id, int hist ) {
-	int index = ( hist - 1 ) * header.nDet + id;
-	int tfType = detectorMap[index].tfType;
-	return timeField[tfType].tMax;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    int index = ( hist - 1 ) * header.nDet + id;
+	    int tfType = detectorMap[index].tfType;
+	    return timeField[tfType].tMax;
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    return maxWave;
+	}
     }
    
     /**
@@ -2000,12 +2546,27 @@ public class Runfile implements Cloneable {
 	    return null;
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
-	for (int i = 1; i <= header.numOfHistograms; i++) {
-	    if ( subgroup <= MaxSubgroupID(i) 
-		 && subgroup >= MinSubgroupID(i)) hist =  i;
-	}
+
+ 	if ( !((psdOrder[segmentMap[subgroup][0].detID] == 2) && (header.versionNumber < 5 )) ) {
+	    for (int i = 1; i <= header.numOfHistograms; i++) {
+		if ( subgroup <= MaxSubgroupID(i) 
+		     && subgroup >= MinSubgroupID(i)) hist =  i;
+	    }
 	    
-	return TimeChannelBoundaries(id, hist);
+	    return TimeChannelBoundaries(id, hist);
+	}
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    int numWaves = header.numOfWavelengths;
+	    float stepWave = (maxWave - minWave)/numWaves;
+
+	    float[] channel = new float[header.numOfWavelengths + 1];
+		for ( int ii = 0; ii < header.numOfWavelengths + 1; ii++ ) {
+		    channel[ii] = (minWave + ii* stepWave);
+		}
+	    return channel;
+	}
     }
 
     /**
@@ -2021,49 +2582,67 @@ public class Runfile implements Cloneable {
 	if ( id > header.numOfElements || hist > header.numOfHistograms ) return null;
 	int index = header.nDet * (hist - 1) + id;
 
-	if (detectorMap[index].tfType == 0 ) return null;
-   
-	int tfType = detectorMap[index].tfType;
-	int numberOfChannels = timeField[tfType].NumOfChannels();
-	float[] channel = new float[numberOfChannels + 1];
-
-	float min = (float)timeField[tfType].tMin;
-	float max = (float)timeField[tfType].tMax;
-	float step = (float)timeField[tfType].tStep;
-
-	float timeToSample = (float)(header.sourceToSample / 
-				     Math.sqrt( header.energyIn/MEV_FROM_VEL));
-
-	switch (header.pseudoTimeUnit ) {
-
-	case ('I'): {
-	    if ( timeField[tfType].timeFocusBit == 0 ) {  //Det not focused
-		if ( header.versionNumber < 5 ) {
-		    us_correction = - (float)(header.hardTimeDelay * 
-					      header.standardClock) + 
-			(float)(Math.floor(timeToSample/header.standardClock) *
-			header.standardClock);
-		}
-		else {
-		    us_correction = 0;
-		}
+	if ( !((psdOrder[0] == 2) && (header.versionNumber < 5 )) ) {
+	    if (detectorMap[index].tfType == 0 ) {
+		System.out.println( "invalid id in TimeChannelBoundaries" +
+				    "(id,hist), returning null");
+		return null;
 	    }
-	    else {						//Det focused
-		us_correction = timeToSample;
+	
+	    int tfType = detectorMap[index].tfType;
+	    int numberOfChannels = timeField[tfType].NumOfChannels();
+	    float[] channel = new float[numberOfChannels + 1];
+	    
+	    float min = (float)timeField[tfType].tMin;
+	    float max = (float)timeField[tfType].tMax;
+	    float step = (float)timeField[tfType].tStep;
+	    
+	    float timeToSample = (float)(header.sourceToSample / 
+					 Math.sqrt( header.energyIn/MEV_FROM_VEL));
+	    
+	    switch (header.pseudoTimeUnit ) {
+		
+	    case ('I'): {
+		if ( timeField[tfType].timeFocusBit == 0 ) {  //Det not focused
+		    if ( header.versionNumber < 5 ) {
+			us_correction = - (float)(header.hardTimeDelay * 
+						  header.standardClock) + 
+			    (float)(Math.floor(timeToSample/header.standardClock) *
+				    header.standardClock);
+		    }
+		    else {
+			us_correction = 0;
+		    }
+		}
+		else {						//Det focused
+		    us_correction = timeToSample;
+		}
+		min = min + us_correction;
+		max = max + us_correction;
+		break;
 	    }
-	    min = min + us_correction;
-	    max = max + us_correction;
-	    break;
+	    default: {
+		min = min;
+		max = max;
+	    }
+	    }
+	    for (int chan = 0; chan <= numberOfChannels; chan++) {
+		channel[chan] = (float)( min + chan * step );
+	    }
+	    return channel;
 	}
-	default: {
-	    min = min;
-	    max = max;
+	else {
+	    float minWave = header.minWavelength;
+	    float maxWave = header.maxWavelength;
+	    int numWaves = header.numOfWavelengths;
+	    float stepWave = (maxWave - minWave)/numWaves;
+
+	    float[] channel = new float[header.numOfWavelengths + 1];
+		for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
+		    channel[ii] = minWave + ii* stepWave;
+		}
+	    return channel;
 	}
-	}
-	for (int chan = 0; chan <= numberOfChannels; chan++) {
-	    channel[chan] = (float)( min + chan * step );
-	}
-	return channel;
     }
 
     /**
@@ -2207,6 +2786,9 @@ public class Runfile implements Cloneable {
        @return boolean true if subgroup is a beam monitor.
    */
    public boolean IsSubgroupBeamMonitor( int sg ) {
+
+       if ( !(header.iName).equalsIgnoreCase("glad"))
+	if ( header.versionNumber < 5 && psdOrder[segmentMap[sg][0].detID] > 1 ) return false;
 	for ( int ii = 0; ii < subgroupMap[sg].length; ii++ ) {
 	    int id = subgroupMap[sg][ii];
 	    if (detectorAngle[id] == 0 || detectorAngle[id] == 180 ||
@@ -2217,6 +2799,8 @@ public class Runfile implements Cloneable {
 	}
 
    public boolean IsPulseHeight( int id, int hist ) {
+       if ( !(header.iName).equalsIgnoreCase("glad"))
+       if ( header.versionNumber < 5 && psdOrder[id] > 1 ) return false;
 	int index = header.nDet * (hist - 1) + id;
 	if (detectorMap[index].tfType == 0 ) return false;
    	int tfType = detectorMap[index].tfType;
@@ -2234,6 +2818,8 @@ public class Runfile implements Cloneable {
        @return boolean true if subgroup is a beam monitor.
    */
     public boolean IsPulseHeight( int sg ) {
+       if ( !(header.iName).equalsIgnoreCase("glad"))
+	if ( header.versionNumber < 5 && psdOrder[segmentMap[sg][0].detID] > 1 ) return false;
 	int hist = 0;
 	for ( int ii = 0; ii < subgroupMap[sg].length; ii++ ) {
 	    int id = subgroupMap[sg][ii];
@@ -2352,12 +2938,17 @@ public class Runfile implements Cloneable {
 	
 	int[] idsInSg = IdsInSubgroup(subgroup);
 	int id = idsInSg[0];
-	for (int i = 1; i <= header.numOfHistograms; i++) {
-	    if ( subgroup <= MaxSubgroupID(i) && subgroup >= MinSubgroupID(i))
-		hist =  i;
+	if ( !((psdOrder[segmentMap[subgroup][0].detID] == 2) && (header.versionNumber < 5 )) ) {
+	    for (int i = 1; i <= header.numOfHistograms; i++) {
+		if ( subgroup <= MaxSubgroupID(i) && subgroup >= MinSubgroupID(i))
+		    hist =  i;
+	    }
+	    
+	    return TimeFieldType(id, hist);
 	}
-	
-	return TimeFieldType(id, hist);
+	else {
+	    return -1;
+	}
     }
 
     /**
@@ -2366,11 +2957,15 @@ public class Runfile implements Cloneable {
     public int TimeFieldType( int detID, int hist) throws IOException
     {
 	int  index;
+	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
 	
-	index  = detID + (hist-1) * this.header.nDet;
-	return this.detectorMap[index].tfType;
+	    index  = detID + (hist-1) * this.header.nDet;
+	    return this.detectorMap[index].tfType;
+	}
+	else {
+	    return -1;
+	    }
     }
-
 
     /**
        Returns a 2D array that contains data from time slice sliceNum
