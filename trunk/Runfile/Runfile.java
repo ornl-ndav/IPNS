@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.17  2002/08/20 20:15:45  hammonds
+ * Added code to deal with dT/T binning.
+ * Added reoutines IsTimeTypeConstStep to see if time fields have constant time step.
+ *
  * Revision 6.16  2002/08/05 14:46:42  hammonds
  * Changed SCD detector angle from 90 to -90 in V3 or earlier files
  * Fixed problem loading POSY and PNE0 files
@@ -3557,8 +3561,22 @@ public class Runfile implements Cloneable {
 		max = max;
 	    }
 	    }
-	    for (int chan = 0; chan <= numberOfChannels; chan++) {
-		channel[chan] = (float)( min + chan * step );
+	    if (  timeField[tfType].wavelengthBinBit == 0 ) {  // check for 
+		                                               //  const t
+		                                               //  binning
+		for (int chan = 0; chan <= numberOfChannels; chan++) {
+		    channel[chan] = (float)( min + chan * step );
+		}
+	    }
+	    else {       // assume dt/t binning
+		channel[0] = min;
+		for ( int chan = 1; chan <= numberOfChannels; chan++ ) {
+		    float clock = (float)header.standardClock; 
+		    channel[chan] = (float)channel[chan-1] * (1.0f + step);
+		    float fjunk = channel[chan] / clock;
+		    channel[chan] = Math.round( fjunk ) * clock;
+		    
+		}
 	    }
 	    return channel;
 	}
@@ -4320,6 +4338,60 @@ public class Runfile implements Cloneable {
     public String iName() {
 	return header.iName;
     }
+
+    /**
+       Checks to see if a subgroup's time binning type has a constant time step
+       @param sg - detector subgroup.
+       @return boolean true if time step is constant in time.
+     */
+    boolean IsTimeTypeConstStep(int subgroup) {
+	int hist=0;
+	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
+	    return false;
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
+	
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) 
+		 && subgroup >= MinSubgroupID(i)) hist =  i;
+	}
+	    
+	return IsTimeTypeConstStep(seg, hist);
+    }
+
+
+    /**
+       Checks to see if a segment's time binning type has a constant time step
+       @param segID - segment ID.
+       @param hist  - histogram #
+       @return boolean true if time step is constant in time.
+     */
+    boolean IsTimeTypeConstStep(Segment segID, int hist) {
+	int id = segID.detID;
+	if ( id > header.numOfElements || 
+	     hist > header.numOfHistograms ) return false;
+	int index = header.numOfElements * (hist - 1) + segID.segID;
+
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    int tftype = detectorMap[index].tfType;
+	    if ( timeField[tftype].wavelengthBinBit != 0 ) {
+		return false;
+	    }
+	    else { 
+		return true;
+	    }
+	}
+	else {
+	    if (header.areaBinning != 0) {
+		return false;
+	    }
+	    else {
+		return true;
+	    }
+	}
+    }
+
+    
 
 }
 
