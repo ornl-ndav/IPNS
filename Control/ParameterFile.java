@@ -107,12 +107,19 @@ public class ParameterFile {
        Prints information on the device and its controller
      */
     public void printDevice() {
-		  System.out.println( deviceName );
-		  System.out.println( deviceNameDbSignal );
-		  System.out.println( controllerName );
-		  System.out.println( dbDevice );
-		  System.out.println( ancIoc );
-		  System.out.println( vetoSignal );
+      System.out.println( deviceName );
+      System.out.println( deviceNameDbSignal );
+      System.out.println( controllerName );
+      System.out.println( dbDevice );
+      System.out.println( ancIoc );
+      System.out.println( vetoSignal );
+    }
+
+    /**
+       Prints information on the device and its controller
+     */
+    public void printDeviceBrief() {
+      System.out.println( deviceName + " uses " + controllerName);
     }
 
     /**
@@ -153,9 +160,23 @@ public class ParameterFile {
 
     /**
      */
+    public void printUserParametersBrief() {
+		  System.out.println("User Parameters");
+		  Parameter.printParametersBrief( userParameter );
+    }
+
+    /**
+     */
     public void printInstParameters() {
 		  System.out.println("Inst Parameters");
 		  Parameter.printParameters( instParameter );
+    }
+
+    /**
+     */
+    public void printInstParametersBrief() {
+		  System.out.println("Inst Parameters");
+		  Parameter.printParametersBrief( instParameter );
     }
 
     /**

@@ -94,25 +94,39 @@ public class Parameter {
     /**
      */
     public static void printParameters( Parameter[] params) {
-		  for ( int ii=0; ii < params.length; ii++) {
-				System.out.println( "  |-" + params[ii].type + "Parameter " + (ii+1) );
-				System.out.println( "  | |-" + "Name: " + params[ii].name);
-				System.out.println( "  | |-" + "Current Value: " + 
-										  params[ii].value);
-				System.out.println( "  | |-" + "DB signal name: " + 
-										  params[ii].dbsignal);
-				if ( params[ii].optionsAvailable ) {
-					 System.out.println( "  | |-Options" );
-					 for (int jj=0; jj<(params[ii].options).length; jj++){
-						  System.out.println( "       | | |-" + 
-													 params[ii].options[jj] + "= " +
-													 jj);
-					 }
-				}
-				else {
-				}
-		  }
+      for ( int ii=0; ii < params.length; ii++) {
+	System.out.println( "  |-" + params[ii].type + "Parameter " + (ii+1) );
+	System.out.println( "  | |-" + "Name: " + params[ii].name);
+	System.out.println( "  | |-" + "Current Value: " + 
+			    params[ii].value);
+	System.out.println( "  | |-" + "DB signal name: " + 
+			    params[ii].dbsignal);
+	if ( params[ii].optionsAvailable ) {
+	  System.out.println( "  | |-Options" );
+	  for (int jj=0; jj<(params[ii].options).length; jj++){
+	    System.out.println( "       | | |-" + 
+				params[ii].options[jj] + "= " +
+				jj);
+	  }
+	}
+	else {
+	}
+      }
     }
+  
+    /**
+     */
+  public static void printParametersBrief( Parameter[] params) {
+    for ( int ii=0; ii < params.length; ii++) {
+      System.out.print( "  |-" + params[ii].name + ": " );
+      if ( params[ii].optionsAvailable ) {
+	  System.out.println( params[ii].options[(int)(params[ii].value)] );
+      }
+      else {
+	System.out.println( params[ii].value);
+      }
+    }
+  }
 
     /**
        Get the Parameter name
