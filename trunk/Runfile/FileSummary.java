@@ -15,6 +15,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.6  2002/12/13 14:23:45  hammonds
+ * Took out println's.  Make necessary diagnostics go into the File Summary
+ *
  * Revision 1.5  2002/12/13 02:59:16  hammonds
  * Added better error checking.  Used to catch an error and then bomb.  Now an error with a runfile is caught and reported and it goes on.
  *
@@ -78,19 +81,17 @@ public class FileSummary {
 			else if (dirList[ii].isDirectory() ){ }
 			
 		    }
-		    
-		    catch ( IOException ex ) {	    
-			System.out.println( "error with file " + 
-					    dirList[ii].getPath() );
-			summaryContents.append( new String( "*******ERROR " +
-							    "with file " +
-							    dirList[ii].getPath())
-						);
+		    catch (IOException ex) {
+		    summaryContents.append
+			    ( new String( "*******ERROR " +
+					  "with file " +
+					  dirList[ii].getPath() + "\n")
+			      );
 		    }
 		}
 	    }
 	    else {
-		System.out.println( "No run files found");
+		summaryContents.append("No run files found.\n");
 	    }
 	}
 	else if ( dirMain.isFile() ) {
@@ -115,11 +116,12 @@ public class FileSummary {
 	    catch (IOException ex) {
 		summaryContents.append( "****ERROR: " + dirName + 
 					" does not appear to be a valid "+
-					"runfile" );
+					"runfile\n" );
 	    }
 	}
 	else {
-	    System.out.println( dirName + " is not a valid file or directory");
+	    summaryContents.append( dirName + " is not a valid file or "
+				    + "directory");
 	}
     }
     
