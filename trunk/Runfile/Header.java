@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.16  2001/11/02 16:33:01  hammonds
+ * Take out name extracted from filename in main.
+ *
  * Revision 5.15  2001/10/31 22:03:01  hammonds
  * Added a rewrite method to allow modifications to header parameters.
  *
@@ -285,7 +288,7 @@ public static void main(String[] args) throws IOException{
 	int slashIndex = args[0]
 	    .lastIndexOf( System.getProperty( "file.separator"));
 	String iName = args[0].substring( slashIndex+1, slashIndex + 5 );
-	System.out.println( "iName: " + iName );
+//	System.out.println( "iName: " + iName );
 	Header header = new Header(runfile, iName );
 	runfile.close();
 
