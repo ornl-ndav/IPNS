@@ -224,7 +224,10 @@ class PrunHead{
 
     */
     public static void main(String[] args) throws IOException {
+      if(args.length==1)
         System.out.print("*****\n"+getHeader(args[0])+"*****\n");
+      else
+        System.out.println("USAGE: "+PrunHead.class.getName()+" <filename>");
     }
 
     static private String format( double number, int sigfig){
