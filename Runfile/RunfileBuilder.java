@@ -19,6 +19,9 @@ import IPNS.Control.ParamPane;
 /*
  *
  * $Log$
+ * Revision 5.52  2004/08/13 03:31:31  millermi
+ * - Fixed javadoc errors.
+ *
  * Revision 5.51  2003/08/28 19:11:19  hammonds
  * Change addXXXXXTimeField so that max channel ends on appropriate boundary.
  *
@@ -1264,7 +1267,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     /**
        This method will set values in the runfile header that are normally 
        from the instrument parameter file.
-       @param paramfilename = filename from which parameters should be taken
+       @param filename = filename from which parameters should be taken
        @return a return error code
     */
     public int headerSetFromParams( String filename){
@@ -1343,7 +1346,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     /**
        This method will set values in the runfile header that are normally 
        from the detector calibration table.
-       @param paramfilename = filename from which calibration data should be 
+       @param filename = filename from which calibration data should be 
        taken.
        @return a return error code
     */
@@ -1500,7 +1503,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        Adds a new TimeField to a Runfile
        @param min Minimum time for the field
        @param max Maximum time for the field
-       @param TFNum Time Field Number
        @param step Step size for the field
        @param TFNum Time Field Number
      */
