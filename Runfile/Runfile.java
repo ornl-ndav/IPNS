@@ -21,8 +21,8 @@ indexed starting at zero.
 /*
  *
  * $Log$
- * Revision 5.10  2000/03/09 19:30:30  hammonds
- * Small change to fix the monitor times in older, focused runs.
+ * Revision 5.11  2000/03/10 04:10:37  hammonds
+ * Changed code to use energy conversion factor from the new PhysicalConstants class.  Small changes
  *
  * Revision 5.9  2000/02/26 18:20:36  hammonds
  * Changed Get1DSpectum to not change byte order for Version >= 5
@@ -138,7 +138,8 @@ public class Runfile implements Cloneable {
 						    "1.5\" pancake monitor",
 						    "Ordela Beam Monitor"
     };
-
+    static double MEV_FROM_VEL = 
+	PhysicalConstants.meV_FROM_m_PER_microsec_CONST;
 
 // --------------------------- readUnsignedInteger -------------------
 
@@ -908,7 +909,8 @@ public class Runfile implements Cloneable {
        @return The source to sample distance
     */
     public double SourceToSampleTime(){
-	double timeToSample = SourceToSample() / Math.sqrt(EnergyIn()/5227060.0);
+	double timeToSample = 
+	    SourceToSample() / Math.sqrt(EnergyIn()/MEV_FROM_VEL);
 	return timeToSample;
     }
 
@@ -918,7 +920,8 @@ public class Runfile implements Cloneable {
        @return The source to sample distance
     */
     public double SourceToSampleTime(double energy){
-	double timeToSample = SourceToSample() / Math.sqrt(energy/5227060.0);
+	double timeToSample = 
+	    SourceToSample() / Math.sqrt(energy/MEV_FROM_VEL);
 	return this.header.sourceToSample;
     }
 
@@ -1728,7 +1731,7 @@ public class Runfile implements Cloneable {
 	float step = (float)timeField[tfType].tStep;
 
 	float timeToSample = (float)(header.sourceToSample / 
-				     Math.sqrt( header.energyIn/5227060.0F));
+				     Math.sqrt( header.energyIn/MEV_FROM_VEL));
 
 	switch (header.pseudoTimeUnit ) {
 
@@ -1797,10 +1800,10 @@ public class Runfile implements Cloneable {
 	timeBounds = TimeChannelBoundaries( detID, hist );
 	float[] energyChannels = new float[timeBounds.length];
 	float timeToSample = (float)(header.sourceToSample / 
-				     Math.sqrt( header.energyIn/5227060.0F));
+				     Math.sqrt( header.energyIn/MEV_FROM_VEL));
    
 	for (int i = 0; i < timeBounds.length; i++ ) {
-	    energyChannels[i] = (float)(header.energyIn - 5227060.0F * 
+	    energyChannels[i] = (float)(header.energyIn - MEV_FROM_VEL * 
 					Math.pow(FlightPath(detID, hist) 
 				     / (timeBounds[i] - timeToSample), 2.0)); 
 	}
