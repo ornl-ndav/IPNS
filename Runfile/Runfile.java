@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.12  2000/03/11 03:06:19  hammonds
+ * Fixed small problem with TimeScales for V<4 and with SourceToSampleTime( float)
+ *
  * Revision 5.11  2000/03/10 04:10:37  hammonds
  * Changed code to use energy conversion factor from the new PhysicalConstants class.  Small changes
  *
@@ -257,7 +260,8 @@ public class Runfile implements Cloneable {
 			       + (float)runFile.detectorAngle[i]
 			       + " " + (float)runFile.flightPath[i] + " "
 			       + (float)runFile.detectorHeight[i] + " "
-			       + runFile.detectorType[i]);
+			       + runFile.detectorType[i] + " " 
+			       + runFile.timeScale[i]);
 	}
 	float data[];
 	data = runFile.Get1DSpectrum(1, 1);
@@ -560,6 +564,16 @@ public class Runfile implements Cloneable {
 		}
  		maxSubgroupID[nHist] = group;
 	    }
+
+	runfile.seek(this.header.timeScaleTable.location);
+	short[] timeScaleTemp = new short[this.header.timeScaleTable.size/2 + 1];
+	timeScale = new float[this.header.timeScaleTable.size/2 + 1];
+	timeScaleTemp = ReadShortArray(runfile,
+					 header.timeScaleTable.size/2);
+	for (i = 1; i <= this.header.timeScaleTable.size/2; i++) {
+	    timeScale[i] = (float)(1 + timeScaleTemp[i]/ Math.pow( 2, 15));
+	}
+
 	properties = new Properties();
 	runfile.seek( this.header.messageRegion.location );
 	byte[] messageBytes = new byte[this.header.messageRegion.size];
@@ -922,7 +936,7 @@ public class Runfile implements Cloneable {
     public double SourceToSampleTime(double energy){
 	double timeToSample = 
 	    SourceToSample() / Math.sqrt(energy/MEV_FROM_VEL);
-	return this.header.sourceToSample;
+	return timeToSample;
     }
 
     /**
