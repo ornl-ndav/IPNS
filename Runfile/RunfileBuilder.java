@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.41  2002/01/02 19:48:15  hammonds
+ * Changes to push a version number into the detector map so that version 6 can get a larger size to allow for a bigger data area.
+ *
  * Revision 5.40  2002/01/02 16:39:05  hammonds
  * Added new constructor that sets the versionNumber
  *
@@ -339,7 +342,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		new DetectorMap[numOfHistograms * (header.numOfElements + 1)];
 	}
 	for ( int i = 0; i < detectorMap.length; i++ ) {
-	    detectorMap[i] = new DetectorMap( header.iName );
+	    detectorMap[i] = new DetectorMap( header.iName, header.versionNumber );
 	}
 	timeField = new TimeField[1];
 	timeField[0] = new TimeField();
@@ -818,12 +821,13 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	if( detectorMap.length > 0 ) {
 	    runfile.seek( 8 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt(  ( detectorMap.length - 1 ) * 4 );
+	    runfile.writeInt(  ( detectorMap.length - 1 ) * DetectorMap.mapSize(header.versionNumber ));
 	    runfile.seek( offsetToFree );
 	    for( int ii = 1; ii < detectorMap.length; ii++ ) {
 		detectorMap[ii].Write( runfile );
  	    }
-	    offsetToFree = offsetToFree + ( detectorMap.length - 1 ) * 4;
+	    offsetToFree = offsetToFree + ( detectorMap.length - 1 ) * 
+		DetectorMap.mapSize(header.versionNumber);
 	}
 
 	//  Write time fields
