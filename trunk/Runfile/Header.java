@@ -12,6 +12,10 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.4  2001/02/27 21:06:36  hammonds
+ * Took out excess prints in read Unsigned Integer.
+ * Added readUnsignedLong
+ *
  * Revision 5.3  2000/05/22 18:37:21  hammonds
  * Fixed problem reading run numbers out of vesion 2 files
  *
@@ -164,7 +168,31 @@ public class Header implements Cloneable {
 	byte b[] = new byte[length];
 	int c[] = new int[length];
 	int nBytesRead = inFile.read(b, 0, length);
+	//	for ( int i = 0; i < length; i++ ){
+	//	    System.out.println ( "b[" + i + "] = " + b[i] );
+	//	}
 	int num = 0;
+	for (int i = 0; i < length; ++i) {
+	    if(b[i] < 0) {
+		c[i] = b[i] + 256;
+	    }
+	    else {
+		c[i] = b[i];
+	    }
+	    num += c[i] * (int)Math.pow(256.0, (double)i);
+	}
+	return num;
+    }
+
+    // --------------------------- readUnsignedInteger -------------------
+
+    protected long readUnsignedLong(RandomAccessFile inFile,
+				      int length) throws IOException {
+
+	byte b[] = new byte[length];
+	int c[] = new int[length];
+	int nBytesRead = inFile.read(b, 0, length);
+	long num = 0;
 	for (int i = 0; i < length; ++i) {
 	    if(b[i] < 0) {
 		c[i] = b[i] + 256;
