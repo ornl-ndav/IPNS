@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.29  2003/03/19 16:13:39  hammonds
+ * Remove debug print.
+ *
  * Revision 6.28  2003/03/12 22:38:17  hammonds
  * Fix trailing characters at the end of username.
  *
@@ -1146,7 +1149,6 @@ public class Runfile implements Cloneable {
 				segments[tminID + ll].column = 1; 
 				segments[tminID + ll].length = 
 				    DC5.LENGTH[7]/ 64; 
-				System.out.println(segments[tminID + ll].length);
 				segments[tminID + ll].width = 
 				    DC5.WIDTH[7]; 
 				segments[tminID + ll].depth = 
