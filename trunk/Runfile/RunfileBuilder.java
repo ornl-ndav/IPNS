@@ -4,9 +4,8 @@ import java.io.*;
 /*
  *
  * $Log$
- * Revision 5.9  2001/04/03 20:47:15  hammonds
- * added detector dataSource and minID tables.
- * added writeIntTable and writeFloatTable to simplify writing out the run file.
+ * Revision 5.10  2001/04/09 18:36:14  hammonds
+ * Added functions for dataSource and minID.
  *
  * Revision 5.8  2001/03/15 17:24:58  hammonds
  * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
@@ -651,7 +650,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
 	header.Write( runfile );
 
+	offsetToFree = writeFloatTable( runfile, detectorAngle, 
+					offsetToFree, 72);
 	// Write Detector Angles
+	/*
 	if (detectorAngle.length > 0 ){
 	    runfile.seek( 72 );
 	    runfile.writeInt( offsetToFree );
@@ -662,7 +664,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    }
 	    offsetToFree = offsetToFree + (detectorAngle.length - 1) * 4;
 	}
+	*/
+	offsetToFree = writeFloatTable( runfile, flightPath, offsetToFree, 80);
 	//Write Flight Path Lengths
+	/*
 	if ( flightPath.length > 0 ) {
 	    runfile.seek( 80 );
 	    runfile.writeInt( offsetToFree );
@@ -673,8 +678,12 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    }
 	    offsetToFree = offsetToFree + ( flightPath.length - 1 ) * 4;
 	}
+	*/
 	//Write detector heights
-	if (detectorHeight.length > 0 ) {
+	offsetToFree = writeFloatTable( runfile, detectorHeight, 
+					offsetToFree, 88);
+
+	/*	if (detectorHeight.length > 0 ) {
 	    runfile.seek( 88 );
  	    runfile.writeInt( offsetToFree );
 	    runfile.writeInt( ( detectorHeight.length - 1 ) * 4 );
@@ -684,6 +693,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    }
 	    offsetToFree = offsetToFree + ( detectorHeight.length - 1 ) * 4;
 	}
+	*/
 	//Write detector type
 	if ( detectorType.length > 0 ) {
 	    runfile.seek( 96 );
@@ -921,6 +931,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    offsetToFree = offsetToFree + 
 		( minID.length - 1 ) * 4;
 	}
+	
+	offsetToFree = writeIntTable( runfile, dataSource, offsetToFree, 832);
+	offsetToFree = writeIntTable( runfile, minID, offsetToFree, 840);
 	//  Write detector Time Scaling factors 
 	if( timeScale.length > 1 ) {
 	    runfile.seek( 24 );
