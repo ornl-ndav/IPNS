@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.8  2001/03/15 17:24:58  hammonds
+ * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
+ *
  * Revision 5.7  2000/03/11 03:07:43  hammonds
  * Fixed small problem with TimeScales.
  *
@@ -595,6 +598,24 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
     }
 
+    public void addDetectorCrateNum( int[] crateNum ) {
+	this.crateNum = new int[ crateNum.length +1 ];
+	System.arraycopy(crateNum, 0, this.crateNum, 1, 
+			 crateNum.length);
+    }
+
+    public void addDetectorSlotNum( int[] slotNum ) {
+	this.slotNum = new int[ slotNum.length +1 ];
+	System.arraycopy(slotNum, 0, this.slotNum, 1, 
+			 slotNum.length);
+    }
+
+    public void addDetectorInputNum( int[] inputNum ) {
+	this.inputNum = new int[ inputNum.length +1 ];
+	System.arraycopy(inputNum, 0, this.inputNum, 1, 
+			 inputNum.length);
+    }
+
     public void addDiscriminatorLevels( int[] lld, int[] uld ) {
 	this.discriminator = new DiscLevel[ lld.length + 1 ];
 	for (int ii = 1; ii <= lld.length; ii++ ) {
@@ -823,6 +844,42 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    }
 	    offsetToFree = offsetToFree + 
 		( numSegs2.length - 1 ) * 4;
+	}
+	//  Write crate # for this detector
+	if( crateNum.length > 0 ) {
+	    runfile.seek( 792 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( crateNum.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < crateNum.length; ii++ ) {
+		runfile.writeInt( crateNum[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( crateNum.length - 1 ) * 4;
+	}
+	//  Write slot in crate # for this detector
+	if( slotNum.length > 0 ) {
+	    runfile.seek( 800 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( slotNum.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < slotNum.length; ii++ ) {
+		runfile.writeInt( slotNum[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( slotNum.length - 1 ) * 4;
+	}
+	//  Write input on slot # for this detector
+	if( inputNum.length > 0 ) {
+	    runfile.seek( 808 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( ( inputNum.length - 1 ) * 4 );
+	    runfile.seek( offsetToFree );
+	    for( int ii = 1; ii < inputNum.length; ii++ ) {
+		runfile.writeInt( inputNum[ii] );
+	    }
+	    offsetToFree = offsetToFree + 
+		( inputNum.length - 1 ) * 4;
 	}
 	//  Write detector Time Scaling factors 
 	if( timeScale.length > 1 ) {
