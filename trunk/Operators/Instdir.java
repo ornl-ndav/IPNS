@@ -1,5 +1,5 @@
 /*
- * File: RFBWrapper.java 
+ * File: Instdir.java 
  *
  * Copyright (C) 2001, Alok Chatterjee,
  *                     Ruth Mikkelson, 
@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2003/08/02 14:46:08  hammonds
+ *  Fix constructor with iName argument.  Fix main method
+ *
  *  Revision 1.3  2003/03/12 02:30:26  hammonds
  *  Trim up imports.
  *
@@ -77,8 +80,9 @@ public class Instdir extends  GenericBatch
   {
 	
     super( "Instdir" );
-    Parameter parameter= new Parameter("filename", new String());
-    addParameter( parameter );
+    getParameter(0).setValue(iName);
+    //    Parameter parameter= new Parameter("filename", new String());
+    //    addParameter( parameter );
 
   }
 
@@ -147,12 +151,8 @@ public Instdir()
 
   public static void main(String[] arg)
   {
-
-  //  try{ Class O = Class.forName( "Operators.RFBWrapper");
-  //   }
-  //  catch(Exception s)
-  //    {System.out.println("Error = "+s);
-  //    }
+    Instdir op = new Instdir(arg[0]);
+    System.out.println(op.getResult());
   }
 
 }
