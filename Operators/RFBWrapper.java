@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2001/11/01 20:06:39  chatterjee
+ *  Changed comments
+ *
  *  Revision 1.2  2001/08/01 20:57:32  chatter
  *  Added GPL license statement
  *
@@ -79,7 +82,7 @@ public RFBWrapper()
 
   /* ---------------------------- getCommand ------------------------------- */
   /**
-   * @return	the command name to be used with script processor: in this case, Pause
+   * @return	the command name to be used with script processor: in this case, RFBWrapper
    */
    public String getCommand()
    {
