@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/01/08 20:15:36  hammonds
+ *  Fixed problem setting iName
+ *
  *  Revision 1.1  2002/01/08 19:32:58  hammonds
  *  Added this class to overload the RFBWrapper routine.  This method will also set the instrument name, versionNumber, and type.
  *
@@ -136,7 +139,7 @@ public RFBWrapper2()
       if (S != null)
 	  {
 	      rfb.setFileName( S + ".run");
-	      rfb.headerSet("iName",vers );
+	      rfb.headerSet("iName",iName );
 	      rfb.headerSet("versionNumber",vers );
 	      rfb.headerSet("instrumentType",type );
 	  }
