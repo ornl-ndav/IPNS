@@ -4,6 +4,7 @@ import java.io.*;
 import java.lang.*;
 import java.util.*;
 import IPNS.Control.*;
+import IPNS.Calib.*;
 
 /**
 This class is designed to provide an interface to IPNS run files for versions
@@ -22,6 +23,11 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.4  2002/02/13 18:36:03  hammonds
+ * Changed DetectorHeight gets to accomodate LPSDs in new runfiles.
+ * Changed ordering of row & coloumn for lpsds in new files.
+ * Switched how detector lengths, widths,... are retrieved for old files.  They are now stored in the DC5 class.
+ *
  * Revision 6.3  2002/02/12 19:46:10  hammonds
  * Fixed offset for data reads for area detectors in Get1DSpectrum.
  * Changed number of y channels in SCD from 87 to 85.  This hides data on the electronics.
@@ -709,22 +715,22 @@ public class Runfile implements Cloneable {
 		    header.iName.equalsIgnoreCase( "qens" )||
 		    header.iName.equalsIgnoreCase( "hipd" )||
 		    header.iName.equalsIgnoreCase( "chex" ) ){
-		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
 		    minID[ii] = ii;
 		    segments[ii] = new Segment();
 		    segments[ii].detID = ii; 
 		    segments[ii].row = 1; 
 		    segments[ii].column = 1; 
-		    segments[ii].length = LENGTH[detectorType[ii]]; 
-		    segments[ii].width = WIDTH[detectorType[ii]]; 
-		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].length = DC5.LENGTH[detectorType[ii]]; 
+		    segments[ii].width = DC5.WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DC5.DEPTH[detectorType[ii]]; 
 		    segments[ii].efficiency = 
-			EFFICIENCY[detectorType[ii]]; 
+			DC5.EFFICIENCY[detectorType[ii]]; 
 		    segments[ii].segID = ii;
 		    if ( header.versionNumber < 4 ) {
  			crateNum[ii] = (ii-1)/160 + 1;
@@ -750,8 +756,8 @@ public class Runfile implements Cloneable {
 		    }
 		    case 11: {
 			detectorType[ii] = 11;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 			}
 		    }
@@ -767,8 +773,8 @@ public class Runfile implements Cloneable {
 		    }
 		    case 12: {
 			detectorType[ii] = 12;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -782,8 +788,8 @@ public class Runfile implements Cloneable {
 		    }
 		    case 13: {
 			detectorType[ii] = 13;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -813,7 +819,7 @@ public class Runfile implements Cloneable {
 		    case 16: {
 			detectorType[ii] = 16;
 			psdOrder[ii] = 2;
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -828,22 +834,22 @@ public class Runfile implements Cloneable {
 		    case 0:
 		    case 1:
 		    case 9: {
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+			detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
 			minID[ii] = ii;
 			segments[ii] = new Segment();
 			segments[ii].detID = ii; 
 			segments[ii].row = 1; 
 			segments[ii].column = 1; 
-			segments[ii].length = LENGTH[detectorType[ii]]; 
-			segments[ii].width = WIDTH[detectorType[ii]]; 
-			segments[ii].depth = DEPTH[detectorType[ii]]; 
+			segments[ii].length = DC5.LENGTH[detectorType[ii]]; 
+			segments[ii].width = DC5.WIDTH[detectorType[ii]]; 
+			segments[ii].depth = DC5.DEPTH[detectorType[ii]]; 
 			segments[ii].efficiency = 
-			    EFFICIENCY[detectorType[ii]]; 
+			    DC5.EFFICIENCY[detectorType[ii]]; 
 			segments[ii].segID = ii;
 			break;
 		    }
@@ -852,10 +858,10 @@ public class Runfile implements Cloneable {
 		    case 13:
 		    case 15:
 		    case 16: {
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
+			detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
+			detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
 			minID[ii] = ii;
 			for ( int segY = 0; segY < header.numOfY; segY++) {
 			    for ( int segX = 0; segX < header.numOfX; segX++) {
@@ -865,13 +871,13 @@ public class Runfile implements Cloneable {
 				segments[index].row = segY + 1; 
 				segments[index].column = segX + 1; 
 				segments[index].length = 
-				    LENGTH[detectorType[ii]]/header.numOfY; 
+				    DC5.LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
-				    WIDTH[detectorType[ii]]/header.numOfX; 
+				    DC5.WIDTH[detectorType[ii]]/header.numOfX; 
 				segments[index].depth = 
-				    DEPTH[detectorType[ii]]; 
+				    DC5.DEPTH[detectorType[ii]]; 
 				segments[index].efficiency = 
-				    EFFICIENCY[detectorType[ii]]; 
+				    DC5.EFFICIENCY[detectorType[ii]]; 
 				segments[index].segID = index;
 			    }
 			}
@@ -1562,7 +1568,7 @@ public class Runfile implements Cloneable {
 		for ( int segX = 0; segX < numSegs2[ii]; segX ++ ) {
 		    int segID = minID[ii] + segX + segY * numSegs2[ii];
 		    segments[segID] = 
-			new Segment( ii, segX +1 , segY + 1, 
+			new Segment( ii, segY +1 , segX + 1, 
 				     detectorLength[ii]/numSegs1[ii],
 				     detectorWidth[ii]/numSegs2[ii],
 				     detectorDepth[ii],
@@ -2413,7 +2419,7 @@ public class Runfile implements Cloneable {
     public double RawFlightPath(Segment seg){
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    return this.flightPath[id];
+		return this.flightPath[id];
 	}
 	else {
 	    float fromLeft = (float)
@@ -2459,7 +2465,17 @@ public class Runfile implements Cloneable {
     public double DetectorHeight(Segment seg, int hist){
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    return this.detectorHeight[id];
+	    if ( (numSegs1[id] == 1) && (numSegs2[id] == 1)) {
+		return this.detectorHeight[id];
+	    }
+	    else {
+		float rotCos = 
+		    (float) Math.cos(detectorRot2[id] * Math.PI/180.0);
+		float psdHeight = detectorHeight[id] - 
+		    (detectorLength[id]/200.0f) * rotCos +
+		    (((float)seg.row / (float)numSegs1[id]) * detectorLength[id]/100.0f) * rotCos;
+		return psdHeight;
+	    }
 	}
 	else {
 	    double height = header.yDisplacement + header.yLower + 
@@ -2488,7 +2504,17 @@ public class Runfile implements Cloneable {
     public double RawDetectorHeight(Segment seg){
 	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    return this.detectorHeight[seg.detID];
+	    if ( (numSegs1[id] == 1) && (numSegs2[id] == 1)) {
+		return this.detectorHeight[seg.detID];
+	    }
+	    else {
+		float rotCos = 
+		    (float) Math.cos(detectorRot2[id] * Math.PI/180.0);
+		float psdHeight = detectorHeight[id] - 
+		    (detectorLength[id]/200.0f) * rotCos +
+		    (((float)seg.row / (float)numSegs1[id]) * detectorLength[id]/100.0f) * rotCos;
+		return psdHeight;
+	    }
 	}
 	else {
 	    double height = header.yDisplacement + header.yLower + 
