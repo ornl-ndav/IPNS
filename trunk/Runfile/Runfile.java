@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.36  2003/04/16 20:32:21  hammonds
+ * Fixed Area Detector Size Problems.  There is still ~1 pixel discrepancy in absolute pixel location.
+ *
  * Revision 6.35  2003/04/14 21:43:38  hammonds
  * Fixed problem with #of segments for SCD.  There are 2 extra channels of y for diagnostic information.
  *
@@ -691,7 +694,9 @@ public class Runfile implements Cloneable {
 	    detectorHeight = tDetectorHeight;
 	    detectorType = tDetectorType;
 	    detectorMap = tDetectorMap;
-	    detectorAngle[detectorAngle.length - 1] = (float)header.dta;
+	    detectorAngle[detectorAngle.length - 1] = (float)header.dta -
+	      (float)(Math.atan(header.xDisplacement/header.dtd) 
+		      * 180/Math.PI);
 	    flightPath[flightPath.length - 1] = (float)header.dtd/100.0f;
 	    detectorHeight[detectorHeight.length - 1] = 
 		(float)header.yDisplacement/100.0f;
@@ -1036,35 +1041,31 @@ public class Runfile implements Cloneable {
 		case 13:
 		case 15:
 		case 16: {
-		    //			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-		    detectorLength[ii] = (float)(header.yUpper - header.yLower);
-		    detectorWidth[ii] = (float)(header.xRight - header.xLeft );
-		    detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
-		    detectorHeight[ii] = (float)header.yDisplacement/100.0f;
-		    minID[ii] = ii;
-		    int index;
-		    for ( int segY = 0; segY < numSegs1[ii]; segY++) {
-			for ( int segX = 0; segX < numSegs2[ii]; segX++) {
-			    index = ii + segX + segY *( numSegs2[ii]);
-			    segments[index] = new Segment();
-			    segments[index].detID = ii; 
-			    segments[index].row = segY + 1; 
-			    segments[index].column = segX + 1; 
-			    segments[index].length = 
-				detectorLength[ii]/numSegs1[ii]; 
-			    segments[index].width = 
-				detectorWidth[ii]/numSegs2[ii]; 
-			    segments[index].depth = 
-				DC5.DEPTH[detectorType[ii]]; 
-			    segments[index].efficiency = 
-				DC5.EFFICIENCY[detectorType[ii]]; 
-			    segments[index].segID = index;
-			}
+		  detectorLength[ii] = (float)(header.yUpper - header.yLower);
+		  detectorWidth[ii] = (float)(header.xRight - header.xLeft );
+		  detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
+		  detectorHeight[ii] = (float)header.yDisplacement/100.0f;
+		  minID[ii] = ii;
+		  int index;
+		  for ( int segY = 0; segY < numSegs1[ii]; segY++) {
+		    for ( int segX = 0; segX < numSegs2[ii]; segX++) {
+		      index = ii + segX + segY *( numSegs2[ii]);
+		      segments[index] = new Segment();
+		      segments[index].detID = ii; 
+		      segments[index].row = segY + 1; 
+		      segments[index].column = segX + 1; 
+		      segments[index].length = detectorLength[ii]/numSegs1[ii];
+		      segments[index].width = detectorWidth[ii]/numSegs2[ii]; 
+		      segments[index].depth = DC5.DEPTH[detectorType[ii]]; 
+		      segments[index].efficiency = 
+			DC5.EFFICIENCY[detectorType[ii]]; 
+		      segments[index].segID = index;
 		    }
-		    break;
+		  }
+		  break;
 		}
 		}		
-
+		
 	    }
 	}
 	if ( header.iName.equalsIgnoreCase( "glad" ) || 
@@ -2452,11 +2453,11 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double fromLeft = 
-		(seg.column * ( -detectorWidth[detID])/100.0f ) 
+		((seg.column + .5) * ( -detectorWidth[detID])/100.0f ) 
 		/ numSegs2[detID];
 	    double fromCenter = fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f;
-	    double offsetAngle = Math.asin(fromCenter / (header.dtd/100)) 
+	    double offsetAngle = Math.atan(fromCenter / (header.dtd/100)) 
 		* ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	    
@@ -2590,7 +2591,7 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    float fromLeft = (float)
-		(seg.column * ( -detectorWidth[id])/100.0f ) 
+		((seg.column+.5) * ( -detectorWidth[id])/100.0f ) 
 		/ numSegs2[id];
 	    float fromCenter = (float)(fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f);
@@ -2686,7 +2687,7 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double height = header.yDisplacement + header.yLower + 
-		(seg.row * (detectorLength[id])) / numSegs1[id];
+		((seg.row+.5) * (detectorLength[id])) / numSegs1[id];
 	    return height/100.0f;
 	}
     }
