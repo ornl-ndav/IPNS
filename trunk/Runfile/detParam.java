@@ -34,7 +34,7 @@ information.
 */
 
 public detParam(Runfile runFile){
-    Object[][] detParamList = new Object[runFile.NumDet()][13];
+    Object[][] detParamList = new Object[runFile.NumDet()][14];
    System.out.println(runFile.NumDet() );
    for (int i = 0; i < runFile.NumDet(); i++) {
 //       System.out.println( "ID: " + i );
@@ -47,17 +47,18 @@ public detParam(Runfile runFile){
      detParamList[i][6] = new Integer((short)runFile.DetectorType( i + 1 ));
      detParamList[i][7] = new Integer((int)runFile.LowerLevelDisc(i + 1));
      detParamList[i][8] = new Integer((int)runFile.UpperLevelDisc(i + 1));
-     detParamList[i][9] = new Integer((int)runFile.DataSource(i + 1));
+     detParamList[i][9] = new Integer((int)runFile.PsdOrder(i + 1));
      detParamList[i][10] = new Integer((int)runFile.NumSegs1(i + 1));
      detParamList[i][11] = new Integer((int)runFile.NumSegs2(i + 1));
-     detParamList[i][12] = new Integer((int)runFile.MinID(i + 1));
+     detParamList[i][12] = new Integer((int)runFile.DataSource(i + 1));
+     detParamList[i][13] = new Integer((int)runFile.MinID(i + 1));
      
      }
 
    String[] columnHeading = {"ID", "Raw Length", "Length", "Raw Angle",
-				"Angle", "Height", "Type", "Lower Disc",
-				"Upper Disc","Data Source", "numSegs1",
-			        "numSegs2", "Min ID"};
+			     "Angle", "Height", "Type", "Lower Disc",
+			     "Upper Disc", "psdOrder", "numSegs1",
+			     "numSegs2","Data Source", "Min ID"};
 
    detParamJTable = new JTable(detParamList, columnHeading);
    setViewportView(detParamJTable);
