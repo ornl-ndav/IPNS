@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.8  2002/04/23 13:52:06  hammonds
+ * Changed bad mapping of LRMECS short detectors.
+ * Changed bad mapping of Area detector positions.
+ *
  * Revision 6.7  2002/04/22 18:07:52  hammonds
  * Changes to accomodate SAD w/ 128x128 or 64x64
  *
@@ -659,7 +663,7 @@ public class Runfile implements Cloneable {
 			detectorType[ii] = 3;
 			break;
 		    }
-		    case 3: {
+		    case 5: {
 			detectorType[ii] = 4;
 			break;
 		    }
@@ -2422,6 +2426,7 @@ public class Runfile implements Cloneable {
 	    double offsetAngle = Math.atan(fromCenter / (header.dtd/100)) 
 		* ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
+	    
 	}
     }
 
@@ -2481,7 +2486,7 @@ public class Runfile implements Cloneable {
 	    float fromCenter = (float)(fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f);
 	    
-	    return Math.sqrt(flightPath[detID] + flightPath[detID] 
+	    return Math.sqrt(flightPath[detID] * flightPath[detID] 
 			     + RawDetectorHeight(seg)*RawDetectorHeight (seg)
 			     + fromCenter * fromCenter );
 	}
