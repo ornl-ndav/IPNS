@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.6  2003/09/17 14:42:27  hammonds
+ *  Added bell and extra formatting to point out messages from caught exceptions
+ *
  *  Revision 1.5  2003/08/02 14:46:07  hammonds
  *  Fix constructor with iName argument.  Fix main method
  *
@@ -141,7 +144,21 @@ public IncNextRun()
 		      datFile.close();
 		  }
 		  catch (IOException e) {
-		      System.out.println("Can't open file " + datFileName);
+		      System.out.println("/007/007/007/007");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>     Can't open file " + 
+					 datFileName);
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		      System.exit(0);
 		  }
 		  paramFileName = new String(instDir + fileSep + iName + 
@@ -153,7 +170,21 @@ public IncNextRun()
 		      paramFile.close();
 		  }
 		  catch (IOException e) {
-		      System.out.println("Can't open file " + paramFileName);
+		      System.out.println("/007/007/007/007");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>      Can't open file " + 
+					 paramFileName);
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		      System.exit(0);
 		  }
 		  try {
@@ -162,8 +193,21 @@ public IncNextRun()
 			  intValue() + 1;
 		  }
 		  catch (NumberFormatException e) {
-		      System.out.println("Improper LastRun number in parameter"
-					 + " file");
+		      System.out.println("/007/007/007/007");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>       Improper LastRun number " +
+					 "in parameter file");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		      System.exit(0);
 		  }
 		  params.put("LastRun", Integer.toString(runNum));
@@ -180,8 +224,21 @@ public IncNextRun()
 		      paramFileOut.close();
 		  }
 		  catch (IOException e) {
-		      System.out.println("Can't open file " + 
+		      System.out.println("/007/007/007/007");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>     Can't open file " + 
 					 paramFileName);
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		      System.exit(0);
 		  }
 	      }
