@@ -15,6 +15,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.2  2002/07/02 16:57:35  hammonds
+ * Changed Sort order
+ *
  * Revision 1.1  2002/07/02 16:48:28  hammonds
  * Class added to print out username and title for runfiles in a given directory
  *
@@ -77,7 +80,7 @@ public class FileSummary {
 	for ( int ii=0; ii< inFiles.length; ii++) {
 	    for ( int jj = 0; jj<( inFiles.length - 1 -ii); jj++) {
 		if ( inFiles[jj+1].getName().compareTo(inFiles[jj].getName())
-		     > 0) {
+		     < 0) {
 		    tempFile = inFiles[jj];
 		    inFiles[jj] = inFiles[jj+1];
 		    inFiles[jj+1] = tempFile;
