@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.45  2003/10/15 02:17:43  hammonds
+ * Fix problems with Javadocs.
+ *
  * Revision 6.44  2003/09/19 03:19:20  hammonds
  * Remove some messages printing when loading a runfile
  *
@@ -589,7 +592,7 @@ public class Runfile implements Cloneable {
        method will load data from the Runfile's header.  Other access methods 
        are provided to retrieve the loaded data.
 
-       @param runfile - This argument should contain the file path unless the 
+       @param infileName - This argument should contain the file path unless the 
        file is in the current directory.
     */
     public Runfile( String infileName ) throws IOException {
@@ -1011,8 +1014,8 @@ public class Runfile implements Cloneable {
 		    slotNum[ii] = 19;
 		    inputNum[ii] = 1;
 		    psdOrder[ii] = 2;
-		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = 2;
+		    numSegs2[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs1[ii] = 2;
 		    break;
 		}
 		}
@@ -1030,8 +1033,8 @@ public class Runfile implements Cloneable {
 		    slotNum[ii] = 19;
 		    inputNum[ii] = 1;
 		    psdOrder[ii] = 2;
-		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-		    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+		    numSegs2[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs1[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 		    break;
 		}
 		}
@@ -2466,7 +2469,7 @@ public class Runfile implements Cloneable {
     /**
        This method retrieves the actual scattering angle for a given detector
        segment. 
-       @param detID The detector segment.
+       @param seg The detector segment.
        @return The scattering angle.
     */
     public double RawDetectorAngle(Segment seg){
@@ -3208,7 +3211,7 @@ public class Runfile implements Cloneable {
     /**
        Retrieves the sum of counts in a 1D detector.  This method opens and 
        closes the file on each call.
-       @param detID Detector ID to be retrieved.
+       @param seg segment to be retrieved.
        @param hist Histogram number for data to retrieved.
        @return The sum.
     */
@@ -3387,7 +3390,7 @@ public class Runfile implements Cloneable {
     /**
        Get number of data channels for a given detector.
        @deprecated Should be using @link #NumChannelsBinned( Segment, int )
-       @param id - Detector ID.
+       @param seg - segment to be retrieved.
        @param hist - Histogram number.
        @return Number of channels binned.
     */
@@ -3445,7 +3448,7 @@ public class Runfile implements Cloneable {
 
     /**
        Minimum Binned time in time field table.
-       @param id - Detector segment.
+       @param seg - Detector segment.
        @param hist - Histogram number.
        @return Raw minumum time in the time field table.
     */
@@ -3497,7 +3500,7 @@ public class Runfile implements Cloneable {
 
     /**
        Maximum Binned time in time field table.
-       @param id - Detector segment.
+       @param seg - Detector segment.
        @param hist - Histogram number.
        @return Raw maxumum time in the time field table.
     */
@@ -3597,7 +3600,7 @@ public class Runfile implements Cloneable {
        Retrieves the time channel boundaries for a given spectrum.  Note that 
        since this is histogram data, there is one more boundary value than 
        there are elements in a spectrum.
-       @param id - Detector ID.
+       @param seg - Detector ID.
        @param hist - Histogram number.
        @return Array of boundaries with 1 + number of channels values.
     */
@@ -3798,7 +3801,7 @@ public class Runfile implements Cloneable {
        that since this is histogram data, there is one more boundary value 
        than there are elements in a spectrum.
        @deprecated Should be using @link #EnergyChannelBoundaries( Segment, int )
-       @param id - Detector ID.
+       @param detID - Detector ID.
        @param hist - Histogram number.
        @return Array of boundary values with 1 + number of channels values.
     */
@@ -3888,7 +3891,7 @@ public class Runfile implements Cloneable {
        Retrieves a list of IDs mapped to a subgroup.  Note that this is a 0
        indexed array since there is no reference to a paticular group or ID for
        this array.
-       @param int sg - subgroup number
+       @param  sg - subgroup number
        @return A list of detector IDs
     */
     public int[] IdsInSubgroup( int sg ) {
@@ -3901,7 +3904,7 @@ public class Runfile implements Cloneable {
        Retrieves a list of Segments mapped to a subgroup.  Note that this is 
        a 0 indexed array since there is no reference to a paticular group or 
        ID for this array.
-       @param int sg - subgroup number
+       @param sg - subgroup number
        @return A list of Segments
     */
     public Segment[] SegsInSubgroup( int sg ) {
@@ -3932,7 +3935,7 @@ public class Runfile implements Cloneable {
    
    /**
        Checks to see if an ID is a beam monitor.
-       @param id - detector segment.
+       @param seg - detector segment.
        @return boolean true if ID is a beam monitor.
    */
    public boolean IsIDBeamMonitor( Segment seg ) {
@@ -4069,8 +4072,8 @@ public class Runfile implements Cloneable {
        Compares this runfile to another Runfile object to see if they have 
        the same structure.  i.e. detector map and time field table are the 
        same.
-       @ param runFile - runfile to compare
-       @ return true if the same structure and false if the structure is 
+       @param runFile - runfile to compare
+       @return true if the same structure and false if the structure is 
        different.
     */
     public boolean isEqual( Runfile runFile ) {
@@ -4103,8 +4106,8 @@ public class Runfile implements Cloneable {
        Compares this runfile to a list of Runfile objects to see if they have 
        the same structure.  i.e. detector map and time field table are the 
        same.
-       @ param runFile[] - list of runfiles to compare
-       @ return true if the same structure and false if the structure is 
+       @param runFile - list of runfiles to compare
+       @return true if the same structure and false if the structure is 
        different.
     */
     public boolean isEqual( Runfile[] runFile ) {
