@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2003/03/04 15:56:52  hammonds
+ *  *** empty log message ***
+ *
  *  Revision 1.1  2003/02/13 17:05:01  hammonds
  *  Initial In
  *
@@ -78,7 +81,6 @@ public class VaxAddAncillaryEquipment2 extends  GenericBatch
 public VaxAddAncillaryEquipment2()
   { super( "VaxAddAncillaryEquipment" );
 	//System.out.println("def constructor");
-     setDefaultParameters();
   }
 
   /* ---------------------------- getCommand ------------------------------- */
