@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.5  2002/02/14 21:05:53  hammonds
+ * Added detector info for 1x8 LPSDs.
+ *
  * Revision 6.4  2002/02/13 18:36:03  hammonds
  * Changed DetectorHeight gets to accomodate LPSDs in new runfiles.
  * Changed ordering of row & coloumn for lpsds in new files.
@@ -253,25 +256,28 @@ public class Runfile implements Cloneable {
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
 		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
-	          20.0F};
+	          20.0F, 20.32F};
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
-		 0.493F, 3.81F, 3.81F, 30.F, 20.0F, 40.0F, 40.0F, 1.0F, 1.0F };
+		 0.493F, 3.81F, 3.81F, 30.F, 20.0F, 40.0F, 40.0F, 1.0F, 1.0F,
+		 2.377F };
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
-		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F};
+		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F,
+		 2.377F};
     public static final float[] 
 	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
 		      1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 
-		      1.00F, 1.00F};
+		      1.00F, 1.00F, 1.0F};
     public static final int[]
-	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1 };
+	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1,
+			  1 };
     public static final int[]
-	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1, 85, 64, 128, 128,
-			  256, 256 };
+	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
+			  256, 256,8 };
     public static final int[]
 	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128, 
-			  1, 1 };
+			  1, 1,1  };
     public static final int[] SEGMENT_SELECT = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256 };
     public static final String[] TYPE_DESCRIPTION ={"Not a detector",
@@ -290,8 +296,8 @@ public class Runfile implements Cloneable {
 						    "Ordella 2400 SAND 40cm",
 						    "Ordella 2410 SAND 40cm",
 						    "Ordella 1204 POSY1 10cm",
-						    "Ordella 1210 POSY2 20cm"
-    
+						    "Ordella 1210 POSY2 20cm",
+  						    "1\" x 8\" LPSD"  
     };
     static double MEV_FROM_VEL = 
 	PhysicalConstants.meV_FROM_m_PER_microsec_CONST;
