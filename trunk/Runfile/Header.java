@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.12  2001/07/24 14:57:19  hammonds
+ * Fixes to methods that set header parameters.
+ *
  * Revision 5.11  2001/07/20 21:41:01  hammonds
  * Fixed some problems with setting usermname and runtitle
  *
@@ -1135,7 +1138,7 @@ public static void main(String[] args) throws IOException{
 	else if ( element.equalsIgnoreCase( "lpsdClock")) {
 	    lpsdClock = val;
 	}
-	if ( ( element.equalsIgnoreCase( "nDet") ||
+	else if ( ( element.equalsIgnoreCase( "nDet") ||
 	    element.equalsIgnoreCase( "numOfCyclesPreset") ||
 	    element.equalsIgnoreCase( "numOfCyclesCompleted") ||
 	    element.equalsIgnoreCase( "groupToMonitor") ||
@@ -1297,94 +1300,94 @@ public static void main(String[] args) throws IOException{
 	if ( element.equalsIgnoreCase( "numOfBlocks") ) {
 	    numOfBlocks= val;
 	}
-	if( element.equalsIgnoreCase( "histStartAddress") ) {
+	else if( element.equalsIgnoreCase( "histStartAddress") ) {
 	    histStartAddress = val;
 	}
-	if( element.equalsIgnoreCase( "offsetToFree") ) {
+	else if( element.equalsIgnoreCase( "offsetToFree") ) {
 	    offsetToFree = val;
 	}
-	if( element.equalsIgnoreCase( "versionNumber") ) {
+	else if( element.equalsIgnoreCase( "versionNumber") ) {
 	    versionNumber = val;
 	}
-	if( element.equalsIgnoreCase( "runNum") ) {
+	else if( element.equalsIgnoreCase( "runNum") ) {
 	    runNum = val;
 	}
-	if( element.equalsIgnoreCase( "nextRun") ) {
+	else if( element.equalsIgnoreCase( "nextRun") ) {
 	    nextRun = val;
 	}
-	if( element.equalsIgnoreCase( "presetMonitorCounts") ) {
+	else if( element.equalsIgnoreCase( "presetMonitorCounts") ) {
 	    presetMonitorCounts = val;
 	}
-	if( element.equalsIgnoreCase( "elapsedMonitorCounts") ) {
+	else if( element.equalsIgnoreCase( "elapsedMonitorCounts") ) {
 	    elapsedMonitorCounts = val;
 	}
-	if( element.equalsIgnoreCase( "runAfterFinished") ) {
+	else if( element.equalsIgnoreCase( "runAfterFinished") ) {
 	    runAfterFinished = val;
 	}
-	if( element.equalsIgnoreCase( "totalMonitorCounts") ) {
+	else if( element.equalsIgnoreCase( "totalMonitorCounts") ) {
 	    totalMonitorCounts = val;
 	}
-	if( element.equalsIgnoreCase( "detCalibFile") ) {
+	else if( element.equalsIgnoreCase( "detCalibFile") ) {
 	    detCalibFile = val;
 	}
-	if( element.equalsIgnoreCase( "moderatorCalibFile") ) {
+	else if( element.equalsIgnoreCase( "moderatorCalibFile") ) {
 	    moderatorCalibFile = val;
 	}
-	if( element.equalsIgnoreCase( "totalChannels") ) {
+	else if( element.equalsIgnoreCase( "totalChannels") ) {
 	    totalChannels = val;
 	}
-	if( element.equalsIgnoreCase( "numOfPulses") ) {
+	else if( element.equalsIgnoreCase( "numOfPulses") ) {
 	    numOfPulses = val;
 	}
-	if( element.equalsIgnoreCase( "sizeOfDataArea") ) {
+	else if( element.equalsIgnoreCase( "sizeOfDataArea") ) {
 	    sizeOfDataArea = val;
 	}
-	if( element.equalsIgnoreCase( "hardwareTMin") ) {
+	else if( element.equalsIgnoreCase( "hardwareTMin") ) {
 	    hardwareTMin = val;
 	}
-	if( element.equalsIgnoreCase( "hardwareTMax") ) {
+	else if( element.equalsIgnoreCase( "hardwareTMax") ) {
 	    hardwareTMax = val;
 	}
-	if( element.equalsIgnoreCase( "hardTimeDelay") ) {
+	else if( element.equalsIgnoreCase( "hardTimeDelay") ) {
 	    hardTimeDelay = val;
 	}
-	if( element.equalsIgnoreCase( "maxWavelength") ) {
+	else if( element.equalsIgnoreCase( "maxWavelength") ) {
 	    maxWavelength = val;
 	}
-	if( element.equalsIgnoreCase( "minWavelength") ) {
+	else if( element.equalsIgnoreCase( "minWavelength") ) {
 	    minWavelength = val;
 	}
-	if( element.equalsIgnoreCase( "addressOf1DData") ) {
+	else if( element.equalsIgnoreCase( "addressOf1DData") ) {
 	    addressOf1DData = val;
 	}
-	if( element.equalsIgnoreCase( "addressOf2DData") ) {
+	else if( element.equalsIgnoreCase( "addressOf2DData") ) {
 	    addressOf2DData = val;
 	}
-	if( element.equalsIgnoreCase( "endOfOverflow") ) {
+	else if( element.equalsIgnoreCase( "endOfOverflow") ) {
 	    endOfOverflow = val;
 	}
-	if( element.equalsIgnoreCase( "channels1D") ) {
+	else if( element.equalsIgnoreCase( "channels1D") ) {
 	    channels1D = val;
 	}
-	if( element.equalsIgnoreCase( "firstOverflow") ) {
+	else if( element.equalsIgnoreCase( "firstOverflow") ) {
 	    firstOverflow = val;
 	}
-	if( element.equalsIgnoreCase( "expNum") ) {
+	else if( element.equalsIgnoreCase( "expNum") ) {
 	    expNum = val;
 	}
-	if( element.equalsIgnoreCase( "firstRun") ) {
+	else if( element.equalsIgnoreCase( "firstRun") ) {
 	    firstRun = val;
 	}
-	if( element.equalsIgnoreCase( "lastRun") ) {
+	else if( element.equalsIgnoreCase( "lastRun") ) {
 	    lastRun = val;
 	}
-	if( element.equalsIgnoreCase( "defaultRun") ) {
+	else if( element.equalsIgnoreCase( "defaultRun") ) {
 	    defaultRun = val;
 	}
-	if( element.equalsIgnoreCase( "numOfElements") ) {
+	else if( element.equalsIgnoreCase( "numOfElements") ) {
 	    numOfElements = val;
 	}
-	if( element.equalsIgnoreCase( "MagicNumber") ) {
+	else if( element.equalsIgnoreCase( "MagicNumber") ) {
 	    MagicNumber = val;
 	}
 	else if (element.equalsIgnoreCase( "sourceToSample") ||
