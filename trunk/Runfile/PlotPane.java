@@ -96,23 +96,24 @@ public void run(){
      float[] x_values;
 
      runFile.LeaveOpen();
-     for (int id = 1; id <= runFile.NumDet(); id++) {
+     //     for (int id = 1; id <= runFile.NumDet(); id++) {
+     for (int id = runFile.MinSubgroupID(1); id <= runFile.MaxSubgroupID( 1 ); id++) {
        progressMonitor.setProgress(id);
        progressMonitor.setNote("Detector " + id );
-       if ( runFile.IsBinned( id, 1 ) ) {
-           float min = (float)runFile.MinBinned(id, 1);
+       //       if ( runFile.IsBinned( id, 1 ) ) {
+           float min = (float)runFile.MinBinned(id);
 
-           float max = (float)runFile.MaxBinned(id, 1);
-	   x_values = runFile.TimeChannelBoundaries( id, 1 );
-      	   x_scale = new UniformXScale(min,max,runFile.NumChannelsBinned( id, 1 ) );
+           float max = (float)runFile.MaxBinned(id);
+	   x_values = runFile.TimeChannelBoundaries( id );
+      	   x_scale = new UniformXScale(min,max,runFile.NumChannelsBinned( id ) );
 //	   x_scale = new VariableXScale( x_values );
 
-       	   y_values = runFile.Get1DSpectrum( id, 1 );
+       	   y_values = runFile.Get1DSpectrum( id );
 
 
            spectrum = new Data(x_scale, y_values, id);
 	   data_set.addData_entry ( spectrum );
-           }
+	   //           }
        }
      runFile.Close();
      ImageView image_view = new ImageView(data_set);
