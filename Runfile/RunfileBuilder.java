@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.32  2001/11/19 22:43:12  hammonds
+ * Put in focusing constants in groupIds separate for inelastic instruments.
+ *
  * Revision 5.31  2001/11/19 16:50:34  hammonds
  * added setting the hardwareTimeDelay to the headerSetFromParams
  *
@@ -1779,11 +1782,58 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     public int groupIdsSeparate( int tf, int hist, int[] list ) {
 	int rval = 0;
 	int numBogusSegs = 0;
+	float focLen = 0.0f;
+
 	if ( !timeField[tf].isUsed() ) {
 	    System.out.println( "Error in groupAllSeparate: Time Field " + 
 				tf + " is not valid.");
 	}
 	
+	if ( timeField[tf].timeFocusBit != 0 ) {
+	    if ( header.pseudoTimeUnit == 'I') {
+		boolean hlen = false;
+		boolean llen = false;
+		boolean ulen = false;
+		for (int ii = 0; ii < list.length; ii++ ) {
+		    if ( detectorLength[list[ii]] > 3.0 ) hlen = true;
+		    else if ( detectorLength[list[ii]] < 3.0 ) llen = true;
+		    if ( (hlen == false && llen == false) ||
+			 (hlen == true && llen == true) ) ulen = true;
+		    
+		    
+		}
+		if ( hlen == true && llen == false ) { 
+		    focLen = 4.0f;
+		    
+		}
+		else if ( llen == true && hlen == false ) {
+		    focLen = 2.5f;
+		}
+		if (ulen != true ) {
+		    for (int ii = 0; ii < list.length; ii++ ) {
+			timeScale[list[ii]] = 
+			    (float)(focLen/
+				    Math.sqrt( Math.pow(flightPath[list[ii]], 
+							2.0) +
+					       Math.pow(detectorLength[list[ii]]
+							   /200, 2.0 ))
+				);
+		    }
+		}
+		else {
+		    System.out.println("length for groups undefined");
+		    System.out.println("Detectors: " );
+		    for ( int ii = 0; ii < list.length-1; ii++ ) {
+			System.out.print( list[ii] + ", ");
+		    }
+		    System.out.println( list[list.length -1] + ", ");
+		}
+		
+	    }
+	    else if ( header.pseudoTimeUnit == 'D') {
+	    }
+	}
+
 	for (int ii = 0; ii < list.length; ii++ ) {
 	    if ( list[ii] != 0 ) {
 		for ( int jj = list[ii]; jj <= header.numOfElements; jj++) {
@@ -2010,16 +2060,16 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		runfile.writeBytes( fixLength( userPars[ii].DbSignal(), 16));
 		if ( userPars[ii].OptionsAvailable() ) {
 		    String[] options = userPars[ii].Options();
-		    System.out.println( "Writing " + options.length + 
-					" options for user parameter " + ii );
+		    //System.out.println( "Writing " + options.length + 
+		    //				" options for user parameter " + ii );
 		    runfile.writeShort( options.length );
 		    for ( int jj = 0; jj < options.length; jj++ ) {
 			runfile.writeBytes( fixLength( options[jj], 16));
 		    }
 		}
 		else {
-		    System.out.println( "Writing " + 0 + 
-					" options for user parameter " + ii );
+		    //System.out.println( "Writing " + 0 + 
+		    //		" options for user parameter " + ii );
 		    runfile.writeShort( 0);
 		}
 	    }
@@ -2029,16 +2079,16 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		runfile.writeBytes( fixLength( instPars[ii].DbSignal(), 16));
 		if ( instPars[ii].OptionsAvailable() ) {
 		    String[] options = instPars[ii].Options();
-		    System.out.println( "Writing " + options.length + 
-					" options for inst parameter " + ii );
+		    //		    System.out.println( "Writing " + options.length + 
+		    //		" options for inst parameter " + ii );
 		    runfile.writeShort( (short)options.length );
 		    for ( int jj = 0; jj < options.length; jj++ ) {
 			runfile.writeBytes( fixLength( options[jj], 16));
 		    }
 		}
 		else {
-		    System.out.println( "Writing " + 0 + 
-					" options for inst parameter " + ii );
+		    //System.out.println( "Writing " + 0 + 
+		    //		" options for inst parameter " + ii );
 		    runfile.writeShort( (short) 0);
 		}
 	    }
