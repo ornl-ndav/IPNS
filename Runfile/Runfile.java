@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.5  2000/02/22 04:10:40  hammonds
+ * Have deleted obsolete lpsd code.
+ *
  * Revision 5.4  2000/02/18 03:41:05  hammonds
  * Removed lpsd member variables whose classes have been removed from the package.
  *
@@ -265,7 +268,9 @@ public class Runfile implements Cloneable {
        Default Constructor with empty Runfile.
     */
     public Runfile() {
+	System.out.println("now");
 	header = new Header();
+	System.out.println("now");
     }
 
     /**
@@ -532,57 +537,6 @@ public class Runfile implements Cloneable {
 		}
  		maxSubgroupID[nHist] = group;
 	    }
-	    /*	
-	}
-	else {
-	    detectorMap = new DetectorMap[0];
-	    timeField = new TimeField[0];
-	    detectorAngle = new float[0];
-	    detectorHeight = new float[0];
-	    detectorType = new short[0];
-	    flightPath = new float[0];
-}
-	if (header.numOfLpsds > 0 ) {
-	    try {
-		lpsdMap = new LpsdMap[ this.header.lpsdMapTable.size/4 + 1 ];
-		for ( i = 1; i <= this.header.lpsdMapTable.size/4; i++ ) {
-		    lpsdMap[i] = new LpsdMap( runfile, i, header );
-		}
-		lpsdTimeField = 
-		    new LpsdTimeField[ this.header.lpsdTimeFieldTable.size/4
-						  + 1 ];
- 		for ( i = 1; i <= this.header.lpsdTimeFieldTable.size/4; 
-		      i++ ) {
-		    lpsdTimeField[i] = new LpsdTimeField( runfile, i, header );
-
-		}
-		lpsdIDMap = new LpsdDetIdMap( runfile, header );
-		lpsdCst = new LpsdChannelStartTime ( runfile, header );
-
-		runfile.seek(this.header.lpsdAngle.location);
-		lpsdAngle = ReadVAXReal4Array(runfile, 
-					      header.lpsdAngle.size/4);
-
-		runfile.seek(this.header.lpsdFlightPath.location);
-		lpsdFlightPath = 
-		    ReadVAXReal4Array(runfile, 
-				      header.lpsdFlightPath.size/4);
-
-		runfile.seek(this.header.lpsdHeight.location);
-		lpsdHeight = ReadVAXReal4Array(runfile, 
-					       header.lpsdHeight.size/4);
-
-		runfile.seek(this.header.lpsdType.location);
-		lpsdType = ReadShortArray(runfile, header.lpsdType.size/2);
-
-	    }
-	    catch ( LpsdNotFound ex ) {
-		System.out.println( "Runfile catching LpsdNotFound Exception\n"
-				    + "*****" + ex );
-	    }
-
-	}
-	    */
 	properties = new Properties();
 	runfile.seek( this.header.messageRegion.location );
 	byte[] messageBytes = new byte[this.header.messageRegion.size];
@@ -1941,127 +1895,6 @@ public class Runfile implements Cloneable {
     }
 
     /**
-       This method retrieves the scattering angle for a given lpsd. 
-       @param detID The detector ID.
-       @return The scattering angle.
-    */
-    /*
-    public double LpsdAngle(int detID) throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	return this.lpsdAngle[detID];
-    }
-    */
-    /**
-       This method retrieves the scattering angle for a given lpsd. 
-       @param bank The detector bank.
-       @param det  The detector number in the bank
-       @param element The element number in the detector
-       @return The scattering angle.
-    */
-    /*
-    public double LpsdAngle(int bank, int det, int element) 
-	throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	int lpsdId = LpsdMapToId( bank, det, element, 1 );
-	return this.lpsdAngle[lpsdId];
-    }
-    */
-    /**
-       This method retrieves the flight path length for a given lpsd. 
-       @param detID The detector ID.
-       @return The flight path length.
-    */
-    /*
-    public double LpsdFlightPath(int detID) throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	return this.lpsdFlightPath[detID];
-    }
-    */
-    /**
-       This method retrieves the flight path length for a given lpsd. 
-       @param bank The detector bank.
-       @param det  The detector number in the bank
-       @param element The element number in the detector
-       @return The flight path length.
-    */
-    /*
-    public double LpsdFlightPath(int bank, int det, int element) 
-	throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	int lpsdId = LpsdMapToId( bank, det, element, 1 );
-	return this.lpsdFlightPath[lpsdId];
-    }
-    */
-    /**
-       This method retrieves the height above the scattering plane for a 
-       given lpsd. 
-       @param detID The detector ID.
-       @return The height of the detecor above the scattering plane.
-    */
-    /*
-    public double LpsdHeight(int detID) throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	return this.lpsdHeight[detID];
-    }
-    */
-    /**
-       This method retrieves the height above the scattering plane for a 
-       given lpsd. 
-       @param bank The detector bank.
-       @param det  The detector number in the bank
-       @param element The element number in the detector
-       @return The height of the detecor above the scattering plane.
-    */
-    /*
-    public double LpsdHeight( int bank, int det, int element ) 
-	throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	int lpsdId = LpsdMapToId( bank, det, element, 1 );
-	return this.lpsdHeight[lpsdId];
-    }
-    */
-    /**
-       This method retrieves the detector type of the LPSD.  
-       @param detID The detector ID.
-       @return The lpsd type.
-    */
-    /*
-    public short LpsdType(int detID) throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	return this.lpsdType[detID];
-    }
-    */
-    /**
-       This method retrieves the detector type of the LPSD.  
-       @param bank The detector bank.
-       @param det  The detector number in the bank
-       @param element The element number in the detector
-        @return The lpsd type.
-    */
-    /*
-    public short LpsdType(int bank, int det, int element) throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	int lpsdId = LpsdMapToId( bank, det, element, 1 );
-	return this.lpsdType[lpsdId];
-    }
-    */
-    /**
        @return The Number of LPSD banks
     */
     /*
@@ -2081,142 +1914,6 @@ public class Runfile implements Cloneable {
 	    throw new LpsdNotFound();
 	}
 	return ( lpsdIDMap.DetsInBank( bankNum )).length;
-    }
-    */
-    /**
-       Retrieves the spectrum of a Linear Position Sensitive Detector.  This 
-       method opens and closes the file on each call unless LeaveOpen() has 
-       been called to leave the file open.
-       @param LpsdId
-       @param hist
-       @return the retrieved spectrum
-    */
-    /*
-    public float[] GetLpsdSpectrum( int lpsdId, int hist )     
-	throws LpsdNotFound, IOException {
-	float[] data;
-	byte[] bdata;
-	int index, offset;
-	int tfType;
-	int numOfTimeChannels;
-	int wordLength;
-
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	if ( lpsdId <= 0 ) return new float[0];
-	if ( !leaveOpen ) {
-	    System.out.println( "GetLpsdSpectrum opening file" );
-	    try {
-		runfile = new RandomAccessFile( runfileName, "r" );
-	    }
-	    catch ( IOException ex ) {
-		System.out.println( "Trouble Opening File" );
-		throw ex;
-	    }
-	}
-
-	int maxElements = ( header.numOfLpsds - 1 )/80 * 8192 + 
-	    (header.numOfLpsds - ((( header.numOfLpsds - 1 )/80 ) * 80 )) * 64;
-	index = lpsdId + ( hist -1 ) * maxElements;
-	tfType = this.lpsdMap[index].tfType;
-	if ( tfType == 0 ) return new float[0];
-	numOfTimeChannels = this.lpsdTimeField[tfType].NumOfChannels() - 2;
-	data = new float[numOfTimeChannels];
-	if ( header.numOfWavelengths > 0 ) {
-	    offset = this.lpsdMap[index].address 
-		+ this.header.totalChannels * 2
-		+ this.header.histStartAddress + 4;
-	}
-	else {
-	    offset = this.lpsdMap[index].address + 
-		this.header.histStartAddress + 4;
-	}
-
-	runfile.seek( offset );
-	if ( numOfTimeChannels != 0 ) {
-	    if ( this.header.versionNumber < 4 ) {
-		wordLength = 2;
-	    }
-	    else {
-		wordLength = 4;
-	    }
-	    bdata = new byte[ (numOfTimeChannels - 2) * wordLength ];
-	    int nbytes = runfile.read( bdata, 0, 
-				       (numOfTimeChannels - 2) * wordLength );
-	    for ( int ii = 0; ii < (numOfTimeChannels - 2); ii++ ) {
-		for ( int jj = 0; jj < wordLength; jj++ ) {
-		    int byteIndex = ii * wordLength + jj;
-		    if ( bdata[ byteIndex ] < 0 ) {
-			data[ii] += ( bdata[byteIndex] + 256 ) *
-			    Math.pow( 256.0, jj );
-		    }
-		    else {
-			data[ii] +=  bdata[byteIndex] * Math.pow(256.0, jj );
-		    }
-		}
-	    }
-	}
-
-	if ( !leaveOpen ) {
-	    runfile.close();
-	}
-	return data;
-    }
-
-    public float[] GetLpsdSpectrum( int bank, int det, int element, 
-				    int hist ) throws LpsdNotFound, 
-				    IOException  {
-
-	int lpsdId = LpsdMapToId( bank, det, element, hist );
-	return GetLpsdSpectrum( lpsdId, hist );
-
-    }
-
-    int LpsdMapToId( int bank, int det, int element, int hist ) {
-	if ( lpsdIDMap.map[bank][det - 1].minID <= 0 ) return -1;
-	int maxElements = ( header.numOfLpsds - 1 )/80 * 8192 + 
-	    (header.numOfLpsds - ((( header.numOfLpsds - 1 )/80 ) * 80 )) * 64;
-	int lpsdId =  lpsdIDMap.map[bank][det - 1].minID + ( element - 1 )
-	    + ( hist - 1 ) * maxElements;
-	return lpsdId;
-    }
-
-    public float[] LpsdTimeChannelBoundaries( int lpsdId, int hist ) 
-	throws LpsdNotFound {
-	int index;
-	int tfType;
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	if ( lpsdId <= 0 ) return new float[0];
-	int maxElements = ( header.numOfLpsds - 1 )/80 * 8192 + 
-	    (header.numOfLpsds - ((( header.numOfLpsds - 1 )/80 ) * 80 )) * 64;
-	index = lpsdId + ( hist -1 ) * maxElements;
-	tfType = this.lpsdMap[index].tfType;
-	if ( tfType == 0 ) return new float[0];
-	float[] times = new float[ (lpsdCst.table[ tfType - 1 ]).length];
-	for (int ii = 0; ii < times.length; ii++ ) {
-	    times[ ii ] = lpsdCst.table[ tfType - 1 ][ii];
-	}
-	return times;
-    }
-
-    public float[] LpsdTimeChannelBoundaries( int bank, int det, int element, 
-					      int hist ) throws LpsdNotFound {
-	int lpsdId = LpsdMapToId( bank, det, element, hist );
-	return LpsdTimeChannelBoundaries( lpsdId, hist );
-    }
-
-    public Object clone() throws CloneNotSupportedException {
-	try {
-	    Runfile copy = (Runfile)super.clone();
-
-	    return copy;
-
-	} catch (CloneNotSupportedException ex ) { 
-	    throw new CloneNotSupportedException ( "Error Cloning Runfile Object" );
-	}
     }
     */
 }
