@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.38  2001/08/27 16:10:29  hammonds
+ * Fix in reading the minID array from the runfile.  Still read the number of detectors instead of number of elements.
+ *
  * Revision 5.37  2001/08/03 19:04:06  hammonds
  * Made Changes to add detector grouping via scripts.
  *
@@ -1477,7 +1480,7 @@ public class Runfile implements Cloneable {
 	else {
 	    dataSource = new int[header.nDet + 1];
 	    minID = new int[header.nDet + 1];
-	    for ( i = 1; i <= header.nDet; i++ ) {
+	    for (i = 1; i <= header.nDet; i++ ) {
 		minID[i] = i;
 	    }
 	}
@@ -1496,8 +1499,8 @@ public class Runfile implements Cloneable {
 	    }
 	}
 	else {
-	    minID = new int[header.nDet + 1];
-	    for ( i = 1; i <= header.nDet; i++ ) {
+	    minID = new int[header.numOfElements + 1];
+	    for ( i = 1; i <= header.numOfElements; i++ ) {
 		minID[i] = i;
 	    }
 	}
