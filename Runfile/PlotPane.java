@@ -42,7 +42,7 @@ public PlotPane () {
         for (int channel = 0; channel < 50; channel++){
 	  y_values[channel] = (float) Math.sin( id * channel/10.0);
 	  }
-          spectrum = new Data(x_scale, y_values, id);
+          spectrum = Data.getInstance(x_scale, y_values, id);
 	data_set.addData_entry ( spectrum );
   }
   InternalViewManager image_view = new InternalViewManager(data_set, IViewManager.IMAGE);
@@ -113,7 +113,7 @@ public void run(){
 	     y_values = runFile.Get1DSpectrum( id );
 	     
 	     
-	     spectrum = new Data(x_scale, y_values, id);
+	     spectrum = Data.getInstance(x_scale, y_values, id);
 	     data_set.addData_entry ( spectrum );
 	 }
      }
@@ -136,7 +136,7 @@ public void run(){
 	 }
 	 x_scale = new UniformXScale( 1, numX, numX );
 	 for ( int ii = 0; ii < numY; ii++ ) {
-	     spectrum = new Data ( x_scale, sliceSum[ii], ii);
+	     spectrum = Datai.getInstance ( x_scale, sliceSum[ii], ii);
 	     data_set.addData_entry ( spectrum );
 	 }
      }
