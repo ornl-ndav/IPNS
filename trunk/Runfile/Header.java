@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.13  2001/07/24 16:04:08  hammonds
+ * Changes in some of the set methods.
+ *
  * Revision 5.12  2001/07/24 14:57:19  hammonds
  * Fixes to methods that set header parameters.
  *
@@ -1227,6 +1230,7 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "protonCurrent") ||
 	    element.equalsIgnoreCase( "standardClock") ||
 	    element.equalsIgnoreCase( "lpsdClock")) {
+	    set(element, (double)val);
 	}
 	else if ( ( element.equalsIgnoreCase( "nDet") ||
 	    element.equalsIgnoreCase( "numOfCyclesPreset") ||
