@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2003/03/12 03:38:11  hammonds
+ *  Cleanup Imports
+ *
  *  Revision 1.2  2003/03/04 15:56:52  hammonds
  *  *** empty log message ***
  *
@@ -46,11 +49,11 @@
 
 package IPNS.Operators;
 
-import  java.io.*;
-import  java.util.*;
-import  DataSetTools.operator.*;
-import  DataSetTools.operator.Generic.Batch.*;
-import  IPNS.VaxAnc.*;
+import  java.io.Serializable;
+import  java.util.Vector;
+import  DataSetTools.operator.Parameter;
+import  DataSetTools.operator.Generic.Batch.GenericBatch;
+import  IPNS.VaxAnc.AncFile;
 
 /**
  * This operator instantiates IPNS.VaxAnc.AncFile.
