@@ -3,6 +3,9 @@
  *
  *
  *  $Log$
+ *  Revision 1.2  2001/03/05 19:42:36  hammonds
+ *  Added test and dlab to instrument types
+ *
  *  Revision 1.1  2001/02/27 21:08:17  hammonds
  *  add function to return the instrument type.
  *
@@ -99,7 +102,9 @@ public class InstrumentType implements Serializable
       return TOF_REFLECTROMETER;
 
     else if ( inst_name.equalsIgnoreCase( "HRCS" )  ||
-              inst_name.equalsIgnoreCase( "LRCS" )    )
+              inst_name.equalsIgnoreCase( "LRCS" )  ||
+              inst_name.equalsIgnoreCase( "TEST" )  ||
+              inst_name.equalsIgnoreCase( "DLAB" )    )
       return TOF_DG_SPECTROMETER;
  
     else if ( inst_name.equalsIgnoreCase( "QENS" ) ||
