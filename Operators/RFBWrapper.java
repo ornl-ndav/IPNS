@@ -34,8 +34,8 @@
  * Modified:
  *
  *  $Log$
- *  Revision 1.5  2002/01/02 21:28:28  hammonds
- *  Added Parameter for version number.
+ *  Revision 1.6  2002/01/08 17:31:04  hammonds
+ *  Removed changes of 1.5
  *
  *  Revision 1.4  2001/11/01 20:36:39  chatterjee
  *  Changed the runfile extension to .run instead of .RUN
@@ -70,35 +70,20 @@ public class RFBWrapper extends  GenericBatch
    * Construct a default RFBWrapper operator to to allow scripts to call IPNS.RunfileBuilder.
    */
   String infileName;
-  public RFBWrapper( String infileName, Integer versionNumber  )
+  public RFBWrapper( String infileName  )
   {
 	
     super( "RFBWrapper" );
     System.out.println("Inside the constructor now");  
-
-    Parameter parameter1= new Parameter("filename", new String());
-    addParameter( parameter1 );
-    Parameter parameter2= new Parameter("versionNumber", new Integer(-1));
-    addParameter( parameter2 );
+    Parameter parameter= new Parameter("filename", new String());
+    addParameter( parameter );
 
   }
 
-   public RFBWrapper( String infileName  )
-  {
-	
-      super( "RFBWrapper" );
-      System.out.println("Inside the constructor now");  
-      Parameter parameter= new Parameter("filename", new String());
-      addParameter( parameter );
-      Parameter parameter2= new Parameter("versionNumber", new Integer(-1));
-      addParameter( parameter2 );
-
-  }
-   
 public RFBWrapper()
   { super( "RFBWrapper" );
 	//System.out.println("def constructor");
-        setDefaultParameters();
+     setDefaultParameters();
   }
 
   /* ---------------------------- getCommand ------------------------------- */
@@ -121,9 +106,6 @@ public RFBWrapper()
      Parameter parameter= new Parameter("Runfilename", 
                                          new String());
      addParameter( parameter );
-     parameter= new Parameter("versionNumber", 
-                                         new Integer(-1) );
-     addParameter( parameter );
 
   }
 
@@ -132,30 +114,20 @@ public RFBWrapper()
 
   public Object getResult()
   {
-      int vers = 0;
-      int numParams = getNum_parameters();
-      String S = (String) (getParameter(0).getValue());
-      if ( ((Integer)getParameter(1).getValue()).intValue() <= 0 ) {
-	  vers = ((Integer)(getParameter(1).getValue())).intValue();
-      }
-      else {
-	  vers = 5;
-      }
-      RunfileBuilder rfb = new RunfileBuilder();
-      
-      if (S != null)
-	  {
-	      rfb.setFileName( S + ".run");
-	      rfb.headerSet("versionNumber",vers );
-	  }
-      return rfb;
-      
+    String S = (String) (getParameter(0).getValue());
+    RunfileBuilder rfb = new RunfileBuilder();
+    if (S != null)
+    {
+       rfb.setFileName( S + ".run");
+    }
+    return rfb;
+
   }  
 
 
   public static void main(String[] arg)
   {
-    RFBWrapper rfb = new RFBWrapper("hello", new Integer(5));
+    RFBWrapper rfb = new RFBWrapper("hello");
 
   //  try{ Class O = Class.forName( "Operators.RFBWrapper");
   //   }
