@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.43  2001/10/31 22:05:08  hammonds
+ * Changed how control parameters are read from a file to account for the fact that a place holder was added for a database record for the deviceName to be stored.
+ *
  * Revision 5.42  2001/10/29 21:08:22  hammonds
  * Some changes in calculation of crate, slot, input.
  *
@@ -3861,6 +3864,8 @@ public class Runfile implements Cloneable {
 	    byte[] temp = new byte[16];
 	    runfile.read( temp, 0, 16);
 	    par.setDeviceName(new String(temp));
+	    runfile.read( temp, 0, 16);
+	    par.setDeviceNameDbSignal(new String(temp));
 	    runfile.read( temp, 0, 16);
 	    par.setControllerName( new String(temp) );
 	    runfile.read( temp, 0, 16);
