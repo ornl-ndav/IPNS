@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.49  2002/01/02 19:47:55  hammonds
+ * Changes to push a version number into the detector map so that version 6 can get a larger size to allow for a bigger data area.
+ *
  * Revision 5.48  2001/12/20 22:04:50  hammonds
  * Made changes to how POSY1&2 detectors are set up.
  * Changed routines that check if a det/seg/group is a beam monitor.  Added a check to make sure that the detector is in the scattering plane and is at zero angle.
@@ -570,7 +573,8 @@ public class Runfile implements Cloneable {
 		flightPath[flightPath.length - 1] = (float)header.dtd/100.0f;
 		detectorHeight[detectorHeight.length - 1] = 
 		    (float)header.yDisplacement/100.0f;
-		detectorMap[detectorMap.length - 1] = new DetectorMap();
+		detectorMap[detectorMap.length - 1] = 
+		    new DetectorMap(header.iName, header.versionNumber );
 		if ( (this.header.iName).equalsIgnoreCase("scd0") ){
 		    detectorType[ detectorType.length - 1 ] = 11;
 		}
@@ -1192,9 +1196,13 @@ public class Runfile implements Cloneable {
 
     void LoadV5( RandomAccessFile runfile ) throws IOException {
 	int i;
-	detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
+	detectorMap = new DetectorMap[this.header.detectorMapTable.size/
+				      DetectorMap.mapSize(header.versionNumber)
 				     + 1];
-	for (i=1; i <= this.header.detectorMapTable.size/4; i++){
+	for (i=1; 
+	     i <= this.header.detectorMapTable.size
+		 /DetectorMap.mapSize(header.versionNumber); 
+	     i++){
 	    detectorMap[i] = new DetectorMap(runfile, i, header);
 	}
 
