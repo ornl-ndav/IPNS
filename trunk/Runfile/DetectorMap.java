@@ -42,12 +42,19 @@ class DetectorMap{
         System.out.println("Number of Time Field entries in the table: " +
 			   numEntries);
         DetectorMap[] detectorMap = new DetectorMap[numEntries+1];
+	runfile.seek(header.detectorMapTable.location);
+	byte[] bArray = new byte[header.detectorMapTable.size];
+	runfile.read(bArray);
+	ByteArrayInputStream bArrayIS = new ByteArrayInputStream( bArray );
+	DataInputStream dataStream = new DataInputStream( bArrayIS );
         for (i=1; i <= numEntries; i++) {
-	    detectorMap[i]  = new DetectorMap(runfile, i, header);
+	    detectorMap[i]  = new DetectorMap(dataStream, i, header);
 	    System.out.println( detectorMap[i].address + " " +
 				detectorMap[i].tfType + " " + 
 				detectorMap[i].moreHistBit);
 	}
+	dataStream.close();
+	bArrayIS.close();
         runfile.close();
     }
 
@@ -58,10 +65,10 @@ class DetectorMap{
 	iName = header.iName;
 	versionNumber= header.versionNumber;
 
-	startingPosition = runfile.getFilePointer();
-	runfile.seek( header.detectorMapTable.location + (id - 1) 
-		      * DetectorMap.mapSize(versionNumber));
-	
+	//startingPosition = runfile.getFilePointer();
+	//runfile.seek( header.detectorMapTable.location + (id - 1) 
+	//	      * DetectorMap.mapSize(versionNumber));
+		      
 	if ( header.versionNumber <= 4 ) {
 	    temp = header.readUnsignedInteger(runfile, 4);
 	}
@@ -92,7 +99,51 @@ class DetectorMap{
 		moreHistBit = (temp >> 23) & 0x1;
 	    }	    
 	}
-	runfile.seek(startingPosition);
+	//runfile.seek(startingPosition);
+    }
+
+    protected  DetectorMap(DataInputStream runfile, int id, 
+			   Header header ) throws IOException{
+	long startingPosition;
+	int temp = 0;
+	iName = header.iName;
+	versionNumber= header.versionNumber;
+
+	//startingPosition = runfile.getFilePointer();
+	//runfile.seek( header.detectorMapTable.location + (id - 1) 
+	//	      * DetectorMap.mapSize(versionNumber));
+		      
+	if ( header.versionNumber <= 4 ) {
+	    temp = header.readUnsignedInteger(runfile, 4);
+	}
+	else if ( header.versionNumber < 6 ){
+	    temp = runfile.readInt();
+	}
+	else {
+	    address = runfile.readInt();
+	    tfType = runfile.readShort();
+	    moreHistBit = runfile.readShort();
+	}
+	
+	if ( header.versionNumber < 6 ) {
+	    iName = new String( header.iName );
+	    versionNumber = header.versionNumber;
+	    if ( (!iName.equalsIgnoreCase("glad") &&
+		  !iName.equalsIgnoreCase("lpsd")) || versionNumber >=5 ) {
+		
+		address = temp & 0x7FFFFF;
+		tfType = (temp >> 24) & 0xFF;
+		moreHistBit = (temp >> 23) & 0x1;
+	    }
+	    else {
+		
+		address = temp & 0xFFFF;
+		address = address << 8;
+		tfType = (temp >> 24) & 0xFF;
+		moreHistBit = (temp >> 23) & 0x1;
+	    }	    
+	}
+	//runfile.seek(startingPosition);
     }
 
     protected DetectorMap() {
