@@ -19,6 +19,9 @@ import IPNS.Control.ParamPane;
 /*
  *
  * $Log$
+ * Revision 5.51  2003/08/28 19:11:19  hammonds
+ * Change addXXXXXTimeField so that max channel ends on appropriate boundary.
+ *
  * Revision 5.50  2003/03/30 04:10:09  hammonds
  * Switch reading to use the new RunfileInputStream and RandomAccessRunfile so that changes can be made to offload the differences in data types.
  *
@@ -1505,13 +1508,15 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum) {
 				  
 	int rval = 0;
-	if ( (min >= max) && (step >= (max-min)) ) {
+	if ( (min >= max) || (step >= (max-min)) ) {
 	    rval = -98;
 	    System.out.println( "Invalid parameters in addNormalTimeFields" +
 				"(min, max, step): (" + min + ", " + max +
 				", " + step + ")");
 	    return (rval);
 	}
+	int nSteps = (int)((max-min)/step);
+	if ( (min + step * nSteps) < max ) max = min + step * (nSteps + 1);
 	TimeField[] tempFields = new TimeField[0]; 
 	if ( TFNum + 1 > timeField.length ) {
 	    tempFields = new TimeField[ TFNum + 1 ];
@@ -1579,13 +1584,15 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.pseudoTimeUnit = pseudo;
 	
 	int rval = 0;
-	if ( (min >= max) && (step >= (max-min)) ) {
+	if ( (min >= max) || (step >= (max-min)) ) {
 	    rval = -98;
 	    System.out.println( "Invalid parameters in addFocusedTimeFields" +
 				"(min, max, step): (" + min + ", " + max +
 				", " + step + ")");
 	    return (rval);
 	}
+	int nSteps = (int)((max-min)/step);
+	if ( (min + step * nSteps) < max ) max = min + step * (nSteps + 1);
 	TimeField[] tempFields = new TimeField[0]; 
 	if ( TFNum + 1 > timeField.length ) {
 	    tempFields = new TimeField[ TFNum + 1 ];
@@ -1703,7 +1710,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum ) {
 				  
 	int rval = 0;
-	if ( (min >= max) && (step >= (max-min)) ) {
+	if ( (min >= max) || (step >= (max-min)) ) {
 	    rval = -98;
 	    System.out.println( "Invalid parameters in addEnergyTimeFields" +
 				"(min, max, step): (" + min + ", " + max +
@@ -1762,7 +1769,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				  int TFNum ) {
 				  
 	int rval = 0;
-	if ( (min >= max) && (step >= (max-min)) ) {
+	if ( (min >= max) || (step >= (max-min)) ) {
 	    rval = -98;
 	    System.out.println( "Invalid parameters in addWavelengthTimeFields" +
 				"(min, max, step): (" + min + ", " + max +
@@ -1819,15 +1826,25 @@ public class RunfileBuilder extends Runfile implements Cloneable{
      */
     public int addLogTimeField(float min, float max, float step, 
 				  int TFNum ) {
-				  
 	int rval = 0;
-	if ( (min >= max) && (step >= (max-min)) ) {
+	if ( (min >= max) || (step >= (max-min)) ) {
 	    rval = -98;
 	    System.out.println( "Invalid parameters in addWavelengthTimeFields" +
 				"(min, max, step): (" + min + ", " + max +
 				", " + step + ")");
 	    return (rval);
 	}
+	int numberOfChannels = (short)(Math.log(max/min)/step + 2);
+	float[] channel = new float[numberOfChannels + 1];
+	channel[0] = min;
+	for ( int chan = 1; chan <= numberOfChannels; chan++ ) {
+	  float clock = (float)header.standardClock; 
+	  channel[chan] = (float)channel[chan-1] * (1.0f + step);
+	  float fjunk = channel[chan] / clock;
+	  channel[chan] = Math.round( fjunk ) * clock;
+	  
+	}
+	if (channel[numberOfChannels] != max ) max = channel[numberOfChannels];
 	TimeField[] tempFields = new TimeField[0]; 
 	if ( TFNum + 1 > timeField.length ) {
 	    tempFields = new TimeField[ TFNum + 1 ];
