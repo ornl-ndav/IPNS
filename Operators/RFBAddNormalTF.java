@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2002/02/23 13:59:46  hammonds
+ *  Added new import line to account for move of GenericBatch and GenericLoad operators.
+ *
  *  Revision 1.3  2001/11/26 15:18:07  hammonds
  *  Deleted println which clutter output.
  *
@@ -48,6 +51,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/02/23 14:00:53  hammonds
+ *  Added new import line to account for move of GenericBatch and GenericLoad operators.
+ *
  *  Revision 1.1  2001/11/01 20:05:37  chatterjee
  *  Method added to set the Disc settings from a file
  *
@@ -48,6 +51,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

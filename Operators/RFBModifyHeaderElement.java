@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/02/23 14:00:28  hammonds
+ *  Added new import line to account for move of GenericBatch and GenericLoad operators.
+ *
  *  Revision 1.1  2001/11/02 17:01:50  chatterjee
  *  New class to Modify header elements from scripts in a runfile
  *
@@ -47,6 +50,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

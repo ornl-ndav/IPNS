@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2002/02/23 14:00:03  hammonds
+ *  Added new import line to account for move of GenericBatch and GenericLoad operators.
+ *
  *  Revision 1.2  2001/08/01 20:57:32  chatter
  *  Added GPL license statement
  *
@@ -45,6 +48,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**
