@@ -1,6 +1,14 @@
 package IPNS.Runfile;
 
 import java.io.*;
+/*
+ *
+ * $Log$
+ * Revision 5.3  2000/02/18 03:34:27  hammonds
+ * Added Log header to track changes
+ *
+ *
+ */
 
 public class RunfileBuilder extends Runfile implements Cloneable{
 
