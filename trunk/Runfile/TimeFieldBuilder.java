@@ -8,6 +8,9 @@ This class is inteded to construct the time fields to be written to a runfile.
 /*
  *
  *  $Log$
+ *  Revision 5.0  2000/01/07 22:45:30  hammonds
+ *  Changed Version Number
+ *
  *  Revision 1.1  2000/01/07 22:16:56  hammonds
  *  Added this file since it was missing.
  *
