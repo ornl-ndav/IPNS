@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.42  2001/10/29 21:08:22  hammonds
+ * Some changes in calculation of crate, slot, input.
+ *
  * Revision 5.41  2001/10/29 17:53:22  hammonds
  * Runfiles can now be read from version 5 files.
  *
@@ -665,6 +668,20 @@ public class Runfile implements Cloneable {
 		    segments[ii].efficiency = 
 			EFFICIENCY[detectorType[ii]]; 
 		    segments[ii].segID = ii;
+		    if ( header.versionNumber < 4 ) {
+ 			crateNum[ii] = (ii-1)/160 + 1;
+			slotNum[ii] = (ii- (crateNum[ii] - 1) * 160 -1) / 8   
+			    + 1;
+			inputNum[ii] = ii - (crateNum[ii] -1) * 160 - 
+			    (slotNum[ii] -1) * 8;
+		    }
+		    else {
+ 			crateNum[ii] = (ii-1)/176 + 1;
+			slotNum[ii] = (ii- (crateNum[ii] - 1) * 176 -1) / 16   
+			    + 1;
+			inputNum[ii] = ii - (crateNum[ii] -1) * 176 - 
+			    (slotNum[ii] -1) * 16;
+		    }
 		}
 		if ( header.iName.equalsIgnoreCase( "scd0") ) {
 		    switch (detectorType[ii]){
