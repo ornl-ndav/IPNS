@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.5  2003/09/17 14:42:28  hammonds
+ *  Added bell and extra formatting to point out messages from caught exceptions
+ *
  *  Revision 1.4  2003/08/02 14:46:08  hammonds
  *  Fix constructor with iName argument.  Fix main method
  *
@@ -139,7 +142,21 @@ public Instdir()
 		      dataDir = iDat.getProperty("dataDir");
 		  }
 		  catch (IOException e) {
-		      System.out.println("Can't open file " + datFileName);
+		      System.out.println("/007/007/007/007");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>    Can't open file " + 
+					 datFileName);
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		      System.exit(0);
 		  }
 	      }
