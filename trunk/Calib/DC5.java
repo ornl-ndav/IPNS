@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.9  2002/12/11 19:46:48  hammonds
+ * Update size info for new SCD anger camera.
+ *
  * Revision 1.8  2002/12/03 19:58:28  hammonds
  * Change SCD Calib detector to a 1x74.
  *
@@ -79,15 +82,15 @@ public class DC5 {
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
 		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
-	          20.0F, 20.32F, 20.0F, 20.0F};
+	          20.0F, 20.32F, 15.0F, 15.0F};
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
 		 0.493F, 3.81F, 3.81F, 30.0F, 20.0F, 40.0F, 40.0F, 1.0F, 1.0F,
-		 2.377F, 20.0F, 1.0F};
+		 2.377F, 15.0F, 1.0F};
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
-		 0.493F, 2.54F, 2,54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F,
-		 2.377F, 0.01F, 0.01F};
+		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F,
+		 2.377F, 0.02F, 0.02F};
     public static final float[] 
 	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
 		      1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 
