@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.48  2003/02/11 20:07:20  hammonds
+ * Fixed Problem with Time focusing calculation on Chopper focusing parameter.  Was using (distance**2 + (tube_length/2)**2)**0.5  for tube location.  Now using (distance**2 + height_above_plane**2)**0.5.
+ *
  * Revision 5.47  2002/12/17 01:31:43  hammonds
  * Added documentation
  *
@@ -1159,7 +1162,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		    timeScale[ids[jj]] = (float)(refLength/
 			Math.sqrt(
 				  Math.pow(flightPath[ids[jj]], 2.0) 
-				 + Math.pow( detectorLength[ids[jj]]/200, 2.0 ))
+				 + Math.pow( detectorHeight[ids[jj]], 2.0 ))
 						 );
 		break;
 	    }
