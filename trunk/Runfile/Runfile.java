@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.40  2003/07/25 14:28:25  dennis
+ * Commented out printing of Overflow information (lines 1513-1515).
+ *
  * Revision 6.39  2003/07/25 04:25:20  hammonds
  * Add overflows for area detectors.  More for std detectors later.
  *
@@ -1510,9 +1513,9 @@ public class Runfile implements Cloneable {
 	  }
 	}
 	  Arrays.sort(overflows);
-	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
-	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
-	  }
+//	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+//	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
+//	  }
     }
 
     void LoadV5( RandomAccessRunfile runfile ) throws IOException {
