@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.3  2000/05/22 18:37:21  hammonds
+ * Fixed problem reading run numbers out of vesion 2 files
+ *
  * Revision 5.2  2000/02/16 01:26:21  hammonds
  * Changed code to handle glad LPSDs.  Have decided to handle all detectors with a common interface.  Most Lpsd<...> classes will be removed.  LpsdDetIDMap will stay since it implements old functionality.
  *
@@ -529,6 +532,7 @@ public static void main(String[] args) throws IOException{
 	int vers = runfile.readInt();
 	//	System.out.println( "Version: " + vers );
 	
+	System.out.println( "Version " + vers + " file" );
 	if ( vers > 16777215 ) {       // Version < 4 was little endian
 	    LoadV4(runfile);
 	}
@@ -728,26 +732,58 @@ public static void main(String[] args) throws IOException{
 	else{
 	  StringBuffer tempExpNum = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempExpNum.append((char)runfile.readByte());
-		}
-	  if ( tempExpNum.toString() != null )
-	     expNum = Integer.parseInt(tempExpNum.toString());
+	      byte temp = runfile.readByte();
+	      if ( temp != 0 ){ 
+		  tempExpNum.append((char)temp);
+	      }
+	      else {
+		  tempExpNum.append("0");
+	      }
+	  }
+	  if ( tempExpNum.toString() != null && 
+	       (tempExpNum.toString()).length() != 0 ) {
+	     expNum = Integer.parseInt(tempExpNum.toString().trim());
+	  }
+	  else {
+	      expNum = 0;
+	  }
 	  StringBuffer tempFirstRun = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempFirstRun.append((char)runfile.readByte());
-		}
+	      byte temp = runfile.readByte();
+	      if ( temp != 0 ){ 
+		  tempFirstRun.append((char)temp);
+	      }
+	      else {
+		  tempFirstRun.append("0");
+	      }
+	      //		tempFirstRun.append((char)runfile.readByte());
+	  }
 	  if ( tempFirstRun.toString() != null )
 	     firstRun = Integer.parseInt(tempFirstRun.toString());
 	  StringBuffer tempLastRun = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempLastRun.append((char)runfile.readByte());
-		}
+	      byte temp = runfile.readByte();
+	      if ( temp != 0 ){ 
+		  tempLastRun.append((char)temp);
+	      }
+	      else {
+		  tempLastRun.append("0");
+	      }
+	      //		tempLastRun.append((char)runfile.readByte());
+	  }
 	  if ( tempLastRun.toString() != null )
 	     lastRun = Integer.parseInt(tempLastRun.toString());
 	  samplePos = (short)readUnsignedInteger(runfile, 2);
 	  StringBuffer tempDefaultRun = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempDefaultRun.append((char)runfile.readByte());
+	      byte temp = runfile.readByte();
+	      if ( temp != 0 ){ 
+		  tempDefaultRun.append((char)temp);
+	      }
+	      else {
+		  tempDefaultRun.append("0");
+	      }
+	      //		tempDefaultRun.append((char)runfile.readByte());
 		}
 	  if ( tempDefaultRun.toString() != null )
 	     defaultRun = Integer.parseInt(tempDefaultRun.toString());
