@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.35  2001/07/18 18:33:28  hammonds
+ * Made changes to row column ordering.
+ *
  * Revision 5.34  2001/07/13 20:35:59  hammonds
  * Fixed Problems with glad detectors all having positove angle.
  *
@@ -736,8 +739,8 @@ public class Runfile implements Cloneable {
 				int index = ii + segX + segY *( header.numOfX);
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
-				segments[index].row = segX + 1; 
-				segments[index].column = segY + 1; 
+				segments[index].row = segY + 1; 
+				segments[index].column = segX + 1; 
 				segments[index].length = 
 				    LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
@@ -784,11 +787,11 @@ public class Runfile implements Cloneable {
 			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
 			for ( int segY = 0; segY < header.numOfY; segY++) {
 			    for ( int segX = 0; segX < header.numOfX; segX++) {
-				int index = ii + segX + segY *( header.numOfY);
+				int index = ii + segX + segY *( header.numOfX);
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
-				segments[index].row = segX+1; 
-				segments[index].column = segY+1; 
+				segments[index].row = segY+1; 
+				segments[index].column = segX+1; 
 				segments[index].length = 
 				    LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
@@ -835,11 +838,11 @@ public class Runfile implements Cloneable {
 			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
 			for ( int segY = 0; segY < header.numOfY; segY++) {
 			    for ( int segX = 0; segX < header.numOfX; segX++) {
-				int index = ii + segX + segY *( header.numOfY);
+				int index = ii + segX + segY *( header.numOfX);
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
-				segments[index].row = segX + 1; 
-				segments[index].column = segY + 1; 
+				segments[index].row = segY + 1; 
+				segments[index].column = segX + 1; 
 				segments[index].length = 
 				    LENGTH[detectorType[ii]]/header.numOfY; 
 				segments[index].width = 
