@@ -1,9 +1,15 @@
 package IPNS.Runfile;
 
 import java.io.*;
+import java.util.*;
+import java.text.*;
 /*
  *
  * $Log$
+ * Revision 5.15  2001/07/23 16:02:21  hammonds
+ * Added routine to add information from the instrument paramenter file to the runfile.
+ * Also added method to set the Current Date and time to the runfile.
+ *
  * Revision 5.14  2001/07/20 21:41:43  hammonds
  * added setHeader methods with double and short arguments
  *
@@ -1055,6 +1061,106 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     public int headerSet( RunfileBuilder rfb, String element, String val ) {
 	int rval = rfb.header.set(element, val);
 	return rval;
+    }
+
+    /**
+       This method will set values in the runfile header that are normally 
+       from the instrument parameter file.
+       @param rfb the runfile to modify
+       @param paramfilename = filename from which parameters should be taken
+       @return a return error code
+    */
+    public int headerSetFromParams(RunfileBuilder rfb, String filename){
+	int rval = 0;
+	Properties params = new Properties();
+	FileInputStream paramFile;
+	
+        try {
+            paramFile = new FileInputStream(filename);
+            params = new Properties();
+            params.load(paramFile);
+        }
+        catch (IOException e) {
+            System.out.println("Can't open file " + filename);
+            return(-1);
+        }
+	rfb.header.sourceToSample = 
+            (new Double(params.getProperty("SourceToSample"))).doubleValue();
+        rfb.header.sourceToChopper =
+            (new Double(params.getProperty("SourceToChopper"))).doubleValue();
+        rfb.header.standardClock = 
+            (new Double(params.getProperty("StdClock"))).doubleValue();
+        rfb.header.lpsdClock =
+            (new Double(params.getProperty("LpsdClock"))).doubleValue();
+        rfb.header.clockPeriod =
+            (new Double(params.getProperty("AreaClock"))).doubleValue();
+        rfb.header.dta = 
+            (new Double(params.getProperty("DetA"))).doubleValue();
+        rfb.header.dtd =
+            (new Double(params.getProperty("DetD"))).doubleValue();
+        rfb.header.chi =
+            (new Double(params.getProperty("Chi"))).doubleValue();
+        rfb.header.phi =
+            (new Double(params.getProperty("Phi"))).doubleValue();
+        rfb.header.omega =
+            (new Double(params.getProperty("Omega"))).doubleValue();
+        rfb.header.xLeft =
+            (new Double(params.getProperty("XLeft"))).doubleValue();
+        rfb.header.xRight =
+            (new Double(params.getProperty("XRight"))).doubleValue();
+        rfb.header.yUpper =
+            (new Double(params.getProperty("YUpper"))).doubleValue();
+        rfb.header.yLower =
+            (new Double(params.getProperty("YLow"))).doubleValue();
+        rfb.header.xDisplacement =
+            (new Double(params.getProperty("XDisplacement"))).doubleValue();
+        rfb.header.yDisplacement =
+            (new Double(params.getProperty("YDisplacement"))).doubleValue();
+        rfb.header.xLength =
+            (new Double(params.getProperty("XLength"))).doubleValue();
+        rfb.header.detCalibFile = 
+	    Integer.parseInt(params.getProperty("DetectorCal"));
+        rfb.header.moderatorCalibFile =
+	    Integer.parseInt(params.getProperty("ModeratorCal"));
+	return (0);
+    }
+
+    /**
+       This method will set start date and time  in the runfile header to the 
+       current time and date.
+       @param rfb the runfile to modify
+       @return a return error code
+    */
+    public int startDateAndTimeToCurrent( RunfileBuilder rfb ) {
+        DateFormat dateFormat = DateFormat.getDateInstance();
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM, 
+							   Locale.FRENCH);
+        String date = (dateFormat.format(
+            new Date())).toUpperCase();
+        String time = timeFormat.format(
+            new Date());
+	rfb.header.startDate = date;
+	rfb.header.startTime = time;
+	return (0);
+    }
+
+    /**
+       This method will set end date and time  in the runfile header to the 
+       current time and date.
+       @param rfb the runfile to modify
+       @return a return error code
+    */
+    public int endDateAndTimeToCurrent( RunfileBuilder rfb ) {
+        DateFormat dateFormat = DateFormat.getDateInstance();
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM, 
+							   Locale.FRENCH);
+        String date = (dateFormat.format(
+            new Date())).toUpperCase();
+        String time = timeFormat.format(
+            new Date());
+	rfb.header.endDate = date;
+	rfb.header.endTime = time;
+	return (0);
     }
 
     public Object clone() {
