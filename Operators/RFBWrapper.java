@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2001/11/01 20:36:39  chatterjee
+ *  Changed the runfile extension to .run instead of .RUN
+ *
  *  Revision 1.3  2001/11/01 20:06:39  chatterjee
  *  Changed comments
  *
@@ -112,7 +115,7 @@ public RFBWrapper()
     RunfileBuilder rfb = new RunfileBuilder();
     if (S != null)
     {
-       rfb.setFileName( S + ".RUN");
+       rfb.setFileName( S + ".run");
     }
     return rfb;
 
