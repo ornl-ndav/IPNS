@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.31  2001/07/10 21:39:28  hammonds
+ * Made changes to the offset angles for area detectors and made some changes to the flight path length for area detectors.
+ *
  * Revision 5.30  2001/07/10 18:24:19  hammonds
  * Changed SAD/SAND detector sizes from meters to centimeters.
  *
@@ -2083,10 +2086,12 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double fromLeft = 
-		(seg.column * ( header.xLeft -header.xRight) ) / header.numOfX;
+		(seg.column * ( header.xLeft -header.xRight)/100 ) 
+		/ header.numOfX;
 	    double fromCenter = fromLeft 
-		 + ( header.xDisplacement + header.xLeft );
-	    double offsetAngle = fromCenter / header.dtd * ( 180 / Math.PI );
+		 - ( header.xDisplacement + header.xLeft )/100;
+	    double offsetAngle = fromCenter / (header.dtd/100.0) 
+		* ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	}
     }
@@ -2170,10 +2175,11 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    double fromLeft = 
-		(seg.column * ( header.xLeft -header.xRight) ) / header.numOfX;
+		(seg.column * ( header.xLeft -header.xRight)/100.0f ) 
+		/ header.numOfX;
 	    double fromCenter = fromLeft 
-		 + ( header.xDisplacement + header.xLeft );
-	    double offsetAngle = fromCenter / header.dtd * ( 180 / Math.PI );
+		 - ( header.xDisplacement + header.xLeft )/100.0f;
+	    double offsetAngle = fromCenter / (header.dtd/100) * ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	}
     }
@@ -2212,8 +2218,15 @@ public class Runfile implements Cloneable {
 	    return fp;
 	}
 	else {
-	    return Math.sqrt(flightPath[detID]*flightPath[detID] 
-			     + RawDetectorHeight(seg)*RawDetectorHeight (seg));
+	    float fromLeft = (float)
+		(seg.column * ( header.xLeft -header.xRight) ) 
+		/ header.numOfX;
+	    float fromCenter = (float)(fromLeft 
+		 - ( header.xDisplacement + header.xLeft ));
+	    
+	    return Math.sqrt(flightPath[detID] + flightPath[detID] 
+			     + RawDetectorHeight(seg)*RawDetectorHeight (seg)
+			     + fromCenter * fromCenter );
 	}
     }
 
@@ -2261,8 +2274,15 @@ public class Runfile implements Cloneable {
 	    return this.flightPath[id];
 	}
 	else {
-	    return Math.sqrt(flightPath[id]*flightPath[id] 
-			     + RawDetectorHeight(seg)*RawDetectorHeight (seg));
+	    float fromLeft = (float)
+		(seg.column * ( header.xLeft -header.xRight) ) 
+		/ header.numOfX;
+	    float fromCenter = (float)(fromLeft 
+		 - ( header.xDisplacement + header.xLeft ));
+	    
+	    return Math.sqrt(flightPath[id] * flightPath[id]
+			     + RawDetectorHeight(seg)*RawDetectorHeight (seg)
+			     + fromCenter * fromCenter );
 	} 
     }
 
