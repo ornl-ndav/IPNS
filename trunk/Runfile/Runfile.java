@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.44  2001/11/16 17:55:30  hammonds
+ * Cleaned up code that reads area data
+ *
  * Revision 5.43  2001/10/31 22:05:08  hammonds
  * Changed how control parameters are read from a file to account for the fact that a place holder was added for a database record for the deviceName to be stored.
  *
@@ -691,102 +694,25 @@ public class Runfile implements Cloneable {
 		    case 0:
 		    case 1:{
 			detectorType[ii] = 1;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-			segments[ii] = new Segment();
-			segments[ii].detID = ii; 
-			segments[ii].row = 1; 
-			segments[ii].column = 1; 
-			segments[ii].length = LENGTH[detectorType[ii]]; 
-			segments[ii].width = WIDTH[detectorType[ii]]; 
-			segments[ii].depth = DEPTH[detectorType[ii]]; 
-			segments[ii].efficiency = 
-			    EFFICIENCY[detectorType[ii]]; 
-			segments[ii].segID = ii;
 			break;
 		    }
 		    case 11: {
 			detectorType[ii] = 11;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-			for ( int segY = 0; segY < header.numOfY; segY++) {
-			    for ( int segX = 0; segX < header.numOfX; segX++) {
-				int index = ii + segX + segY *( header.numOfX);
-				segments[index] = new Segment();
-				segments[index].detID = ii; 
-				segments[index].row = segY + 1; 
-				segments[index].column = segX + 1; 
-				segments[index].length = 
-				    LENGTH[detectorType[ii]]/header.numOfY; 
-				segments[index].width = 
-				    WIDTH[detectorType[ii]]/header.numOfX; 
-				segments[index].depth = 
-				    DEPTH[detectorType[ii]]; 
-				segments[index].efficiency = 
-				    EFFICIENCY[detectorType[ii]]; 
-				segments[ii].segID = ii;
-			    }
+			break;
 			}
-			break;		    }
 		    }
-		    
 		}
+		    
+		
 		if ( header.iName.equalsIgnoreCase( "sad0") ||
 		     header.iName.equalsIgnoreCase( "sad1") ) {
 		    switch (detectorType[ii]){
 		    case 1: {
 			detectorType[ii] = 9;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-			segments[ii] = new Segment();
-			segments[ii].detID = ii; 
-			segments[ii].row = 1; 
-			segments[ii].column = 1; 
-			segments[ii].length = LENGTH[detectorType[ii]]; 
-			segments[ii].width = WIDTH[detectorType[ii]]; 
-			segments[ii].depth = DEPTH[detectorType[ii]]; 
-			segments[ii].efficiency = 
-			    EFFICIENCY[detectorType[ii]]; 
-			segments[ii].segID = ii;
 			break;
 		    }
 		    case 12: {
 			detectorType[ii] = 12;
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-			for ( int segY = 0; segY < header.numOfY; segY++) {
-			    for ( int segX = 0; segX < header.numOfX; segX++) {
-				int index = ii + segX + segY *( header.numOfX);
-				segments[index] = new Segment();
-				segments[index].detID = ii; 
-				segments[index].row = segY+1; 
-				segments[index].column = segX+1; 
-				segments[index].length = 
-				    LENGTH[detectorType[ii]]/header.numOfY; 
-				segments[index].width = 
-				    WIDTH[detectorType[ii]]/header.numOfX; 
-				segments[index].depth = 
-				    DEPTH[detectorType[ii]]; 
-				segments[index].efficiency = 
-				    EFFICIENCY[detectorType[ii]]; 
-				segments[ii].segID = index;
-			    }
-			}
 			break;
 		    }
 		    }
@@ -796,6 +722,22 @@ public class Runfile implements Cloneable {
 		    case 0: 
 		    case 1: {
 			detectorType[ii] = 9;
+			break;
+		    }
+		    case 13: {
+			detectorType[ii] = 13;
+			break;
+		    }
+		    }
+		}
+		if (header.iName.equalsIgnoreCase( "scd0" ) ||
+		    header.iName.equalsIgnoreCase( "sad0" )||
+		    header.iName.equalsIgnoreCase( "sad1" )||
+		    header.iName.equalsIgnoreCase( "sand" ) ){
+		    switch (detectorType[ii]) {
+		    case 0:
+		    case 1:
+		    case 9: {
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
 			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
@@ -814,8 +756,9 @@ public class Runfile implements Cloneable {
 			segments[ii].segID = ii;
 			break;
 		    }
+		    case 11:
+		    case 12:
 		    case 13: {
-			detectorType[ii] = 13;
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
 			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
@@ -842,10 +785,9 @@ public class Runfile implements Cloneable {
 			}
 			break;
 		    }
-		    }
-		}
+		}		
 
-
+	    }
 	    }
 	    if ( header.iName.equalsIgnoreCase( "glad" ) || 
 		 header.iName.equalsIgnoreCase( "lpsd" ) ) {
