@@ -15,6 +15,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 1.2  2004/10/11 14:45:30  hammonds
+ * Add start date & end date
+ *
  * Revision 1.1  2004/07/09 16:25:48  hammonds
  * A copy of File Summary to support the needs of GPPD.
  *
@@ -58,6 +61,12 @@ public class LRuns {
 		            while (sb1.length() < 122 ) 
 		                sb1.append(" ");
 		            sb1.append( head.numOfPulses) ;
+		            while (sb1.length() < 132 ) 
+		                sb1.append(" ");
+			    sb1.append( head.startDate );
+		            while (sb1.length() < 142 ) 
+		                sb1.append(" ");
+			    sb1.append( head.endDate );
 			    sb1.append( "\n" );
 			    summaryContents.append( sb1.toString() );
 			    head = null;
@@ -95,6 +104,12 @@ public class LRuns {
 		while (sb1.length() < 122 ) 
 		    sb1.append(" ");
 		sb1.append( head.numOfPulses) ;
+		while (sb1.length() < 132 ) 
+		  sb1.append(" ");
+		sb1.append( head.startDate );
+		while (sb1.length() < 142 ) 
+		  sb1.append(" ");
+		sb1.append( head.endDate );
 		sb1.append( "\n" );
 		summaryContents.append( sb1.toString() );
 		head = null;
