@@ -123,10 +123,26 @@ public class ParameterFile {
     }
 
     /**
+       Set the device name
+    */
+    public void setDeviceName(String name){
+	deviceName = name;
+	return;
+    }
+
+    /**
        Returns the name of the controller used for this device
      */
     public String getControllerName() {
 	return controllerName;
+    }
+
+    /**
+       Set the controller name
+    */
+    public void setControllerName(String name){
+	controllerName = name;
+	return;
     }
 
     /**
@@ -138,10 +154,26 @@ public class ParameterFile {
     }
 
     /**
+       Set the database device name
+    */
+    public void setDbDevice(String name){
+	dbDevice = name;
+	return;
+    }
+
+    /**
        Returns the veto signal for connection to the DAS veto.
      */
     public String getVetoSignal() {
 	return vetoSignal;
+    }
+
+    /**
+       Set the veto signal name
+    */
+    public void setVetoSignal(String name){
+	vetoSignal = name;
+	return;
     }
 
     /**
@@ -151,6 +183,18 @@ public class ParameterFile {
 	return userParameter;
     }
 
+    /** 
+	sets the user parameters
+    */
+    public void setUserParameters(Parameter[] params) {
+	userParameter = params;
+	numUserParameters = params.length;
+	for (int ii =0; ii < numUserParameters; ii++ ) {
+	    params[ii].type = new String("User");
+	}
+	return;
+    }
+
     /**
        Returns an array of Instrument level parameters
      */
@@ -158,7 +202,29 @@ public class ParameterFile {
 	return instParameter;
     }
 
-    
+    /** 
+	sets the user parameters
+    */
+    public void setInstParameters(Parameter[] params) {
+	instParameter = params;
+	numInstParameters = params.length;
+	return;
+    }
+
+    /**
+       Returns the crate label for this parameters crate
+    */
+    public String getAncIoc() {
+	return ancIoc;
+    }
+
+    /**
+       Set the ancillary Ioc name
+    */
+    public void setAncIoc(String name){
+	ancIoc = name;
+    }
+
     /**
        Returns file name for the ParameterFile if one is available.
      */
