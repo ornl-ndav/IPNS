@@ -15,7 +15,8 @@ data from a specified runfile.
 @version 4.0beta1
 */
 
-public class PlotPane extends JScrollPane {
+//public class PlotPane extends JScrollPane {
+public class PlotPane extends JDesktopPane {
 
 /** A dummy method simply used to create a place holder until the runfile can
 be specified
@@ -44,8 +45,8 @@ public PlotPane () {
           spectrum = new Data(x_scale, y_values, id);
 	data_set.addData_entry ( spectrum );
   }
-  ViewManager image_view = new ViewManager(data_set, IViewManager.IMAGE);
-  setViewportView( image_view );
+  InternalViewManager image_view = new InternalViewManager(data_set, IViewManager.IMAGE);
+  add( image_view );
 }
 
 /**
@@ -138,8 +139,8 @@ public void run(){
      }
      System.out.println( (new Date()).toString() );
      runFile.Close();
-     ViewManager image_view = new ViewManager(data_set, IViewManager.IMAGE);
-     plotPane.setViewportView( image_view );
+     InternalViewManager image_view = new InternalViewManager(data_set, IViewManager.IMAGE);
+     plotPane.add( image_view );
    }
    catch (IOException e) {
    }
