@@ -18,11 +18,14 @@ indexed starting at zero.
 
 @author  John P Hammonds
 @author  Richard J. Goyette
-@version 5.1
+@version 6.0
 */
 /*
  *
  * $Log$
+ * Revision 6.0  2002/01/02 21:22:40  hammonds
+ * Change to version 6.0
+ *
  * Revision 5.49  2002/01/02 19:47:55  hammonds
  * Changes to push a version number into the detector map so that version 6 can get a larger size to allow for a bigger data area.
  *
@@ -2223,6 +2226,7 @@ public class Runfile implements Cloneable {
        detector.  For a detector that is not time foused this routine 
        retrieves the actual angle.  For a time focuesed detector this 
        retrieves the average angle of the focused group of detectors.
+       @depricated Should be using @link #DetectorAngle( Segment, int )
        @param detID The detector ID.
        @return The scattering angle.
     */
@@ -2277,6 +2281,7 @@ public class Runfile implements Cloneable {
 
     /**
        This method retrieves the actual scattering angle for a given detector. 
+       @depricated Should be using @link #RawDetectorAngle(Segment )
        @param detID The detector ID.
        @return The scattering angle.
     */
@@ -2358,6 +2363,7 @@ public class Runfile implements Cloneable {
        detector.  For a detector that is not time foused this routine 
        retrieves the actual length.  For a time focuesed detector this 
        retrieves the focused flight path length.
+       @depricated Should be using @link #FlightPath( Segment, int )
        @param detID The detector ID.
        @return The focused flight path length if pseudoUnit = I.
        The raw flight path length otherwise.
@@ -2412,6 +2418,7 @@ public class Runfile implements Cloneable {
     /**
        This method retrieves the actual flight path length for a given 
        detector.  
+       @depricated Should be using @link #RawFlightPath( Segment, int )
        @param detID The detector ID.
        @return The flight path length.
     */
@@ -2422,6 +2429,7 @@ public class Runfile implements Cloneable {
     /**
        This method retrieves the height of the detector above the scattering 
        plane.  
+       @depricated Should be using @link #DetectorHeight( Segment, int )
        @param detID The detector ID.
        @return The height of the detector above the scattering plane.
     */
@@ -2450,6 +2458,7 @@ public class Runfile implements Cloneable {
     /**
        This method retrieves the height of the detector above the scattering 
        plane.  
+       @depricated Should be using @link #RawDetectorHeight( Segment )
        @param detID The detector ID.
        @return The height of the detector above the scattering plane.
     */
@@ -2728,6 +2737,7 @@ public class Runfile implements Cloneable {
     /**
        Retrieves the spectrum of a 1D detector.  This method opens and closes 
        the file on each call.
+       @depricated Should be using @link #Get1DSpectrum( Segment, int )
        @param detID Detector ID to be retrieved.
        @param hist Histogram number for data to retrieved.
        @return The retrieved spectrum.
@@ -2904,6 +2914,7 @@ public class Runfile implements Cloneable {
     /**
        Retrieves the sum of counts in a 1D detector.  This method opens and 
        closes the file on each call.
+       @depricated Should be using @link #Get1DSum( Segment, int )
        @param detID Detector ID to be retrieved.
        @param hist Histogram number for data to retrieved.
        @return The sum.
@@ -3005,6 +3016,7 @@ public class Runfile implements Cloneable {
 
     /**
        Get number of data channels for a given detector.
+       @depricated Should be using @link #NumChannelsBinned( Segment, int )
        @param id - Detector ID.
        @param hist - Histogram number.
        @return Number of channels binned.
@@ -3083,6 +3095,7 @@ public class Runfile implements Cloneable {
    
     /**
        Minimum Binned time in time field table.
+       @depricated Should be using @link #MinBinned( Segment, int )
        @param id - Detector ID.
        @param hist - Histogram number.
        @return Raw minumum time in the time field table.
@@ -3135,6 +3148,7 @@ public class Runfile implements Cloneable {
    
     /**
        Maximum Binned time in time field table.
+       @depricated Should be using @link #MaxBinned( Segment, int )
        @param id - Detector ID.
        @param hist - Histogram number.
        @return Raw maxumum time in the time field table.
@@ -3291,6 +3305,7 @@ public class Runfile implements Cloneable {
        Retrieves the time channel boundaries for a given spectrum.  Note that 
        since this is histogram data, there is one more boundary value than 
        there are elements in a spectrum.
+       @depricated Should be using @link #TimeChannelBoundaries( Segment, int )
        @param id - Detector ID.
        @param hist - Histogram number.
        @return Array of boundaries with 1 + number of channels values.
@@ -3397,6 +3412,7 @@ public class Runfile implements Cloneable {
        Retrieves the energy channel boundaries for a given spectrum.  Note 
        that since this is histogram data, there is one more boundary value 
        than there are elements in a spectrum.
+       @depricated Should be using @link #EnergyChannelBoundaries( Segment, int )
        @param id - Detector ID.
        @param hist - Histogram number.
        @return Array of boundary values with 1 + number of channels values.
@@ -3507,6 +3523,7 @@ public class Runfile implements Cloneable {
 
    /**
        Checks to see if an ID is a beam monitor.
+       @depricated Should be using @link #IsIDBeamMonitor( Segment )
        @param id - detector ID.
        @return boolean true if ID is a beam monitor.
    */
@@ -3567,6 +3584,7 @@ public class Runfile implements Cloneable {
 
    /**
        Checks to see if an ID is binned for Pulse height.
+       @depricated Should be using @link #IsPulseHeight( Segment, int )
        @param id - detector ID.
        @param hist - Histogram.
        @return boolean true if subgroup is a beam monitor.
@@ -3773,6 +3791,7 @@ public class Runfile implements Cloneable {
 
     /**
        Returns the time field type for a given detector ID
+       @depricated Should be using @link #TimeFieldType( Segment, int )
     */
     public int TimeFieldType( int detID, int hist) throws IOException
     {
