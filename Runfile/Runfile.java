@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.10  2002/04/24 15:17:06  hammonds
+ * Undepricated the RawDetectorAngle(detID), RawFlightPath(detID), RawDetectorHeight(detID).  A special need for these was determined.  For General use, Segment calls are prefered.
+ *
  * Revision 6.9  2002/04/24 14:58:01  hammonds
  * Reading Control Parameters out of the old Runfiles.
  * For SCD Copy chi, phi and omega from control parameters to header.
@@ -2395,7 +2398,6 @@ public class Runfile implements Cloneable {
 
     /**
        This method retrieves the actual scattering angle for a given detector. 
-       @deprecated Should be using @link #RawDetectorAngle(Segment )
        @param detID The detector ID.
        @return The scattering angle.
     */
@@ -2598,7 +2600,6 @@ public class Runfile implements Cloneable {
     /**
        This method retrieves the actual flight path length for a given 
        detector.  
-       @deprecated Should be using @link #RawFlightPath( Segment, int )
        @param detID The detector ID.
        @return The flight path length.
     */
@@ -2649,7 +2650,6 @@ public class Runfile implements Cloneable {
     /**
        This method retrieves the height of the detector above the scattering 
        plane.  
-       @deprecated Should be using @link #RawDetectorHeight( Segment )
        @param detID The detector ID.
        @return The height of the detector above the scattering plane.
     */
