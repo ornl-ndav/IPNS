@@ -55,6 +55,8 @@ class DetectorMap{
 			   Header header ) throws IOException{
 	long startingPosition;
 	int temp = 0;
+	iName = header.iName;
+	versionNumber= header.versionNumber;
 
 	startingPosition = runfile.getFilePointer();
 	runfile.seek( header.detectorMapTable.location + (id - 1) * 4);
@@ -138,6 +140,15 @@ class DetectorMap{
 	     this.moreHistBit == mapToCompare.moreHistBit )
 	    answer = true;
 	return answer;
+    }
+
+    protected static int mapSize( int versionNumber ) {
+	if (versionNumber <= 5 ) {
+	    return (4);
+	}
+	else {
+	    return (8);
+	}
     }
 }
  
