@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.24  2001/10/29 17:54:05  hammonds
+ * Runfiles can now be written to version 5 files.
+ *
  * Revision 5.23  2001/10/11 15:16:40  hammonds
  * Fixed problems with groupAllSeperate routine.  It was having problems when detectors were not valid detectors.
  * Also some work on Ancillary Equipment.
@@ -107,7 +110,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        	newRF.groupAllSeparate(1, 1);
 	newRF.endDateAndTimeToCurrent();
 	newRF.addAncillaryEquipment("/home/hammonds/inst/anc/Lakeshore330.dat");
-	System.out.println("here");
 	newRF.Write();
 	System.exit(0);
     }
@@ -789,9 +791,11 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	if( header.numOfHistograms * header.numOfElements > 0 ) {
 	    runfile.seek( 728 );
 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( header.numOfHistograms * header.numOfElements * 4 );
+	    runfile.writeInt( header.numOfHistograms * header.numOfElements 
+			      * 4 );
 	    runfile.seek( offsetToFree );
-	    int[][] IDList = new int[header.numOfHistograms][header.numOfElements];
+	    int[][] IDList = new int[header.numOfHistograms]
+		[header.numOfElements];
 	    for( int ii = 0; ii < header.numOfHistograms; ii++ ) {
 		for ( int jj = 0; jj < header.numOfElements; jj++ ) {
 		    IDList[ii][jj] = -1;
@@ -847,7 +851,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
 	//  Write data Source for this detector
 	offsetToFree = writeIntTable( runfile, dataSource, offsetToFree, 816);
-
 	//  Write input on slot # for this detector
 	offsetToFree = writeIntTable( runfile, minID, offsetToFree, 824);
 
@@ -869,7 +872,23 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		( discriminator.length - 1 ) * 8;
 	}
 
-
+	//  Write Control Parameter Table
+      	if ( params.length > 0 ) {
+	    int sizeOfControl = 0;
+	    int numParams = params.length;
+	    for ( int ii = 0; ii < numParams; ii++) {
+		sizeOfControl = sizeOfControl + 
+		    ancFileSizeToRunfile(params[ii]);
+	    }
+	    runfile.seek( 104 );
+	    runfile.writeInt( offsetToFree );
+	    runfile.writeInt( sizeOfControl );
+	    runfile.seek( offsetToFree );
+	    for ( int ii = 0; ii < numParams; ii++) {
+		writeAncFileToRunfile(runfile, params[ii]);
+	    }
+	    offsetToFree += sizeOfControl;
+	    }
 	header.totalChannels = header.channels1D;
 	header.histStartAddress = offsetToFree;
 	header.offsetToFree = header.histStartAddress + 
@@ -1831,18 +1850,114 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	String[] options = new String[1];
 	options[0] = new String("OK");
 	mainframe.setOptions(options);
-	/*mainframe.getContentPane().add( this, );*/
-	//	mainframe.pack();
-	//mainframe.show();
-	JDialog dialog = mainframe.createDialog(JOptionPane.getRootFrame(),new String("Enter User Parameters"));
+	JDialog dialog = 
+	    mainframe.createDialog(JOptionPane.getRootFrame(),
+				   new String(params[thisParam].getDeviceName()
+					      + " User Parameters"));
 	dialog.show();
-	//	Object value = mainframe.getValue();
-	//	if ( value == null ) {}
 	header.numOfControl += 1;   
-	//	mainframe = null;
 	dialog.dispose();
-	//	value = null;
+	//	mainframe.
 	System.gc();
 	return (rval);
    }
+
+    int ancFileSizeToRunfile( ParameterFile par ) {
+	int size = 0;
+	Parameter[] userPars = par.getUserParameters();
+	Parameter[] instPars = par.getInstParameters();
+	int devInfoSize = 97; 
+	// 16 bytes deviceName
+	// 16 bytes controllerName
+	// 16 bytes dbDevice
+	// 16 bytes vetoSignal
+	// 16 bytes numUserParameters
+	// 1 byte ancIO
+	int userDataSize = 0;
+	int instDataSize = 0;
+	//	System.out.println( "# of user parameters" + userPars.length);
+	for (int ii = 0; ii < userPars.length; ii++ ) {
+	    userDataSize += 80 + 16 * userPars[ii].NumOptions();
+	}
+	//	System.out.println( "# of inst parameters" + instPars.length);
+	for (int ii = 0; ii < instPars.length; ii++ ) {
+	    instDataSize += 80 + 16 * instPars[ii].NumOptions();
+	}
+	// 16 bytes ParameterName
+	// 32 bytes Parameter
+	// 16 bytes ParameterDbName
+	// 16 bytes numberOptions
+	// 16 * nuberUserOptions  UserOptions;
+	size = devInfoSize + userDataSize + 
+	    instDataSize;
+	return (size);
+    }
+
+    void writeAncFileToRunfile( RandomAccessFile runfile, 
+				ParameterFile par ) throws IOException {
+	try {
+	    runfile.writeBytes( fixLength( par.getDeviceName(), 16));
+	    runfile.writeBytes( fixLength( par.getControllerName(), 16));
+	    runfile.writeBytes( fixLength( par.getDbDevice(), 16));
+	    runfile.writeBytes( fixLength( par.getVetoSignal(), 16));
+	    Parameter[] userPars = par.getUserParameters();
+	    Parameter[] instPars = par.getInstParameters();
+	    runfile.writeShort( userPars.length );
+	    runfile.writeShort( instPars.length );
+	    runfile.writeBytes( fixLength( par.getAncIoc(), 1));
+	    
+	    for ( int ii = 0; ii < userPars.length; ii++ ) {
+		runfile.writeBytes( fixLength( userPars[ii].Name(), 16));
+		runfile.writeFloat( userPars[ii].Value() );
+		runfile.writeBytes( fixLength( userPars[ii].DbSignal(), 16));
+		if ( userPars[ii].OptionsAvailable() ) {
+		    String[] options = userPars[ii].Options();
+		    System.out.println( "Writing " + options.length + 
+					" options for user parameter " + ii );
+		    runfile.writeShort( options.length );
+		    for ( int jj = 0; jj < options.length; jj++ ) {
+			runfile.writeBytes( fixLength( options[jj], 16));
+		    }
+		}
+		else {
+		    System.out.println( "Writing " + 0 + 
+					" options for user parameter " + ii );
+		    runfile.writeShort( 0);
+		}
+	    }
+	    for ( int ii = 0; ii < instPars.length; ii++ ) {
+		runfile.writeBytes( fixLength( instPars[ii].Name(), 16));
+		runfile.writeFloat( instPars[ii].Value() );
+		runfile.writeBytes( fixLength( instPars[ii].DbSignal(), 16));
+		if ( instPars[ii].OptionsAvailable() ) {
+		    String[] options = instPars[ii].Options();
+		    System.out.println( "Writing " + options.length + 
+					" options for inst parameter " + ii );
+		    runfile.writeShort( (short)options.length );
+		    for ( int jj = 0; jj < options.length; jj++ ) {
+			runfile.writeBytes( fixLength( options[jj], 16));
+		    }
+		}
+		else {
+		    System.out.println( "Writing " + 0 + 
+					" options for inst parameter " + ii );
+		    runfile.writeShort( (short) 0);
+		}
+	    }
+	    return;
+	}
+	catch ( IOException ex ) {
+	    System.out.println("Error writing Ancillary File " + 
+			       par.getDeviceName() );
+	    ex.printStackTrace();
+	    throw new IOException();
+	}
+	}
+
+
+    String fixLength(String inString, int length) {
+	    StringBuffer tempBuff = new StringBuffer( inString );
+	    tempBuff.setLength(length);
+	    return( new String(tempBuff));
+    }
 }
