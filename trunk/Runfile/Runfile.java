@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.36  2001/07/23 20:37:35  hammonds
+ * Fixed some problems with missing data in early HRMECS V5 files.
+ *
  * Revision 5.35  2001/07/18 18:33:28  hammonds
  * Made changes to row column ordering.
  *
@@ -1331,42 +1334,70 @@ public class Runfile implements Cloneable {
 	bArrayIS.close();
 	dataStream.close();
 
-	runfile.seek(this.header.psdOrder.location);
-	bArray = new byte[ this.header.psdOrder.size ];
-	runfile.read( bArray );
-	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
-	psdOrder = new int[header.psdOrder.size / 4 + 1];
-	for ( i = 1; i <= header.psdOrder.size / 4; i++ ) {
-	    psdOrder[i] = dataStream.readInt();
+	if (header.psdOrder.size != 0 ) {
+	    runfile.seek(this.header.psdOrder.location);
+	    bArray = new byte[ this.header.psdOrder.size ];
+	    runfile.read( bArray );
+	    bArrayIS = new ByteArrayInputStream( bArray );
+	    dataStream = new DataInputStream( bArrayIS );
+	    psdOrder = new int[header.psdOrder.size / 4 + 1];
+	    for ( i = 1; i <= header.psdOrder.size / 4; i++ ) {
+		psdOrder[i] = dataStream.readInt();
+	    }
+	    bArrayIS.close();
+	    dataStream.close();
 	}
-	bArrayIS.close();
-	dataStream.close();
-
-	runfile.seek(this.header.numSegs1.location);
-	bArray = new byte[ this.header.numSegs1.size ];
-	runfile.read( bArray );
-	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
-	numSegs1 = new int[header.numSegs1.size / 4 + 1];
-	for ( i = 1; i <= header.numSegs1.size / 4; i++ ) {
-	    numSegs1[i] = dataStream.readInt();
+	else {
+	    psdOrder = new int[header.nDet + 1];
+	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
+		if ( detectorType[ii] != 0 ) psdOrder[ii] = 1;
+	    }
 	}
-	bArrayIS.close();
-	dataStream.close();
-
-	runfile.seek(this.header.numSegs2.location);
-	bArray = new byte[ this.header.numSegs2.size ];
-	runfile.read( bArray );
-	bArrayIS = new ByteArrayInputStream( bArray );
-	dataStream = new DataInputStream( bArrayIS );
-	numSegs2 = new int[header.numSegs2.size / 4 + 1];
-	for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
-	    numSegs2[i] = dataStream.readInt();
+	
+	if (header.numSegs1.size != 0 ) {
+	    runfile.seek(this.header.numSegs1.location);
+	    bArray = new byte[ this.header.numSegs1.size ];
+	    runfile.read( bArray );
+	    bArrayIS = new ByteArrayInputStream( bArray );
+	    dataStream = new DataInputStream( bArrayIS );
+	    numSegs1 = new int[header.numSegs1.size / 4 + 1];
+	    for ( i = 1; i <= header.numSegs1.size / 4; i++ ) {
+		numSegs1[i] = dataStream.readInt();
+		//correction for missing data in Early HRMECS files
+		if ((numSegs1[i] == 0 ) && (detectorType[i] != 0)) { 
+		    numSegs1[i] = 1;
+		}
+	    }
+	    bArrayIS.close();
+	    dataStream.close();
 	}
-	bArrayIS.close();
-	dataStream.close();
+	else {
+	    numSegs1 = new int[header.nDet + 1];
+	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
+		if ( detectorType[ii] != 0 ) numSegs1[ii] = 1;
+	    }
+	}
 
+	if (header.numSegs2.size != 0 ) {
+	    runfile.seek(this.header.numSegs2.location);
+	    bArray = new byte[ this.header.numSegs2.size ];
+	    runfile.read( bArray );
+	    bArrayIS = new ByteArrayInputStream( bArray );
+	    dataStream = new DataInputStream( bArrayIS );
+	    numSegs2 = new int[header.numSegs2.size / 4 + 1];
+	    for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
+		numSegs2[i] = dataStream.readInt();
+	    }
+	    bArrayIS.close();
+	    dataStream.close();
+	}
+	else {
+	    numSegs2 = new int[header.nDet + 1];
+	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
+		if ( detectorType[ii] != 0 ) numSegs2[ii] = 1;
+	    } 
+	}
+	    
 	runfile.seek(this.header.crateNum.location);
 	bArray = new byte[ this.header.crateNum.size ];
 	runfile.read( bArray );
@@ -1431,8 +1462,9 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    dataSource = new int[header.nDet + 1];
+	    minID = new int[header.nDet + 1];
 	    for ( i = 1; i <= header.nDet; i++ ) {
-		minID[i] = 0;
+		minID[i] = i;
 	    }
 	}
 	bArrayIS.close();
@@ -1475,6 +1507,7 @@ public class Runfile implements Cloneable {
 	segments = new Segment[1];
 	segments[0] = new Segment();
 	for (int ii = 1; ii <= header.nDet; ii++ ) {
+	    System.out.println("segment binning: " + ii);
 	    int segs = minID[ii] + numSegs1[ii] * numSegs2[ii];
 	    if ( segments.length < ( segs + 1 ) ){
 		Segment [] tsegments =new Segment[segs + 1];
@@ -1553,16 +1586,6 @@ public class Runfile implements Cloneable {
 	}
 	bArrayIS.close();
 	dataStream.close();
-	/*	for ( int ii = 1; ii <= header.nDet; ii++ ) {
-	    if ( psdOrder[ii] == 1 ) {
-		header.numOfElements += numSegs1[ii];
-		System.out.println( "Num Segs: " + ii + " " + numSegs1[ii]);
-	    }
-	    else if ( psdOrder[ii] == 2 ) {
-		header.numOfElements += numSegs1[ii] * numSegs2[ii];
-	    }
-	}
-	*/
 	header.numOfElements = header.nDet;
 
     }
@@ -2472,6 +2495,15 @@ public class Runfile implements Cloneable {
      */
     public int MinID( Segment seg ) {
 	return this.minID[seg.detID];
+    }
+
+    /**
+       This method retrieves the PsdOrder for an ID.  
+       @param detID The detector ID.
+       @return The psd order.
+     */
+    public int PsdOrder( int detID ) {
+	return this.psdOrder[detID];
     }
 
     /**
