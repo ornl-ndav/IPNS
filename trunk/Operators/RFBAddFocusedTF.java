@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2001/11/01 20:08:26  chatterjee
+ *  Has an extra empty line
+ *
  *  Revision 1.2  2001/08/01 20:57:32  chatter
  *  Added GPL license statement
  *
@@ -46,7 +49,6 @@ import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
 import  IPNS.Runfile.*;
-
 /**
  * This operator instantiates IPNS.RunfileBuilder.
  * 
