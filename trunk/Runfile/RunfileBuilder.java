@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.11  2001/04/24 20:06:49  hammonds
+ * Changed addSubgroup so that the step size that comes in for Pulse Height subgroups is the number of steps.  This is used to calculate a step size that will produce that many steps so that the data area is properly sized.
+ *
  * Revision 5.10  2001/04/09 18:36:14  hammonds
  * Added functions for dataSource and minID.
  *
@@ -1048,8 +1051,14 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	if ( sgNum < minSubgroupID[hist + 1] || minSubgroupID[hist + 1] == 0 ) 
 	    minSubgroupID[hist +1] = sgNum;
 	float maxDiff = 0.0000001f;
-	int matchingTimeField;
+ 	int matchingTimeField;
 	matchingTimeField = 0;
+	if ( pulseHeightBin == (short)1 ) {
+	    float tempStep=(float)(int)((maxVal-minVal)/stepVal);
+	    short tempNchans= (short)stepVal;	    
+	    stepVal = tempStep;
+	    nChanns = tempNchans;
+	}    
 	if ( timeField.length > 1 ) {
 	    for ( int ii = 1; ii < timeField.length; ii++ ) {
 		if ( minVal == timeField[ii].tMin &&
