@@ -4,6 +4,7 @@ import java.util.*;
 
 public class ParameterFile {
     String deviceName = new String("Not Defined");
+    String deviceNameDbSignal = new String("Not Defined");
     String controllerName = new String("Not Defined");
     String fileName = new String("noname.anc");
     String dbDevice = new String("Not Defined");
@@ -43,6 +44,8 @@ public class ParameterFile {
      */
     private void readPropsFile(Properties input){
 	deviceName = input.getProperty("deviceName", "Not_Defined");
+	deviceNameDbSignal = input.getProperty("deviceNameDbSignal", 
+					       "Not_Defined");
 	controllerName = input.getProperty("controllerName", "Not_Defined");
 	dbDevice = input.getProperty("dbDevice", "Not_Defined");
 	ancIoc = input.getProperty("ancIoc", "Not_Defined");
@@ -67,6 +70,7 @@ public class ParameterFile {
      */
     public void printDevice() {
 	System.out.println( deviceName );
+	System.out.println( deviceNameDbSignal );
 	System.out.println( controllerName );
 	System.out.println( dbDevice );
 	System.out.println( ancIoc );
@@ -80,6 +84,7 @@ public class ParameterFile {
 	FileOutputStream  out = new FileOutputStream(outname);
 	PrintWriter pwout =new PrintWriter(out);
 	pwout.println("deviceName=" + deviceName);
+	pwout.println("deviceNameDbSignal=" + deviceNameDbSignal );
 	pwout.println("controllerName=" + controllerName);
 	pwout.println("dbDevice=" + dbDevice );
 	pwout.println("ancIoc=" + ancIoc );
@@ -127,6 +132,21 @@ public class ParameterFile {
     */
     public void setDeviceName(String name){
 	deviceName = name;
+	return;
+    }
+
+    /**
+       Returns the database signal that holds the the device Name
+    */
+    public String getDeviceNameDbSignal() {
+	return deviceNameDbSignal;
+    }
+
+    /**
+       Set the device name
+    */
+    public void setDeviceNameDbSignal(String name){
+	deviceNameDbSignal = name;
 	return;
     }
 
