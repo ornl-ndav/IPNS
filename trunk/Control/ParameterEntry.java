@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 
-public class ParameterEntry extends JPanel implements ActionListener {
+public class ParameterEntry extends JPanel implements ActionListener, FocusListener {
     Parameter param = new Parameter();
     JLabel paramLabel = new JLabel();
     JTextField paramValEntry = new JTextField();
@@ -34,6 +34,7 @@ public class ParameterEntry extends JPanel implements ActionListener {
 	    paramChoiceEntry.setSelectedIndex((int)param.Value());
 	    paramChoiceEntry.setActionCommand(new String("ChoiceEntry"));
 	    paramChoiceEntry.addActionListener(this);
+	    paramChoiceEntry.addFocusListener(this);
 	    add ( paramChoiceEntry );
 	}
 	else {
@@ -41,11 +42,12 @@ public class ParameterEntry extends JPanel implements ActionListener {
 		new JTextField( (new Float(param.Value())).toString(), 20 );
 	    paramValEntry.setActionCommand( "ValEntry" );
 	    paramValEntry.addActionListener( this );
+	    paramValEntry.addFocusListener( this );
 	    add ( paramValEntry );
 	}
 	paramDbEntry = new JTextField(param.DbSignal());
 	paramDbEntry.setActionCommand( "DbEntry" );
-	paramDbEntry.addActionListener( this );
+	paramDbEntry.addFocusListener( this );
 				      
     }
 
@@ -92,5 +94,39 @@ public class ParameterEntry extends JPanel implements ActionListener {
 	    param.dbsignal= paramDbEntry.getText();
 	}
     }
+
+    public void focusLost( FocusEvent e ) {
+        String command = e.paramString();
+	Component comp = e.getComponent();
+
+	if (comp == paramChoiceEntry) {
+	    param.value = 
+		paramChoiceEntry.getSelectedIndex();
+	    System.out.println( "Setting " + param.name + " to " + 
+				param.options[(int)param.value]);
+	}
+	else if (comp == paramValEntry ){
+	    try{
+		float tValue= 
+		    ( new Float(paramValEntry.getText())).floatValue();
+		param.value = tValue;
+	    }
+	    catch (NumberFormatException ex) {
+		JOptionPane.showMessageDialog(this, 
+			    "All Parameters must be entered as a number");
+		paramValEntry.
+		    setText(Float.toString(param.value));
+	    }
+	    System.out.println("Field " + param.name + " set to " + 
+			       param.value );
+	    
+	}
+	
+    }
+    public void focusGained( FocusEvent e ) {
+	
+    }
+    
+    
 
 }
