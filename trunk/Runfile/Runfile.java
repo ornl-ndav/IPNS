@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.45  2001/11/26 15:21:14  hammonds
+ * Added some code for POSY instruments.
+ * Also added printStackTrace to caught exceptions.
+ *
  * Revision 5.44  2001/11/16 17:55:30  hammonds
  * Cleaned up code that reads area data
  *
@@ -214,22 +218,26 @@ public class Runfile implements Cloneable {
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
-		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F};
+		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
+	          20.0F};
     public static final float[] 
 	WIDTH = {0.0F, 7.62F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F, 
-		 0.493F, 3.81F, 3.81F, 30.F, 20.0F, 40.0F, 40.0F };
+		 0.493F, 3.81F, 3.81F, 30.F, 20.0F, 40.0F, 40.0F, 1.0F, 1.0F };
     public static final float[] 
 	DEPTH = {0.0F, 3.81F, 2.377F, 2.377F, 2.377F, 2.377F, 1.074F, 1.074F,
-		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F};
+		 0.493F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 2.54F, 1.0F, 1.0F};
     public static final float[] 
 	EFFICIENCY = {0.0F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F, 1.00F,
-		 1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F};
+		      1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 
+		      1.00F, 1.00F};
     public static final int[]
-	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2 };
+	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1 };
     public static final int[]
-	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1, 85, 64, 128, 128 };
+	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 8, 1, 32, 1, 1, 1, 85, 64, 128, 128,
+			  256, 256 };
     public static final int[]
-	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 87, 64, 128, 128 };
+	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 87, 64, 128, 128, 
+			  1, 1 };
     public static final int[] SEGMENT_SELECT = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256 };
     public static final String[] TYPE_DESCRIPTION ={"Not a detector",
@@ -246,7 +254,9 @@ public class Runfile implements Cloneable {
 						    "SCD Anger Camera",
 						    "Ordella 2210 SAD 20cm",
 						    "Ordella 2400 SAND 40cm",
-						    "Ordella 2410 SAND 40cm"
+						    "Ordella 2410 SAND 40cm",
+						    "Ordella 1204 POSY1 10cm",
+						    "Ordella 1210 POSY2 20cm"
     
     };
     static double MEV_FROM_VEL = 
@@ -510,7 +520,9 @@ public class Runfile implements Cloneable {
 	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
 		 (this.header.iName).equalsIgnoreCase("sad0") ||
 		 (this.header.iName).equalsIgnoreCase("sad1") ||
-		 (this.header.iName).equalsIgnoreCase("sand") ) {
+		 (this.header.iName).equalsIgnoreCase("sand") || 
+		 (this.header.iName).equalsIgnoreCase("pne0") || 
+		 (this.header.iName).equalsIgnoreCase("posy") ) {
 		float[] tDetectorAngle = new float[ detectorAngle.length + 1];
 		float[] tFlightPath = new float[ flightPath.length + 1];
 		float[] tDetectorHeight = new float[ detectorHeight.length+ 1];
@@ -545,6 +557,14 @@ public class Runfile implements Cloneable {
 		}
 		else if ( (this.header.iName).equalsIgnoreCase("sand") ){
 		    detectorType[ detectorType.length - 1 ] = 13;
+
+		}
+		else if ( (this.header.iName).equalsIgnoreCase("pne0") ){
+		    detectorType[ detectorType.length - 1 ] = 15;
+
+		}
+		else if ( (this.header.iName).equalsIgnoreCase("posy") ){
+		    detectorType[ detectorType.length - 1 ] = 16;
 
 		}
 
@@ -698,6 +718,7 @@ public class Runfile implements Cloneable {
 		    }
 		    case 11: {
 			detectorType[ii] = 11;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
 			break;
 			}
 		    }
@@ -713,6 +734,7 @@ public class Runfile implements Cloneable {
 		    }
 		    case 12: {
 			detectorType[ii] = 12;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -726,6 +748,35 @@ public class Runfile implements Cloneable {
 		    }
 		    case 13: {
 			detectorType[ii] = 13;
+			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			break;
+		    }
+		    }
+		}
+		if ( header.iName.equalsIgnoreCase( "pne0") ){
+		    switch (detectorType[ii]){
+		    case 0: 
+		    case 1: {
+			detectorType[ii] = 1;
+			break;
+		    }
+		    case 13: {
+			detectorType[ii] = 15;
+			psdOrder[ii] = 2;
+			break;
+		    }
+		    }
+		}
+		if ( header.iName.equalsIgnoreCase( "posy") ){
+		    switch (detectorType[ii]){
+		    case 0: 
+		    case 1: {
+			detectorType[ii] = 1;
+			break;
+		    }
+		    case 13: {
+			detectorType[ii] = 16;
+			psdOrder[ii] = 2;
 			break;
 		    }
 		    }
@@ -758,8 +809,9 @@ public class Runfile implements Cloneable {
 		    }
 		    case 11:
 		    case 12:
-		    case 13: {
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    case 13:
+		    case 15:
+		    case 16: {
 			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
@@ -2207,7 +2259,7 @@ public class Runfile implements Cloneable {
     */
     public double RawDetectorAngle(Segment seg){
 	int detID = seg.detID;
-	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
+	if ( !((psdOrder[detID]  == 2) && (header.versionNumber < 5 )) ) {
 	    return this.detectorAngle[seg.detID];
 	}
 	else {
@@ -3083,6 +3135,7 @@ public class Runfile implements Cloneable {
 	}
 	catch ( IOException e ) {
 	    System.out.println("Problem Opening File: " + runfileName );
+	    e.printStackTrace();
 	}
 	leaveOpen = true;
     }
@@ -3096,6 +3149,7 @@ public class Runfile implements Cloneable {
 	}
 	catch ( IOException e ) {
 	    System.out.println("Problem Closing File: " + runfileName );
+	    e.printStackTrace();
 	}
 	leaveOpen = false;
     }
