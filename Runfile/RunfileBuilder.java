@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.13  2001/07/20 20:04:38  hammonds
+ * Added methods for setting the values in the Header from the RunfileBuilder.  Also made some small changes that will allow a runfile with a header to be constructed from the main method of RunfileBuilder.
+ *
  * Revision 5.12  2001/07/18 18:28:41  hammonds
  * Condensed writes of tables to use writeFloatTable, writeIntTable, writeShortTable.
  *
@@ -36,6 +39,12 @@ import java.io.*;
 
 public class RunfileBuilder extends Runfile implements Cloneable{
 
+    public static void main (String[] args) throws IOException {
+	String filename = args[0];
+	RunfileBuilder newRF = new RunfileBuilder();
+        newRF.setFileName(filename);
+	newRF.Write();
+    }
     public RunfileBuilder() {
 	super( );
 	header = new Header();
@@ -63,6 +72,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	subgroupMap = new int[1][];
 	minSubgroupID = new int[0];
 	maxSubgroupID = new int[0];
+	discriminator = new DiscLevel[0];
     }
     
     public RunfileBuilder( String infileName ) throws IOException {
@@ -983,6 +993,42 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
      }
 
+
+    /**
+       This method sets a value in the runfile header. 
+       @param rfb the runfile to modify
+       @param element The String code for the element to be modified
+       @param val The value to be placed in the field.
+       @return A return error code
+     */
+    public int headerSet( RunfileBuilder rfb, String element, float val ) {
+	int rval = rfb.header.set(element, val);
+	return rval;
+    }
+
+    /**
+       This method sets a value in the runfile header. 
+       @param rfb the runfile to modify
+       @param element The String code for the element to be modified
+       @param val The value to be placed in the field.
+       @return A return error code
+     */
+    public int headerSet( RunfileBuilder rfb, String element, int val ) {
+	int rval = rfb.header.set(element, val);
+	return rval;
+    }
+
+    /**
+       This method sets a value in the runfile header. 
+       @param rfb the runfile to modify
+       @param element The String code for the element to be modified
+       @param val The value to be placed in the field.
+       @return A return error code
+     */
+    public int headerSet( RunfileBuilder rfb, String element, String val ) {
+	int rval = rfb.header.set(element, val);
+	return rval;
+    }
 
     public Object clone() {
 	try {
