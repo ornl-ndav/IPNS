@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.3  2000/02/17 21:20:41  hammonds
+ * Minor bug fixes.
+ *
  * Revision 5.2  2000/02/16 01:43:14  hammonds
  * Changed code to handle glad LPSDs.  Changes will soon result in a common interface for all detectors.  Most of the Lpsd<...> classes will be removed in favor of a unified interface references have been commented out for now.  References to Header member variable numOfLpsd have been changed to nDet or numOfElements as appropriate.  Lpsds will be treated as a multi-element detector.
  *
@@ -458,9 +461,9 @@ public class Runfile implements Cloneable {
 		if ( header.iName.equalsIgnoreCase( "glad" ) || 
 		     header.iName.equalsIgnoreCase( "lpsd" ) ) {
 		    int detNum = 0;
-		    for ( int ii = 0; ii < lpsdIdMap.NumOfBanks(); ii++ ) {
-			for ( int jj = 0; jj < lpsdIdMap.DetsInBank().length;
-			      jj++ ) {
+		    for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
+			for ( int kk = 0; kk < lpsdIDMap.DetsInBank(jj).length;
+			      kk++ ) {
 			    psdOrder[detNum] = 1;
 			    numSegs1[detNum] = 64;
 			    
