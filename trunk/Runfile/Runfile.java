@@ -21,8 +21,8 @@ indexed starting at zero.
 /*
  *
  * $Log$
- * Revision 5.13  2000/03/15 15:25:53  hammonds
- * Changed the way arrays were read for V5 files.  Now read all elements into a stream and then read from the stream.  This speeds up the read.
+ * Revision 5.14  2000/05/22 18:42:23  hammonds
+ * Removed old LPSD routines and added solid angle (JPH) and Time Field Type (DJM) methods
  *
  * Revision 5.12  2000/03/11 03:06:19  hammonds
  * Fixed small problem with TimeScales for V<4 and with SourceToSampleTime( float)
@@ -611,6 +611,7 @@ public class Runfile implements Cloneable {
 	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
 	    timeField[i] = new TimeField(runfile, i, header);
 	}
+
 	runfile.seek(this.header.detectorAngle.location);
 	detectorAngle = new float[header.detectorAngle.size / 4 + 1];
 	byte[] bArray = new byte[ this.header.detectorAngle.size ];
@@ -2108,25 +2109,53 @@ public class Runfile implements Cloneable {
     }
 
     /**
-       @return The Number of LPSD banks
+       Returns the solid angle for a given detector or group of detectors in
+       a subgroup
     */
-    /*
-    public int NumOfLpsdBanks() throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	return lpsdIDMap.NumOfBanks();
+    public float solidAngle( int subgroup ) {
+	return (float)subgroupMap[subgroup].length;
     }
-    */
+
     /**
-       @return The Number of LPSD banks
+       Returns the solid angle for a given detector ID
     */
-    /*
-    public int NumOfLpsdsInBank( int bankNum ) throws LpsdNotFound {
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound();
-	}
-	return ( lpsdIDMap.DetsInBank( bankNum )).length;
+    public float solidAngle( int detID, int hist ) {
+	return 1.0f;
     }
+
+
+    /**
+       Returns the time field type for a given detector or group of detectors 
+       in a subgroup
     */
+    public int TimeFieldType( int subgroup ) throws IOException
+    {
+	int hist=0;
+
+	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet)
+	    return -1;
+	
+	int[] idsInSg = IdsInSubgroup(subgroup);
+	int id = idsInSg[0];
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) && subgroup >= MinSubgroupID(i))
+		hist =  i;
+	}
+	
+	return TimeFieldType(id, hist);
+    }
+
+    /**
+       Returns the time field type for a given detector ID
+    */
+    public int TimeFieldType( int detID, int hist) throws IOException
+    {
+	int  index;
+	
+	index  = detID + (hist-1) * this.header.nDet;
+	return this.detectorMap[index].tfType;
+    }
+
+
+
 }
