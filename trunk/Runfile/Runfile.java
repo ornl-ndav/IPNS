@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.12  2002/04/25 14:33:14  hammonds
+ * Removed debug message
+ *
  * Revision 6.11  2002/04/25 14:21:29  hammonds
  * Corrected times for area detectors.
  *
@@ -1287,8 +1290,6 @@ public class Runfile implements Cloneable {
 	    for (int ii = 0; ii < numStart; ii++) {
 		areaStartTime[ii] = 
 		    iareaStartTime[ii+1]/(float)header.clockPeriod;
-		System.out.println( ii + ", " + areaStartTime[ii] + ", " +
-				    iareaStartTime[ii+1] );
 	    }
 	    
 	}
