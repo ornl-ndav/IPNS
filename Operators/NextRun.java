@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2001/11/26 15:18:04  hammonds
+ *  Deleted println which clutter output.
+ *
  *  Revision 1.1  2001/11/02 19:15:43  hammonds
  *  Get the next run number from the paramenter file.
  *
@@ -125,8 +128,6 @@ public NextRun()
 		      iDat.load(datFile);
 		      instDir = iDat.getProperty("instDir");
 		      dataDir = iDat.getProperty("dataDir");
-		      System.out.println("instDir = " + instDir);
-		      System.out.println("dataDir = " + dataDir);
 		  }
 		  catch (IOException e) {
 		      System.out.println("Can't open file " + datFileName);
@@ -153,7 +154,6 @@ public NextRun()
 					 + " file");
 		      System.exit(0);
 		  }
-		  System.out.println("RunNum " + runNum );
 	      }
 	  if ( runNum >=1000 ) {
 	      sRunNum = Integer.toString(runNum);
