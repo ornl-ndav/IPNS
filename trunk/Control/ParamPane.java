@@ -1,9 +1,12 @@
 package IPNS.Control;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
+import javax.swing.JPanel;
 
 public class ParamPane extends JPanel implements ActionListener {
     Parameter[] params = new Parameter[0];
