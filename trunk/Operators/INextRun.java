@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2001/11/26 15:18:00  hammonds
+ *  Deleted println which clutter output.
+ *
  *  Revision 1.1  2001/11/02 19:14:06  hammonds
  *  Retrieve the next run number as an Integer
  *
@@ -125,8 +128,6 @@ public INextRun()
 		      iDat.load(datFile);
 		      instDir = iDat.getProperty("instDir");
 		      dataDir = iDat.getProperty("dataDir");
-		      System.out.println("instDir = " + instDir);
-		      System.out.println("dataDir = " + dataDir);
 		  }
 		  catch (IOException e) {
 		      System.out.println("Can't open file " + datFileName);
@@ -153,7 +154,6 @@ public INextRun()
 					 + " file");
 		      System.exit(0);
 		  }
-		  System.out.println("RunNum " + runNum );
 	      }
 
 	  return (new Integer(runNum));

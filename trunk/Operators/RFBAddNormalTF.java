@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2001/11/26 15:18:07  hammonds
+ *  Deleted println which clutter output.
+ *
  *  Revision 1.2  2001/08/01 20:57:32  chatter
  *  Added GPL license statement
  *
@@ -80,7 +83,7 @@ public class RFBAddNormalTF extends  GenericBatch
 
 public RFBAddNormalTF()
   { super( "RFBAddNormalTF" );
-	System.out.println("def constructor");
+//	System.out.println("def constructor");
      setDefaultParameters();
   }
 

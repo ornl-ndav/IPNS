@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2001/11/26 15:18:02  hammonds
+ *  Deleted println which clutter output.
+ *
  *  Revision 1.1  2001/11/02 19:14:57  hammonds
  *  Incremement the last run number in parameter file.
  *
@@ -125,8 +128,6 @@ public IncNextRun()
 		      iDat.load(datFile);
 		      instDir = iDat.getProperty("instDir");
 		      dataDir = iDat.getProperty("dataDir");
-		      System.out.println("instDir = " + instDir);
-		      System.out.println("dataDir = " + dataDir);
 		      datFile.close();
 		  }
 		  catch (IOException e) {
@@ -155,7 +156,6 @@ public IncNextRun()
 					 + " file");
 		      System.exit(0);
 		  }
-		  System.out.println("RunNum " + runNum );
 		  params.put("LastRun", Integer.toString(runNum));
 		   
 		  try {
