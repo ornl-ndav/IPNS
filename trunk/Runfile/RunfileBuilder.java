@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.45  2002/08/20 20:36:28  hammonds
+ * Changes to AddWavelengthTimeField for dt/t binning
+ *
  * Revision 5.44  2002/03/04 20:55:50  hammonds
  * Fixed a problem with a write of rotation angle #2
  *
@@ -1762,7 +1765,8 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	tempFields[matchingTimeField].tMax = max;
 	tempFields[matchingTimeField].tStep = step;
 	tempFields[matchingTimeField].tDoubleLength = 32768;
-	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].numOfChannels = 
+	    (short) ((1/step) Math.log(max/min) + 2);
 	tempFields[matchingTimeField].timeFocusBit = 0;
 	tempFields[matchingTimeField].emissionDelayBit = 0;
 	tempFields[matchingTimeField].constantDelayBit = 0;
