@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.21  2001/04/03 20:46:09  hammonds
+ * added detector dataSource and minID tables.
+ *
  * Revision 5.20  2001/03/15 17:24:56  hammonds
  * Added stuff to handle new dcalib info ( det. size, rotations, crate info...).
  *
@@ -130,6 +133,8 @@ public class Runfile implements Cloneable {
     int[] crateNum = new int[0];
     int[] slotNum = new int[0];
     int[] inputNum = new int[0];
+    int[] dataSource = new int[0];
+    int[] minID = new int[0];
     //-----------------------------------------------------------------
     public static final float[] 
 	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
