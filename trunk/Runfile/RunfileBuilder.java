@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.30  2001/11/16 19:52:40  hammonds
+ * Fixed writeShortTable.  It was reserving enough space for ints.  This was causing short tables to grow if files were written from default runs.
+ *
  * Revision 5.29  2001/11/07 19:19:53  hammonds
  * Added groupIdsSeparate for scripting purposes.
  *
@@ -967,13 +970,13 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    if( intList.length > 0 ) {
 		runfile.seek( headLoc );
 		runfile.writeInt( offsetToFree );
-		runfile.writeInt( ( intList.length - 1 ) * 4 );
+		runfile.writeInt( ( intList.length - 1 ) * 2 );
 		runfile.seek( offsetToFree );
 		for( int ii = 1; ii < intList.length; ii++ ) {
 		    runfile.writeShort( intList[ii] );
 		}
 		offsetToFree = offsetToFree + 
-		    ( intList.length - 1 ) * 4;
+		    ( intList.length - 1 ) * 2;
 	    }
 	}
 	catch ( IOException ex ) {
