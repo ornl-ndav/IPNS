@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.12  2001/07/18 18:28:41  hammonds
+ * Condensed writes of tables to use writeFloatTable, writeIntTable, writeShortTable.
+ *
  * Revision 5.11  2001/04/24 20:06:49  hammonds
  * Changed addSubgroup so that the step size that comes in for Pulse Height subgroups is the number of steps.  This is used to calculate a step size that will produce that many steps so that the data area is properly sized.
  *
@@ -653,94 +656,26 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
 	header.Write( runfile );
 
+	// Write Detector Angles
 	offsetToFree = writeFloatTable( runfile, detectorAngle, 
 					offsetToFree, 72);
-	// Write Detector Angles
-	/*
-	if (detectorAngle.length > 0 ){
-	    runfile.seek( 72 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorAngle.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for ( int ii = 1; ii < detectorAngle.length; ii++ ) {
-		runfile.writeFloat( detectorAngle[ii] );
-	    }
-	    offsetToFree = offsetToFree + (detectorAngle.length - 1) * 4;
-	}
-	*/
-	offsetToFree = writeFloatTable( runfile, flightPath, offsetToFree, 80);
 	//Write Flight Path Lengths
-	/*
-	if ( flightPath.length > 0 ) {
-	    runfile.seek( 80 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( flightPath.length - 1 )* 4 );
-	    runfile.seek( offsetToFree );
-	    for ( int ii = 1; ii < flightPath.length; ii++ ) {
-		runfile.writeFloat( flightPath[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( flightPath.length - 1 ) * 4;
-	}
-	*/
+	offsetToFree = writeFloatTable( runfile, flightPath, offsetToFree, 80);
 	//Write detector heights
 	offsetToFree = writeFloatTable( runfile, detectorHeight, 
 					offsetToFree, 88);
-
-	/*	if (detectorHeight.length > 0 ) {
-	    runfile.seek( 88 );
- 	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorHeight.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for ( int ii = 1; ii < detectorHeight.length; ii++ ) {
-		runfile.writeFloat( detectorHeight[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorHeight.length - 1 ) * 4;
-	}
-	*/
 	//Write detector type
-	if ( detectorType.length > 0 ) {
-	    runfile.seek( 96 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorType.length - 1 )* 2 );
-	    runfile.seek( offsetToFree );
-	    for ( int ii = 1; ii < detectorType.length; ii++ ) {
-		runfile.writeShort( detectorType[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorType.length - 1 )* 2;
-	}
-	//Write detector length
-	if( detectorLength.length > 0 ) { 
-	    runfile.seek( 700 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorLength.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < detectorLength.length; ii++ ) {
-		runfile.writeFloat( detectorLength[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorLength.length -  1 ) * 4;
-	}
+	offsetToFree = writeShortTable( runfile, detectorType, offsetToFree, 
+					96);
+     	//Write detector length
+	offsetToFree = writeFloatTable( runfile, detectorLength, offsetToFree, 
+					700 );
 	// Write detector widths
-	if( detectorWidth.length > 0 ) {
-	    runfile.seek( 708 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorWidth.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < detectorWidth.length; ii++ ) {
-		runfile.writeFloat( detectorWidth[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorWidth.length - 1 ) * 4;
-	}
+	offsetToFree = writeFloatTable( runfile, detectorWidth, offsetToFree, 
+					708 );
 	//  Write detector Depths
-	if( detectorDepth.length > 0 ) {
-	    runfile.seek( 716 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorDepth.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < detectorDepth.length; ii++ ) {
-		runfile.writeFloat( detectorDepth[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorDepth.length - 1 ) * 4;
-	}
+	offsetToFree = writeFloatTable( runfile, detectorDepth, offsetToFree, 
+					716 );
 	//  Write detector Maps
 	if( detectorMap.length > 0 ) {
 	    runfile.seek( 8 );
@@ -794,161 +729,44 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    offsetToFree += header.numOfHistograms * header.nDet * 4;
 	}
 	//Write detector coordinate system
-	if ( detCoordSys.length > 0 ) {
-	    runfile.seek( 736 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detCoordSys.length - 1 )* 2 );
-	    runfile.seek( offsetToFree );
-	    for ( int ii = 1; ii < detCoordSys.length; ii++ ) {
-		runfile.writeShort( detCoordSys[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detCoordSys.length - 1 )* 2;
-	}
+	offsetToFree = writeShortTable( runfile, detCoordSys, offsetToFree, 
+					736 );
 	//  Write detector rotation angle 1
-	if( detectorRot1.length > 0 ) {
-	    runfile.seek( 744 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorRot1.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < detectorRot1.length; ii++ ) {
-		runfile.writeFloat( detectorRot1[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorRot1.length - 1 ) * 4;
-	}
+	offsetToFree = writeFloatTable( runfile, detectorRot1, offsetToFree, 
+					744 );
 	//  Write detector rotation angle 2
-	if( detectorRot2.length > 0 ) {
-	    runfile.seek( 752 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorRot2.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < detectorRot2.length; ii++ ) {
-		runfile.writeFloat( detectorRot2[ii] );
-	    }
-	    offsetToFree = offsetToFree + ( detectorRot2.length - 1 ) * 4;
-	}
+	offsetToFree = writeFloatTable( runfile, detectorRot2, offsetToFree, 
+					752 );
 	//  Write detector Efficiencies
-	if( detectorEfficiency.length > 0 ) {
-	    runfile.seek( 760 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( detectorEfficiency.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < detectorEfficiency.length; ii++ ) {
-		runfile.writeFloat( detectorEfficiency[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( detectorEfficiency.length - 1 ) * 4;
-	}
+	offsetToFree = writeFloatTable( runfile, detectorEfficiency, 
+					offsetToFree, 760 );
 	//  Write detector psd dimensionality 1 for lpsd, 2 for area
-	if( psdOrder.length > 0 ) {
-	    runfile.seek( 768 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( psdOrder.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < psdOrder.length; ii++ ) {
-		runfile.writeInt( psdOrder[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( psdOrder.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, psdOrder, offsetToFree, 768);
+
 	//  Write # psd segments in 1st dimension
-	if( numSegs1.length > 0 ) {
-	    runfile.seek( 776 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( numSegs1.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < numSegs1.length; ii++ ) {
-		runfile.writeInt( numSegs1[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( numSegs1.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, numSegs1, offsetToFree, 776);
+
 	//  Write # psd segments in 2nd dimension
-	if( numSegs2.length > 0 ) {
-	    runfile.seek( 784 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( numSegs2.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < numSegs2.length; ii++ ) {
-		runfile.writeInt( numSegs2[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( numSegs2.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, numSegs2, offsetToFree, 784);
+
 	//  Write crate # for this detector
-	if( crateNum.length > 0 ) {
-	    runfile.seek( 792 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( crateNum.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < crateNum.length; ii++ ) {
-		runfile.writeInt( crateNum[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( crateNum.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, crateNum, offsetToFree, 792);
+
 	//  Write slot in crate # for this detector
-	if( slotNum.length > 0 ) {
-	    runfile.seek( 800 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( slotNum.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < slotNum.length; ii++ ) {
-		runfile.writeInt( slotNum[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( slotNum.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, slotNum, offsetToFree, 800);
+
 	//  Write input on slot # for this detector
-	if( inputNum.length > 0 ) {
-	    runfile.seek( 808 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( inputNum.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < inputNum.length; ii++ ) {
-		runfile.writeInt( inputNum[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( inputNum.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, inputNum, offsetToFree, 808);
+
 	//  Write data Source for this detector
-	if( dataSource.length > 0 ) {
-	    runfile.seek( 816 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( (dataSource.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < dataSource.length; ii++ ) {
-		runfile.writeInt( dataSource[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( dataSource.length - 1 ) * 4;
-	}
+	offsetToFree = writeIntTable( runfile, dataSource, offsetToFree, 816);
+
 	//  Write input on slot # for this detector
-	if( minID.length > 0 ) {
-	    runfile.seek( 824 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( minID.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < minID.length; ii++ ) {
-		runfile.writeInt( minID[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( minID.length - 1 ) * 4;
-	}
-	
-	offsetToFree = writeIntTable( runfile, dataSource, offsetToFree, 832);
-	offsetToFree = writeIntTable( runfile, minID, offsetToFree, 840);
+	offsetToFree = writeIntTable( runfile, minID, offsetToFree, 824);
+
 	//  Write detector Time Scaling factors 
-	if( timeScale.length > 1 ) {
-	    runfile.seek( 24 );
-	    runfile.writeInt( offsetToFree );
-	    runfile.writeInt( ( timeScale.length - 1 ) * 4 );
-	    runfile.seek( offsetToFree );
-	    for( int ii = 1; ii < timeScale.length; ii++ ) {
-		runfile.writeFloat( timeScale[ii] );
-	    }
-	    offsetToFree = offsetToFree + 
-		( timeScale.length - 1 ) * 4;
-	}
+	offsetToFree = writeFloatTable( runfile, timeScale, 
+					offsetToFree, 24 );
 
 	//  Write detector discriminator levels 
 	if( discriminator.length > 1 ) {
@@ -970,6 +788,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.offsetToFree = header.histStartAddress + 
 	    header.totalChannels * 4;
 	header.sizeOfDataArea = header.totalChannels;
+
 	runfile.seek( 56 );
 
 	runfile.writeInt( header.histStartAddress );
@@ -1013,6 +832,30 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	catch ( IOException ex ) {
 	    System.out.println("Error writing IntTable: " + runfileName );
+	    throw new IOException();
+	}
+	return offsetToFree;
+ 
+    }
+
+    private int writeShortTable( RandomAccessFile runfile, short[] intList, 
+			       int offsetToFree, int headLoc ) 
+    throws IOException {
+	try {
+	    if( intList.length > 0 ) {
+		runfile.seek( headLoc );
+		runfile.writeInt( offsetToFree );
+		runfile.writeInt( ( intList.length - 1 ) * 4 );
+		runfile.seek( offsetToFree );
+		for( int ii = 1; ii < intList.length; ii++ ) {
+		    runfile.writeShort( intList[ii] );
+		}
+		offsetToFree = offsetToFree + 
+		    ( intList.length - 1 ) * 4;
+	    }
+	}
+	catch ( IOException ex ) {
+	    System.out.println("Error writing ShortTable: " + runfileName );
 	    throw new IOException();
 	}
 	return offsetToFree;
