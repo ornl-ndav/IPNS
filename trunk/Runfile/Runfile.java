@@ -24,6 +24,12 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.34  2003/04/14 20:29:58  hammonds
+ * Add new
+ * Changed how GLAD <V3 files operate to coordinate better with ISAWs UniformDataGrid.  Since data is stored as individual segments, this is how data will be treated.  This causes some loss of info of actual SegmentInfo.
+ *
+ * This also seems to have an effect on how SCD data is displayed?
+ *
  * Revision 6.33  2003/03/31 20:59:45  hammonds
  * Fix problem with SCD width.
  * Fix problem with GLAD length, width & depth.
@@ -297,7 +303,8 @@ indexed starting at zero.
  */
 
 public class Runfile implements Cloneable {
-    /** Flag to indicate if file is left open */ boolean leaveOpen;
+   public static int CURRENT_VERSION = 6;
+   /** Flag to indicate if file is left open */ boolean leaveOpen;
     /** The file name associated with this Runfile object. */
     protected String runfileName;
     /** The FileStream containing the data. */   RandomAccessRunfile runfile;
@@ -1030,6 +1037,7 @@ public class Runfile implements Cloneable {
 		    detectorLength[ii] = (float)(header.yUpper - header.yLower);
 		    detectorWidth[ii] = (float)(header.xRight - header.xLeft );
 		    detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
+		    detectorHeight[ii] = (float)header.yDisplacement/100.0f;
 		    minID[ii] = ii;
 		    int index;
 		    for ( int segY = 0; segY < header.numOfY; segY++) {
@@ -1126,7 +1134,7 @@ public class Runfile implements Cloneable {
 				detectorDepth[tminID] = DC5.DEPTH[7]; 
 				segments[tminID + ll] = new Segment();
 				segments[tminID + ll].detID = tminID + ll; 
-				segments[tminID + ll].row = ll; 
+				segments[tminID + ll].row = 1; 
 				segments[tminID + ll].column = 1; 
 				segments[tminID + ll].length = 
 				    DC5.LENGTH[7]/ 64; 
