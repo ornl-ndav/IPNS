@@ -144,7 +144,7 @@ class TimeField{
 	used = false;
     }
     protected int NumOfChannels(){
-	if ( wavelengthBinBit != 0 ) {
+	if ( logBinBit != 0 ) {
 	    return (int)(( 1/tStep) * Math.log( (double)(tMax/tMin))+2 );
 	}
 	else {
