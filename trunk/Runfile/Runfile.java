@@ -4,6 +4,7 @@ import java.io.*;
 //import java.lang.*;
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.Arrays;
 import IPNS.Control.*;
 import IPNS.Calib.*;
 import IPNS.Runfile.RandomAccessRunfile;
@@ -24,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.39  2003/07/25 04:25:20  hammonds
+ * Add overflows for area detectors.  More for std detectors later.
+ *
  * Revision 6.38  2003/07/07 20:11:40  hammonds
  * Fixed time field for area detectors.  Was dividing channel starting times by hardware clock period.  This should not affect SCD (clock period = 1 us) but will affect others SAND (clock period = .5 us)
  *
@@ -365,6 +369,7 @@ public class Runfile implements Cloneable {
     int[] inputNum = new int[0];
     int[] dataSource = new int[0];
     int[] minID = new int[0];
+  int[] overflows = new int[0];
     ParameterFile[] params = new ParameterFile[0];
     //-----------------------------------------------------------------
     static double MEV_FROM_VEL = 
@@ -1478,8 +1483,36 @@ public class Runfile implements Cloneable {
 	    }
 	    
 	}
+	// Read Overflow Table
+	if ( header.numOfOverflows > 0 ) {
+	  int nchall =  header.channels1D;
+	  if ( (header.numOfWavelengths > 0) &&
+	       (header.totalChannels > 0 )) {
+	    nchall = header.channels1D + header.totalChannels;
+	  }
+	  int nover = (header.endOfOverflow - nchall)/2;
+	  
+	  int offset = nchall*2 + header.histStartAddress;
+	  runfile.seek( offset );
+	  overflows = runfile.readRunIntArray(header.numOfOverflows);
+	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+	    if (overflows[ii] > header.addressOf2DData && 
+		header.numOfWavelengths>0) {
+	      overflows[ii] = (overflows[ii]-header.addressOf2DData);
+	    }
+	    else if (overflows[ii] > header.addressOf1DData){
+	      overflows[ii] = (overflows[ii]-header.addressOf1DData);
+	      if ( header.numOfWavelengths > 0 ) {
+		overflows[ii]= overflows[ii]+header.totalChannels * 2;
+	      }
+	    }
 
-
+	  }
+	}
+	  Arrays.sort(overflows);
+	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
+	  }
     }
 
     void LoadV5( RandomAccessRunfile runfile ) throws IOException {
@@ -2996,13 +3029,12 @@ public class Runfile implements Cloneable {
 	    bdata = new byte[2];
 	    int nbytes;
 	    int xx;
+	    int minSearchChan=1;
+	    int maxSearchChan=header.numOfOverflows;
 	    for ( int ii = 0; ii < numWaves; ii++ ) {
-		//		runfile.seek( areaStartAddress + ii * sliceInterval + 2 +
-		//			      (aindex )*2);
     		runfile.seek( ioffset + ii * sliceInterval );
+		int ovOffset = ioffset + ii * sliceInterval - header.histStartAddress;
 		nbytes = runfile.read ( bdata, 0, 2 );
-		//		for ( int xx = 0; xx < 2; xx++ ) {
-		//xx =0;
 		if (bdata[0] < 0 ) {
 		    data[ii] += 
 			(bdata[0] + 256);
@@ -3011,7 +3043,6 @@ public class Runfile implements Cloneable {
 		else {
 		    data[ii] += bdata[0];
 		}
-		//xx =1;
 		if (bdata[1] < 0 ) {
 		    data[ii] += 
        			(bdata[1] + 256) * 256;
@@ -3020,8 +3051,19 @@ public class Runfile implements Cloneable {
 		else {
 		    data[ii] += bdata[1] * 256;
 		}
-		//		}
-		//		    data[ii] = ii* stepWave *seg.row *seg.column ;
+		if (header.numOfOverflows > 0) {
+		  boolean sdone = false;
+		  for(int jj = minSearchChan; jj<=maxSearchChan&&!sdone; jj++) {
+		    if ( ovOffset == overflows[jj] ) {
+							       
+		      data[ii] = data[ii] + 65536;
+		    }
+		    else if( ovOffset < overflows[jj] ) {
+		      sdone = true;
+		      minSearchChan = jj;
+		    }
+		  }
+		}
 	    }
 	if (!leaveOpen ){
 	    runfile.close();
