@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/02/23 13:50:57  hammonds
+ *  Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
+ *
  *  Revision 1.1  2001/11/01 20:05:09  chatterjee
  *  New method to add the ancillary equipment inputs
  *
@@ -48,6 +51,7 @@ package IPNS.Operators;
 import  java.io.*;
 import  java.util.*;
 import  DataSetTools.operator.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  IPNS.Runfile.*;
 
 /**

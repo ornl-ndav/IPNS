@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2002/02/23 13:50:00  hammonds
+ *  Added import statement for new location of GenericBatch and Generic Load Operators which are the base class for these operators.
+ *
  *  Revision 1.1  2001/11/02 19:12:55  hammonds
  *  Added to allow scripts to get the data directory
  *
@@ -45,6 +48,7 @@ package IPNS.Operators;
 
 import  java.io.*;
 import  java.util.*;
+import  DataSetTools.operator.Generic.Batch.*;
 import  DataSetTools.operator.*;
 import  IPNS.Runfile.*;
 
@@ -53,7 +57,7 @@ import  IPNS.Runfile.*;
  * 
  */
 
-public class Datadir extends  GenericBatch 
+public class Datadir extends  GenericBatch
                             implements Serializable
 {
 
