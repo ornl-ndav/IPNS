@@ -37,7 +37,7 @@ public detParam(Runfile runFile){
     Object[][] detParamList = new Object[runFile.NumDet()][11];
    System.out.println(runFile.NumDet() );
    for (int i = 0; i < runFile.NumDet(); i++) {
-       System.out.println( "ID: " + i );
+//       System.out.println( "ID: " + i );
      detParamList[i][0] = new Integer(i +1);
      detParamList[i][1] = new Float((float)runFile.RawFlightPath( i + 1 ));
      detParamList[i][2] = new Float((float)runFile.FlightPath( i + 1, (int)1 ));
