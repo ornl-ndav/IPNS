@@ -7,6 +7,10 @@ import IPNS.Calib.*;
 /*
  *
  * $Log$
+ * Revision 5.17  2001/07/24 15:05:31  hammonds
+ * Took RunfileBuilder argument out of many calls related to building a runfile from a script.
+ * Added timesetting methods.
+ *
  * Revision 5.16  2001/07/23 21:18:38  hammonds
  * Added to support newrun type scripts without iCame
  *
@@ -56,6 +60,17 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	String filename = args[0];
 	RunfileBuilder newRF = new RunfileBuilder();
         newRF.setFileName(filename);
+	newRF.headerSet( "versionNumber", 5);
+	newRF.headerSet( "energyIn", 5.0);
+ 	newRF.startDateAndTimeToCurrent();
+	newRF.headerSetFromParams( "/home/hammonds/inst/hrcs__V5.par");
+	newRF.headerSetFromDCalib( "/home/hammonds/inst/hrcs0116.dc5");
+	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 1);
+	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 3);
+	newRF.addNormalTimeField( 1000.0f, 10000.0f, 10.0f, 3);
+
+	newRF.endDateAndTimeToCurrent();
+
 	newRF.Write();
     }
     public RunfileBuilder() {
@@ -1009,13 +1024,23 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 
     /**
        This method sets a value in the runfile header. 
-       @param rfb the runfile to modify
        @param element The String code for the element to be modified
        @param val The value to be placed in the field.
        @return A return error code
      */
-    public int headerSet( RunfileBuilder rfb, String element, double val ) {
-	int rval = rfb.header.set(element, val);
+    public int headerSet( String element, double val ) {
+	int rval = this.header.set(element, val);
+	return rval;
+    }
+
+    /**
+       This method sets a value in the runfile header. 
+       @param element The String code for the element to be modified
+       @param val The value to be placed in the field.
+       @return A return error code
+     */
+    public int headerSet( String element, float val ) {
+	int rval = this.header.set(element, val);
 	return rval;
     }
 
@@ -1026,44 +1051,30 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @param val The value to be placed in the field.
        @return A return error code
      */
-    public int headerSet( RunfileBuilder rfb, String element, float val ) {
-	int rval = rfb.header.set(element, val);
+    public int headerSet( String element, int val ) {
+	int rval = this.header.set(element, val);
 	return rval;
     }
 
     /**
        This method sets a value in the runfile header. 
-       @param rfb the runfile to modify
        @param element The String code for the element to be modified
        @param val The value to be placed in the field.
        @return A return error code
      */
-    public int headerSet( RunfileBuilder rfb, String element, int val ) {
-	int rval = rfb.header.set(element, val);
+    public int headerSet( String element, short val ) {
+	int rval = this.header.set(element, val);
 	return rval;
     }
 
     /**
        This method sets a value in the runfile header. 
-       @param rfb the runfile to modify
        @param element The String code for the element to be modified
        @param val The value to be placed in the field.
        @return A return error code
      */
-    public int headerSet( RunfileBuilder rfb, String element, short val ) {
-	int rval = rfb.header.set(element, val);
-	return rval;
-    }
-
-    /**
-       This method sets a value in the runfile header. 
-       @param rfb the runfile to modify
-       @param element The String code for the element to be modified
-       @param val The value to be placed in the field.
-       @return A return error code
-     */
-    public int headerSet( RunfileBuilder rfb, String element, String val ) {
-	int rval = rfb.header.set(element, val);
+    public int headerSet( String element, String val ) {
+	int rval = this.header.set(element, val);
 	return rval;
     }
 
@@ -1074,7 +1085,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @param paramfilename = filename from which parameters should be taken
        @return a return error code
     */
-    public int headerSetFromParams(RunfileBuilder rfb, String filename){
+    public int headerSetFromParams( String filename){
 	int rval = 0;
 	Properties params = new Properties();
 	FileInputStream paramFile;
@@ -1088,43 +1099,43 @@ public class RunfileBuilder extends Runfile implements Cloneable{
             System.out.println("Can't open file " + filename);
             return(-1);
         }
-	rfb.header.sourceToSample = 
+	this.header.sourceToSample = 
             (new Double(params.getProperty("SourceToSample"))).doubleValue();
-        rfb.header.sourceToChopper =
+        this.header.sourceToChopper =
             (new Double(params.getProperty("SourceToChopper"))).doubleValue();
-        rfb.header.standardClock = 
+        this.header.standardClock = 
             (new Double(params.getProperty("StdClock"))).doubleValue();
-        rfb.header.lpsdClock =
+        this.header.lpsdClock =
             (new Double(params.getProperty("LpsdClock"))).doubleValue();
-        rfb.header.clockPeriod =
+        this.header.clockPeriod =
             (new Double(params.getProperty("AreaClock"))).doubleValue();
-        rfb.header.dta = 
+        this.header.dta = 
             (new Double(params.getProperty("DetA"))).doubleValue();
-        rfb.header.dtd =
+        this.header.dtd =
             (new Double(params.getProperty("DetD"))).doubleValue();
-        rfb.header.chi =
+        this.header.chi =
             (new Double(params.getProperty("Chi"))).doubleValue();
-        rfb.header.phi =
+        this.header.phi =
             (new Double(params.getProperty("Phi"))).doubleValue();
-        rfb.header.omega =
+        this.header.omega =
             (new Double(params.getProperty("Omega"))).doubleValue();
-        rfb.header.xLeft =
+        this.header.xLeft =
             (new Double(params.getProperty("XLeft"))).doubleValue();
-        rfb.header.xRight =
+        this.header.xRight =
             (new Double(params.getProperty("XRight"))).doubleValue();
-        rfb.header.yUpper =
+        this.header.yUpper =
             (new Double(params.getProperty("YUpper"))).doubleValue();
-        rfb.header.yLower =
+        this.header.yLower =
             (new Double(params.getProperty("YLow"))).doubleValue();
-        rfb.header.xDisplacement =
+        this.header.xDisplacement =
             (new Double(params.getProperty("XDisplacement"))).doubleValue();
-        rfb.header.yDisplacement =
+        this.header.yDisplacement =
             (new Double(params.getProperty("YDisplacement"))).doubleValue();
-        rfb.header.xLength =
+        this.header.xLength =
             (new Double(params.getProperty("XLength"))).doubleValue();
-        rfb.header.detCalibFile = 
+        this.header.detCalibFile = 
 	    Integer.parseInt(params.getProperty("DetectorCal"));
-        rfb.header.moderatorCalibFile =
+        this.header.moderatorCalibFile =
 	    Integer.parseInt(params.getProperty("ModeratorCal"));
 	return (0);
     }
@@ -1138,7 +1149,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        taken.
        @return a return error code
     */
-    public int headerSetFromDCalib(RunfileBuilder rfb, String filename){
+    public int headerSetFromDCalib( String filename){
 	int rval = 0;
 	DC5 dCalib = new DC5();
         try {
@@ -1147,36 +1158,35 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         catch (IOException ex) {
             System.out.println(" Trouble opening detector calibration file");
         }
-        rfb.addDetectorCoordSys(dCalib.CoordSys());
-        rfb.addDetectorAngle(dCalib.Angles());
-        rfb.addFlightPath(dCalib.FlightPath());
-        rfb.addDetectorHeight(dCalib.Height());
-        rfb.addDetectorRot1(dCalib.Rot1());
-        rfb.addDetectorRot2(dCalib.Rot1());
-        rfb.addDetectorType(dCalib.Type());
-        rfb.addDetectorLength(dCalib.Length());
-        rfb.addDetectorWidth(dCalib.Width());
-        rfb.addDetectorDepth(dCalib.Depth());
-        rfb.addDetectorEfficiency(dCalib.Efficiency());
-        rfb.addDetectorPsdOrder(dCalib.PsdOrder());
-        rfb.addDetectorNumSegs1(dCalib.NumSegs1());
-        rfb.addDetectorNumSegs2(dCalib.NumSegs2());
-        rfb.addDetectorCrateNum(dCalib.Crate());
-        rfb.addDetectorSlotNum(dCalib.Slot());
-        rfb.addDetectorInputNum(dCalib.Input());
-        rfb.addDetectorDataSource(dCalib.DataSource());
-        rfb.addDetectorMinID(dCalib.MinID());
-	
+        this.addDetectorCoordSys(dCalib.CoordSys());
+        this.addDetectorAngle(dCalib.Angles());
+        this.addFlightPath(dCalib.FlightPath());
+        this.addDetectorHeight(dCalib.Height());
+        this.addDetectorRot1(dCalib.Rot1());
+        this.addDetectorRot2(dCalib.Rot1());
+        this.addDetectorType(dCalib.Type());
+        this.addDetectorLength(dCalib.Length());
+        this.addDetectorWidth(dCalib.Width());
+        this.addDetectorDepth(dCalib.Depth());
+        this.addDetectorEfficiency(dCalib.Efficiency());
+        this.addDetectorPsdOrder(dCalib.PsdOrder());
+        this.addDetectorNumSegs1(dCalib.NumSegs1());
+        this.addDetectorNumSegs2(dCalib.NumSegs2());
+        this.addDetectorCrateNum(dCalib.Crate());
+        this.addDetectorSlotNum(dCalib.Slot());
+        this.addDetectorInputNum(dCalib.Input());
+        this.addDetectorDataSource(dCalib.DataSource());
+        this.addDetectorMinID(dCalib.MinID());
+	this.header.nDet = (short)dCalib.NDet();
 	return rval;
     }
 
     /**
        This method will set start date and time  in the runfile header to the 
        current time and date.
-       @param rfb the runfile to modify
        @return a return error code
     */
-    public int startDateAndTimeToCurrent( RunfileBuilder rfb ) {
+    public int startDateAndTimeToCurrent( ) {
         DateFormat dateFormat = DateFormat.getDateInstance();
         DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM, 
 							   Locale.FRENCH);
@@ -1184,18 +1194,21 @@ public class RunfileBuilder extends Runfile implements Cloneable{
             new Date())).toUpperCase();
         String time = timeFormat.format(
             new Date());
-	rfb.header.startDate = date;
-	rfb.header.startTime = time;
+	String fixedDate = new String(date.substring(4,6) + "-" + date.substring(0,3)
+			       + "-" + date.substring(9,11) );
+      	System.out.println( "Date: " + date + "   " + fixedDate );
+      	System.out.println( "Time: " + time );
+	header.startDate = fixedDate;
+	header.startTime = time;
 	return (0);
     }
 
     /**
        This method will set end date and time  in the runfile header to the 
        current time and date.
-       @param rfb the runfile to modify
        @return a return error code
     */
-    public int endDateAndTimeToCurrent( RunfileBuilder rfb ) {
+    public int endDateAndTimeToCurrent( ) {
         DateFormat dateFormat = DateFormat.getDateInstance();
         DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM, 
 							   Locale.FRENCH);
@@ -1203,9 +1216,205 @@ public class RunfileBuilder extends Runfile implements Cloneable{
             new Date())).toUpperCase();
         String time = timeFormat.format(
             new Date());
-	rfb.header.endDate = date;
-	rfb.header.endTime = time;
+	String fixedDate = new String(date.substring(4,6) + "-" 
+				      + date.substring(0,3)
+				      + "-" + date.substring(9,11) );
+	header.endDate = fixedDate;
+	header.endTime = time;
 	return (0);
+    }
+
+    /**
+       Adds a new TimeField to a Runfile
+       @param min Minimum time for the field
+       @param max Maximum time for the field
+       @param TFNum Time Field Number
+       @param step Step size for the field
+       @param TFNum Time Field Number
+     */
+    public int addNormalTimeField(float min, float max, float step, 
+				  int TFNum) {
+				  
+	int rval = 0;
+	int maxfield;
+	TimeField[] tempFields = new TimeField[0]; 
+	if ( TFNum + 1 > timeField.length ) {
+	    tempFields = new TimeField[ TFNum + 1 ];
+	    System.arraycopy ( timeField, 0, tempFields, 0, 
+			       timeField.length );
+	    for (int ii= timeField.length; ii <= TFNum; ii++){
+		tempFields[ii] = new TimeField();
+	    }
+	}
+	else {
+	    if ( timeField[TFNum].isUsed() ) {
+		System.out.println( "TimeField[" + TFNum 
+				    + "] is already used");
+		return -99;
+	    }
+	    else {
+		maxfield = timeField.length - 1;
+		tempFields = timeField;
+	    }
+	}
+	int matchingTimeField = TFNum;
+	tempFields[matchingTimeField] = new TimeField();
+	tempFields[matchingTimeField].tMin = min;
+	tempFields[matchingTimeField].tMax = max;
+	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tDoubleLength = 32768;
+	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].timeFocusBit = 0;
+	tempFields[matchingTimeField].emissionDelayBit = 0;
+	tempFields[matchingTimeField].constantDelayBit = 0;
+	tempFields[matchingTimeField].energyBinBit = 0;
+	tempFields[matchingTimeField].wavelengthBinBit = 0;
+	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].used = true;
+	timeField = tempFields;
+	header.numOfTimeFields = (short)(timeField.length - 1);
+	return(rval);
+
+    }
+
+    /**
+       Adds a new TimeField to a Runfile
+       @param min Minimum time for the field
+       @param max Maximum time for the field
+       @param step Step size for the field
+       @param TFNum Time Field Number
+     */
+    public int addFocusedTimeField(float min, float max, float step, 
+				  int TFNum ) {
+				  
+	int rval = 0;
+	
+	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
+	System.arraycopy ( timeField, 0, tempFields, 0, 
+			   timeField.length );
+	int matchingTimeField = timeField.length;
+	tempFields[matchingTimeField] = new TimeField();
+	tempFields[matchingTimeField].tMin = min;
+	tempFields[matchingTimeField].tMax = max;
+	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tDoubleLength = 32768;
+	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].timeFocusBit = 1;
+	tempFields[matchingTimeField].emissionDelayBit = 0;
+	tempFields[matchingTimeField].constantDelayBit = 0;
+	tempFields[matchingTimeField].energyBinBit = 0;
+	tempFields[matchingTimeField].wavelengthBinBit = 0;
+	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].used = true;
+	timeField = tempFields;
+
+	return(rval);
+
+    }
+
+    /**
+       Adds a new TimeField to a Runfile
+       @param min Minimum time for the field
+       @param max Maximum time for the field
+       @param step number of steps for the field
+       @param TFNum Time Field Number
+     */
+    public int addPulseHeightTimeField(float min, float max, float step, 
+				  int TFNum ) {
+				  
+	int rval = 0;
+	
+	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
+	System.arraycopy ( timeField, 0, tempFields, 0, 
+			   timeField.length );
+	int matchingTimeField = timeField.length;
+	tempFields[matchingTimeField] = new TimeField();
+	tempFields[matchingTimeField].tMin = min;
+	tempFields[matchingTimeField].tMax = max;
+	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tDoubleLength = 32768;
+	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].timeFocusBit = 0;
+	tempFields[matchingTimeField].emissionDelayBit = 0;
+	tempFields[matchingTimeField].constantDelayBit = 0;
+	tempFields[matchingTimeField].energyBinBit = 0;
+	tempFields[matchingTimeField].wavelengthBinBit = 0;
+	tempFields[matchingTimeField].pulseHeightBit = 1;
+	tempFields[matchingTimeField].used = true;
+	timeField = tempFields;
+
+	return(rval);
+
+    }
+
+    /**
+       Adds a new TimeField to a Runfile
+       @param min Minimum energy for the field
+       @param max Maximum energy for the field
+       @param step Step size for the field
+       @param TFNum Time Field Number
+     */
+    public int addEnergyTimeField(float min, float max, float step, 
+				  int TFNum ) {
+				  
+	int rval = 0;
+	
+	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
+	System.arraycopy ( timeField, 0, tempFields, 0, 
+			   timeField.length );
+	int matchingTimeField = timeField.length;
+	tempFields[matchingTimeField] = new TimeField();
+	tempFields[matchingTimeField].tMin = min;
+	tempFields[matchingTimeField].tMax = max;
+	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tDoubleLength = 32768;
+	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].timeFocusBit = 0;
+	tempFields[matchingTimeField].emissionDelayBit = 0;
+	tempFields[matchingTimeField].constantDelayBit = 0;
+	tempFields[matchingTimeField].energyBinBit = 1;
+	tempFields[matchingTimeField].wavelengthBinBit = 0;
+	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].used = true;
+	timeField = tempFields;
+
+	return(rval);
+
+    }
+
+    /**
+       Adds a new TimeField to a Runfile
+       @param min Minimum energy for the field
+       @param max Maximum energy for the field
+       @param step Step size for the field
+       @param TFNum Time Field Number
+     */
+    public int addWavelengthTimeField(float min, float max, float step, 
+				  int TFNum ) {
+				  
+	int rval = 0;
+	
+	TimeField[] tempFields = new TimeField[ timeField.length + 1 ];
+	System.arraycopy ( timeField, 0, tempFields, 0, 
+			   timeField.length );
+	int matchingTimeField = timeField.length;
+	tempFields[matchingTimeField] = new TimeField();
+	tempFields[matchingTimeField].tMin = min;
+	tempFields[matchingTimeField].tMax = max;
+	tempFields[matchingTimeField].tStep = step;
+	tempFields[matchingTimeField].tDoubleLength = 32768;
+	tempFields[matchingTimeField].numOfChannels = (short)((max-min)/step);
+	tempFields[matchingTimeField].timeFocusBit = 0;
+	tempFields[matchingTimeField].emissionDelayBit = 0;
+	tempFields[matchingTimeField].constantDelayBit = 0;
+	tempFields[matchingTimeField].energyBinBit = 0;
+	tempFields[matchingTimeField].wavelengthBinBit = 1;
+	tempFields[matchingTimeField].pulseHeightBit = 0;
+	tempFields[matchingTimeField].used = true;
+	timeField = tempFields;
+
+	return(rval);
+
     }
 
     public Object clone() {
