@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.22  2001/04/09 18:45:20  hammonds
+ * Added functions for dataSource and minID.
+ *
  * Revision 5.21  2001/04/03 20:46:09  hammonds
  * added detector dataSource and minID tables.
  *
@@ -264,6 +267,17 @@ public class Runfile implements Cloneable {
 	}
 	return sdata;
     }
+
+    /** Utility method for reading an integer table from a Version 5 Runfile
+     */
+    private int[] readV5IntTable( ) {
+	int[] data = new int[1];
+
+	return data;
+
+    }
+
+
 
     /**
        This function provides a test method for this class' functionality.  It 
@@ -797,6 +811,18 @@ public class Runfile implements Cloneable {
 	bArrayIS.close();
 	dataStream.close();
 
+	runfile.seek(this.header.numSegs2.location);
+	bArray = new byte[ this.header.numSegs2.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
+	numSegs2 = new int[header.numSegs2.size / 4 + 1];
+	for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
+	    numSegs2[i] = dataStream.readInt();
+	}
+	bArrayIS.close();
+	dataStream.close();
+
 	runfile.seek(this.header.crateNum.location);
 	bArray = new byte[ this.header.crateNum.size ];
 	runfile.read( bArray );
@@ -848,14 +874,36 @@ public class Runfile implements Cloneable {
 	bArrayIS.close();
 	dataStream.close();
 
-	runfile.seek(this.header.numSegs2.location);
-	bArray = new byte[ this.header.numSegs2.size ];
+	runfile.seek(this.header.dataSource.location);
+	bArray = new byte[ this.header.dataSource.size ];
 	runfile.read( bArray );
 	bArrayIS = new ByteArrayInputStream( bArray );
 	dataStream = new DataInputStream( bArrayIS );
-	numSegs2 = new int[header.numSegs2.size / 4 + 1];
-	for ( i = 1; i <= header.numSegs2.size / 4; i++ ) {
-	    numSegs2[i] = dataStream.readInt();
+	if ( header.dataSource.size > 0 ) {
+	    dataSource = new int[header.dataSource.size / 4 + 1];
+	    for ( i = 1; i <= header.dataSource.size / 4; i++ ) {
+		dataSource[i] = dataStream.readInt();
+	    }
+	}
+	else {
+	    dataSource = new int[header.nDet + 1];
+	}
+	bArrayIS.close();
+	dataStream.close();
+
+	runfile.seek(this.header.minID.location);
+	bArray = new byte[ this.header.minID.size ];
+	runfile.read( bArray );
+	bArrayIS = new ByteArrayInputStream( bArray );
+	dataStream = new DataInputStream( bArrayIS );
+	if ( header.minID.size > 0 ) {
+	    minID = new int[header.minID.size / 4 + 1];
+	    for ( i = 1; i <= header.minID.size / 4; i++ ) {
+		minID[i] = dataStream.readInt();
+	    }
+	}
+	else {
+	    minID = new int[header.nDet + 1];
 	}
 	bArrayIS.close();
 	dataStream.close();
@@ -877,11 +925,14 @@ public class Runfile implements Cloneable {
 	runfile.seek(this.header.detectorSGMap.location );
 	int [][] IDMap = 
 	    new int[this.header.numOfHistograms][this.header.nDet];
+	subgroupIDList = 
+	    new int[this.header.nDet *this.header.numOfHistograms +1];
 	minSubgroupID = new int[this.header.numOfHistograms + 1];
 	maxSubgroupID = new int[this.header.numOfHistograms + 1];
 	for ( i = 0; i < this.header.numOfHistograms; i++ ) {
 	    for (int jj = 0; jj < this.header.nDet; jj++ ) {
 		IDMap[i][jj] = runfile.readInt();
+		subgroupIDList[(i)* this.header.nDet + jj]  = IDMap[i][jj];
 		if ( IDMap[i][jj] > maxSubgroupID[i + 1]){
 		    maxSubgroupID[i + 1] = IDMap[i][jj];
 		}
@@ -1487,7 +1538,9 @@ public class Runfile implements Cloneable {
 		for ( int nid = 1; nid <= header.nDet; nid++ ) {
 		    int nindex = (hist - 1) * header.nDet + nid;
 		    int tempType = detectorMap[nindex].tfType;
-		    
+
+		    //		    System.out.println( "Sizeof subgroupIDList = " + 
+		    //		subgroupIDList.length );
 		    if ( tempType == tfType && 
 			 subgroupIDList[index] == 
 			 subgroupIDList[nindex] )
@@ -1586,6 +1639,24 @@ public class Runfile implements Cloneable {
     */
     public short DetectorType(int detID){
 	return this.detectorType[detID];
+    }
+
+    /**
+       This method retrieves the detector data Source.  
+       @param detID The detector ID.
+       @return The detector dataSource.
+     */
+    public int DataSource( int detID ) {
+	return this.dataSource[detID];
+    }
+
+    /**
+       This method retrieves the detector minimum ID.  
+       @param detID The detector ID.
+       @return The detector minimum ID.
+     */
+    public int MinID( int detID ) {
+	return this.minID[detID];
     }
 
     /**
