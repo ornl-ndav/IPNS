@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.22  2002/12/11 21:43:33  hammonds
+ * Change how chi, phi & omega are defined.
+ *
  * Revision 6.21  2002/12/09 15:54:20  hammonds
  * Flip detector x-axis.  This affects new runfiles only.  All V4 & earlier should remain the same.
  *
@@ -491,7 +494,7 @@ public class Runfile implements Cloneable {
 	int[] subgroups;
 	System.setProperty("Runfile_Debug", "yes" );
 	Runfile runFile = new Runfile(args[0]);
-	/*
+	
 	System.out.println(runFile.UserName());
 	if (runFile.header.nDet > 0 ){
 	for (i=1; i <= runFile.header.nDet; i++){
@@ -540,7 +543,7 @@ public class Runfile implements Cloneable {
 	    String key = (String)propNames.nextElement();
 	    System.out.println( key + ":" + runFile.getProperty( key ) );
 	}
-	*/
+	
     }
 
 
@@ -1792,6 +1795,12 @@ public class Runfile implements Cloneable {
 	    }
 	    //	    System.out.println ( "Done Reading Control Parameters" );
 	    
+	}
+	if ( header.instrumentType == InstrumentType.TOF_SCD ) {
+	    Parameter[] upar = params[0].getUserParameters();
+	    header.chi = upar[0].Value();
+	    header.phi = upar[1].Value();
+	    header.omega = 45.0f;
 	}
 
 
