@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.37  2003/04/22 21:40:31  hammonds
+ * Fix problem Loading a new SCD file with no control parameters.
+ *
  * Revision 6.36  2003/04/16 20:32:21  hammonds
  * Fixed Area Detector Size Problems.  There is still ~1 pixel discrepancy in absolute pixel location.
  *
@@ -1636,7 +1639,7 @@ public class Runfile implements Cloneable {
 	    //	    System.out.println ( "Done Reading Control Parameters" );
 	    
 	}
-	if ( header.instrumentType == InstrumentType.TOF_SCD ) {
+	if ( (header.instrumentType == InstrumentType.TOF_SCD) && (header.numOfControl > 0) ) {
 	    Parameter[] upar = params[0].getUserParameters();
 	    header.chi = upar[0].Value();
 	    header.phi = upar[1].Value();
