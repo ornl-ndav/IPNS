@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.33  2001/07/12 21:31:48  hammonds
+ * Now reading area detector data.
+ *
  * Revision 5.32  2001/07/12 14:40:40  hammonds
  * Fixed positions for GLAD and for area detectors.
  *
@@ -2506,27 +2509,13 @@ public class Runfile implements Cloneable {
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return null;
 	Segment[] segsInSg = SegsInSubgroup(subgroup);
-	int id = segsInSg[0].detID;
-	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    for (int i = 1; i <= header.numOfHistograms; i++) {
-		if ( subgroup <= MaxSubgroupID(i) 
-		     && subgroup >= MinSubgroupID(i)) hist =  i;
-	    }
-	    
-	    return Get1DSpectrum(id, hist);
+	Segment seg = segsInSg[0];
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) 
+		 && subgroup >= MinSubgroupID(i)) hist =  i;
 	}
-	else {
-	    float minWave = header.minWavelength;
-	    float maxWave = header.maxWavelength;
-	    int numWaves = header.numOfWavelengths;
-	    float stepWave = (maxWave - minWave)/numWaves;
-
-	    float[] data = new float[header.numOfWavelengths];
-		for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
-		    data[ii] = ii* stepWave * segmentMap[subgroup][0].row * segmentMap[subgroup][0].column;
-		}
-	    return data;
-	}
+	
+	return Get1DSpectrum(seg, hist);
     }
 
     /**
@@ -2615,16 +2604,41 @@ public class Runfile implements Cloneable {
 	}
 	return data; 
 	}
-	else {
+	else {                        // Area detector data
 	    float minWave = header.minWavelength;
 	    float maxWave = header.maxWavelength;
 	    int numWaves = header.numOfWavelengths;
 	    float stepWave = (maxWave - minWave)/numWaves;
+	    int areaStartAddress;
+	    int sliceInterval;
+	    int aindex;
 
-	    data = new float[header.numOfWavelengths];;
-		for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
-		    data[ii] = ii* stepWave *detID ;
+	    areaStartAddress = header.histStartAddress;
+	    sliceInterval = (header.totalChannels*2)/(header.numOfWavelengths);
+	    aindex = seg.column + (seg.row -1) * header.numOfX;
+
+	    
+	    data = new float[header.numOfWavelengths];
+	    for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
+		runfile.seek( areaStartAddress + ii * sliceInterval + 2 +
+			      (aindex -1)*2);
+		bdata = new byte[2];
+		int nbytes = runfile.read ( bdata, 0, 2 );
+		for ( int xx = 0; xx < 2; xx++ ) {
+		    if (bdata[xx] < 0 ) {
+			data[ii] += 
+			    (bdata[xx] + 256) * Math.pow(256.0, xx );
+			
+		    }
+		    else {
+			data[ii] += bdata[xx] * Math.pow(256.0, xx);
+		    }
 		}
+		//		    data[ii] = ii* stepWave *seg.row *seg.column ;
+	    }
+	if (!leaveOpen ){
+	    runfile.close();
+	}
 	    return data;
 	}
     }
