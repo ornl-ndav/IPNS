@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.18  2000/10/04 21:58:10  hammonds
+ * Added routines IsPulseHeight to determine if a detector or subgroup has been binned pulse height data.
+ *
  * Revision 5.17  2000/08/17 14:25:29  hammonds
  * Added routine AreaTimeSlice to read time slice data from an area detector.
  *
@@ -271,7 +274,7 @@ public class Runfile implements Cloneable {
 			       + " " + (float)runFile.flightPath[i] + " "
 			       + (float)runFile.detectorHeight[i] + " "
 			       + runFile.detectorType[i] + " " 
-			       + runFile.timeScale[i]);
+			       + runFile.IsPulseHeight(i));
 	}
 	float data[];
 	data = runFile.Get1DSpectrum(1, 1);
@@ -2074,6 +2077,36 @@ public class Runfile implements Cloneable {
 	    return false;
 	}
 
+   public boolean IsPulseHeight( int id, int hist ) {
+	int index = header.nDet * (hist - 1) + id;
+	if (detectorMap[index].tfType == 0 ) return false;
+   	int tfType = detectorMap[index].tfType;
+	if ( timeField[tfType].pulseHeightBit > 0 ) {
+	    return true;
+	}
+       
+	else
+	   return false;
+	}
+   
+   /**
+       Checks to see if a subgroup is a beam monitor.
+       @param sg - detector subgroup.
+       @return boolean true if subgroup is a beam monitor.
+   */
+    public boolean IsPulseHeight( int sg ) {
+	int hist = 0;
+	for ( int ii = 0; ii < subgroupMap[sg].length; ii++ ) {
+	    int id = subgroupMap[sg][ii];
+	    for ( int jj = 1; jj <= header.numOfHistograms; jj++ ) {
+		if ( sg <= MaxSubgroupID(jj) ) hist = jj;
+	    }
+	    if ( IsPulseHeight( id, hist ))
+		return true;
+	}
+	return false;
+    }
+    
     /**
        Compares this runfile to another Runfile object to see if they have 
        the same structure.  i.e. detector map and time field table are the 
