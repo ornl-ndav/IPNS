@@ -1,6 +1,8 @@
 package IPNS.Runfile;
 
-import java.io.*; 
+//import.RandomAccessRunfile; 
+import java.io.IOException;
+import java.io.DataInputStream; 
 import java.lang.Math;
 
 /**
@@ -12,6 +14,11 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.24  2003/03/30 04:12:53  hammonds
+ * Switch reading to use the new RunfileInputStream and RandomAccessRunfile so that changes can be made to offload the differences in data types.
+ *
+ * Further modifications have been made here to take advantage of some of the changes in these classes.
+ *
  * Revision 5.23  2002/10/28 22:57:30  hammonds
  * Speed/memory improvements.  This is from change of code structure.
  *
@@ -235,7 +242,7 @@ public class Header implements Cloneable {
 
     // --------------------------- readUnsignedInteger -------------------
 
-    protected int readUnsignedInteger(DataInputStream inFile,
+      protected int readUnsignedInteger(DataInputStream inFile,
 				      int length) throws IOException {
 
 	int zero=0;
@@ -261,10 +268,10 @@ public class Header implements Cloneable {
 	}
 	return num;
     }
-
+  
     // --------------------------- readUnsignedInteger -------------------
-    
-    protected int readUnsignedInteger(RandomAccessFile inFile,
+  /*  
+     protected int readUnsignedInteger(RandomAccessRunfile inFile,
 				      int length) throws IOException {
 
 	int zero=0;
@@ -290,10 +297,10 @@ public class Header implements Cloneable {
 	}
 	return num;
 		}
-
+  */  
     // --------------------------- readUnsignedLong -------------------
-    
-    protected long readUnsignedLong(RandomAccessFile inFile,
+  /*    
+    protected long readUnsignedLong(RandomAccessRunfile inFile,
 				    int length) throws IOException {
 	
 	byte b[] = new byte[length];
@@ -317,46 +324,46 @@ public class Header implements Cloneable {
 	}
 	return num;
     }
-
+  */
     // ---------------------------- ReadVAXReal4 ------------------------
 
-    protected double ReadVAXReal4(RandomAccessFile inFile)
-	throws IOException {
+  //    protected double ReadVAXReal4(RandomAccessRunfile inFile)
+  //throws IOException {
 
-        int length = 4;
-        long hi_mant, low_mant, exp, sign;
-        double f_val;
-        long val = (long )readUnsignedInteger(inFile, length);
-        if (val < 0) {
-	    val = val + 4294967296L;
-	    /*	    val = val + (long)Math.pow(2.0, 32.0);*/
-	}
-	/* add 128 to put in the implied 1 */
-        hi_mant  = (val & 127) + 128;
-        val      = val >> 7;
-	/* exponent is "excess 128" */
-        exp      = ((int)(val & 255)) - 128;
-        val      = val >> 8;
-
-        sign     = val & 1;
-        low_mant = val >> 1;
-	/* This could also be a "reserved" operand of some sort?*/
-        if ( exp == -128 )
-	    f_val = 0;
-        else
-	    f_val = ((hi_mant /256.0) + (low_mant/16777216.0)) *
-		Math.pow(2.0, (double)exp );
-
-        if ( sign == 1 )
-	    f_val = -f_val;
-        return f_val;
-    }
+  //    int length = 4;
+  //    long hi_mant, low_mant, exp, sign;
+  //    double f_val;
+  //    long val = (long )readUnsignedInteger(inFile, length);
+  //    if (val < 0) {
+  //    val = val + 4294967296L;
+  //    /*	    val = val + (long)Math.pow(2.0, 32.0);*/
+  //}
+  ///* add 128 to put in the implied 1 */
+  //    hi_mant  = (val & 127) + 128;
+  //    val      = val >> 7;
+  ///* exponent is "excess 128" */
+  //    exp      = ((int)(val & 255)) - 128;
+  //    val      = val >> 8;
+  //
+  //    sign     = val & 1;
+  //    low_mant = val >> 1;
+  ///* This could also be a "reserved" operand of some sort?*/
+  //    if ( exp == -128 )
+  //    f_val = 0;
+  //    else
+  //    f_val = ((hi_mant /256.0) + (low_mant/16777216.0)) *
+  //	Math.pow(2.0, (double)exp );
+  //
+  //    if ( sign == 1 )
+  //    f_val = -f_val;
+  //    return f_val;
+  //}
 
 
 public static void main(String[] args) throws IOException{
     System.setProperty( "Runfile_Debug", "yes" );
 	System.out.println("Runfile Name is " + args[0]);
-	RandomAccessFile runfile = new RandomAccessFile(
+	RandomAccessRunfile runfile = new RandomAccessRunfile(
 		args[0], "r");
 	int slashIndex = args[0]
 	    .lastIndexOf( System.getProperty( "file.separator"));
@@ -657,7 +664,7 @@ public static void main(String[] args) throws IOException{
     protected Header() {
     }
 
-    protected Header( RandomAccessFile runfile, String iName ) 
+    protected Header( RandomAccessRunfile runfile, String iName ) 
 	throws IOException {
 	this( runfile );
 	if ( versionNumber < 5 ) {
@@ -699,9 +706,11 @@ public static void main(String[] args) throws IOException{
 	}
     }
 
-    protected Header(RandomAccessFile runfile) throws IOException{
+    protected Header(RandomAccessRunfile runfile) throws IOException{
 	int i;
 	long filePosition;
+	StringBuffer tempStrBuff = new StringBuffer();
+	String tempStr = new String();
 	filePosition = runfile.getFilePointer();
 
 	runfile.seek(68);
@@ -709,10 +718,137 @@ public static void main(String[] args) throws IOException{
 	if ( (System.getProperty("Runfile_Debug", "no" ))
 	     .equalsIgnoreCase("yes") ) {
 	    System.out.println( "Version: " + vers );
-	    System.out.println( "Version " + vers + " file" );
+	    System.out.println( "Version" + vers + " file" );
 	}
-	if ( vers > 16777215 ) {       // Version < 4 was little endian
-	    LoadV4(runfile);
+
+	runfile.seek(0);
+	controlParameter.location = runfile.readRunInt();
+	controlParameter.size = runfile.readRunInt();
+	detectorMapTable.location = runfile.readRunInt();
+	detectorMapTable.size = runfile.readRunInt();
+	timeFieldTable.location = runfile.readRunInt();
+	timeFieldTable.size = runfile.readRunInt();
+	timeScaleTable.location = runfile.readRunInt();
+	timeScaleTable.size = runfile.readRunInt( );
+	timeShiftTable.location = runfile.readRunInt();
+	timeShiftTable.size = runfile.readRunInt();
+	areaStartTable.location = runfile.readRunInt();
+	areaStartTable.size = runfile.readRunInt();
+	timeDelayTable.location = runfile.readRunInt();
+	timeDelayTable.size = runfile.readRunInt( );
+	histStartAddress = runfile.readRunInt( );
+	numOfBlocks = runfile.readRunInt( );
+	offsetToFree = runfile.readRunInt( );
+	versionNumber = runfile.readRunInt( );
+	detectorAngle.location = runfile.readRunInt( );
+	detectorAngle.size = runfile.readRunInt( );
+	flightPath.location = runfile.readRunInt( );
+	flightPath.size = runfile.readRunInt( );
+	detectorHeight.location = runfile.readRunInt( );
+	detectorHeight.size = runfile.readRunInt( );
+	detectorType.location = runfile.readRunInt( );
+	detectorType.size = runfile.readRunInt( );
+	controlTable.location = runfile.readRunInt( );
+	controlTable.size = runfile.readRunInt( );
+	seqHistWidth.location = runfile.readRunInt( );
+	seqHistWidth.size = runfile.readRunInt( );
+	nDet = runfile.readRunShort( );
+	userName = runfile.readRunString(20);
+	runTitle = runfile.readRunString(80);
+	runNum = runfile.readRunFileNum();
+	nextRun = runfile.readRunFileNum();
+	startDate = runfile.readRunString(9);
+	startTime = runfile.readRunString(8);
+	endDate = runfile.readRunString(9);
+	endTime = runfile.readRunString(8);
+	protStatus = (char)runfile.readByte();
+	varToMonitor = (char)runfile.readByte();
+	presetMonitorCounts = runfile.readRunInt();
+	elapsedMonitorCounts = runfile.readRunInt();
+	numOfCyclesPreset = runfile.readRunShort( );
+	numOfCyclesCompleted = runfile.readRunShort(  );
+	runAfterFinished = runfile.readRunFileNum();
+	totalMonitorCounts = runfile.readRunInt( );
+	detCalibFile = runfile.readRunFileNum();
+	detLocUnit = (char)runfile.readByte( );
+	pseudoTimeUnit = (char)runfile.readByte( );
+	runfile.seek(292);
+	sourceToSample = runfile.readRunFloat( );
+	sourceToChopper = runfile.readRunFloat( );
+	moderatorCalibFile = runfile.readRunFileNum();
+	groupToMonitor = runfile.readRunShort( );
+	channelToMonitor = runfile.readRunShort( );
+	numOfHistograms = runfile.readRunShort( );
+	numOfTimeFields = runfile.readRunShort( );
+	numOfControl = runfile.readRunShort( );
+	controlFlag = runfile.readRunShort( );
+	clockShift = runfile.readRunShort( );
+	totalChannels = runfile.readRunInt( );
+	numOfPulses = runfile.readRunInt( );
+	sizeOfDataArea = runfile.readRunInt( );
+	hardwareTMin = runfile.readRunInt( );
+	hardwareTMax = runfile.readRunInt( );
+	hardTimeDelay = runfile.readRunInt( );
+	numOfX = runfile.readRunShort( );
+	numOfY = runfile.readRunShort( );
+	numOfWavelengths = runfile.readRunShort( );
+	maxWavelength = runfile.readRunInt( );
+	minWavelength = runfile.readRunInt( );
+	dta = (double)runfile.readRunFloat();
+	dtd = (double)runfile.readRunFloat();
+	omega = (double)runfile.readRunFloat();
+	chi = (double)runfile.readRunFloat();
+	phi = (double)runfile.readRunFloat();
+	xLeft = (double)runfile.readRunFloat();
+	xRight = (double)runfile.readRunFloat();
+	yLower = (double)runfile.readRunFloat();
+	yUpper = (double)runfile.readRunFloat();
+	xDisplacement = (double)runfile.readRunFloat();
+	yDisplacement = (double)runfile.readRunFloat();
+	xLength = (double)runfile.readRunFloat();
+	areaChannelWidth = runfile.readRunShort( );
+	areaDoubleInterval = runfile.readRunShort( );
+	addressOf1DData = runfile.readRunInt( );
+	addressOf2DData = runfile.readRunInt( );
+	endOfOverflow = runfile.readRunInt( );
+	channels1D = runfile.readRunInt( );
+	numOfOverflows = runfile.readRunShort( );
+	clockPeriod = (double)runfile.readRunFloat();
+	runfile.seek(462);
+	energyIn = (double)runfile.readRunFloat();
+	energyOut = (double)runfile.readRunFloat();
+	numOfSeqHist = runfile.readRunShort();
+	protonCurrent = (double)runfile.readRunFloat();
+	areaBinning = runfile.readRunShort(  );
+	microprocessor = runfile.readRunShort( );
+	numOfLockouts = runfile.readRunShort( );
+	firstOverflow = runfile.readRunInt( );
+	expNum = runfile.readRunFileNum();
+	firstRun = runfile.readRunFileNum();
+	lastRun = runfile.readRunFileNum();
+	samplePos = (short)runfile.readRunShort();
+	defaultRun = runfile.readRunFileNum();
+	numOfHeadBlocks = runfile.readRunShort( );
+	overflowSort = runfile.readRunShort( );
+	runfile.seek( 512 );
+	messageRegion.location = runfile.readRunInt( );
+	messageRegion.size =  runfile.readRunInt( );
+	discSettings.location = runfile.readRunInt( );
+	discSettings.size = runfile.readRunInt( );
+	PSD_IDMap.location = runfile.readRunInt( );
+	PSD_IDMap.size = runfile.readRunInt( );
+
+	if ( versionNumber < 5 ) {       // Version < 4 was little endian
+	  if (versionNumber < 4 ) {      // old das on VAX
+	    standardClock = 0.125;
+	    lpsdClock = 0.5;
+	  }
+	  else {                         // new das w VAX
+	    runfile.seek(632);
+	    standardClock = runfile.readRunFloat();
+	    lpsdClock = runfile.readFloat();
+	  }
+	  //	  LoadV4(runfile);
 	}
 	else {
 	    LoadV5(runfile);
@@ -721,430 +857,22 @@ public static void main(String[] args) throws IOException{
 	runfile.seek(filePosition);
 	}
 
-
-    void LoadV4(RandomAccessFile runfile) throws IOException {
+  /*    void LoadV4(RandomAccessRunfile runfile) throws IOException {
 	int i;
 	int temp;
 	StringBuffer tempStrBuff = new StringBuffer();
-	runfile.seek(0);  
-        controlParameter.location = readUnsignedInteger(runfile, 4);
-        controlParameter.size = readUnsignedInteger(runfile, 4);
-        detectorMapTable.location = readUnsignedInteger(runfile, 4);
-        detectorMapTable.size = readUnsignedInteger(runfile, 4);
-        timeFieldTable.location = readUnsignedInteger(runfile, 4);
-        timeFieldTable.size = readUnsignedInteger(runfile, 4);
-        timeScaleTable.location = readUnsignedInteger(runfile, 4);
-        timeScaleTable.size = readUnsignedInteger(runfile, 4);
-        timeShiftTable.location = readUnsignedInteger(runfile, 4);
-        timeShiftTable.size = readUnsignedInteger(runfile, 4);
-        areaStartTable.location = readUnsignedInteger(runfile, 4);
-        areaStartTable.size = readUnsignedInteger(runfile, 4);
-        timeDelayTable.location = readUnsignedInteger(runfile, 4);
-        timeDelayTable.size = readUnsignedInteger(runfile, 4);
-	histStartAddress = readUnsignedInteger(runfile, 4);
-	numOfBlocks = readUnsignedInteger(runfile, 4);
-	offsetToFree = readUnsignedInteger(runfile, 4);
-	versionNumber = readUnsignedInteger(runfile, 4);
-        detectorAngle.location = readUnsignedInteger(runfile, 4);
-        detectorAngle.size = readUnsignedInteger(runfile, 4);
-        flightPath.location = readUnsignedInteger(runfile, 4);
-        flightPath.size = readUnsignedInteger(runfile, 4);
-        detectorHeight.location = readUnsignedInteger(runfile, 4);
-        detectorHeight.size = readUnsignedInteger(runfile, 4);
-        detectorType.location = readUnsignedInteger(runfile, 4);
-        detectorType.size = readUnsignedInteger(runfile, 4);
-        controlTable.location = readUnsignedInteger(runfile, 4);
-        controlTable.size = readUnsignedInteger(runfile, 4);
-        seqHistWidth.location = readUnsignedInteger(runfile, 4);
-        seqHistWidth.size = readUnsignedInteger(runfile, 4);
-	nDet = (short)readUnsignedInteger(runfile, 2);
-	tempStrBuff = new StringBuffer(20);
-	for (i=0; i < 20; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	userName = tempStrBuff.toString();
-	tempStrBuff = new StringBuffer(80);
-	for (i=0; i < 80; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	runTitle = tempStrBuff.toString();
-	if (versionNumber >= 3)
-	    runNum = readUnsignedInteger(runfile, 4);
-	else{
-	    tempStrBuff = new StringBuffer(4);
-	    for (i=0; i < 4; i++){
-		tempStrBuff.append((char)runfile.readByte());
-	    }
-	    if ( tempStrBuff.toString() != null )
-		runNum = (int)Integer.parseInt(tempStrBuff.toString());
-	}
-	if (versionNumber >= 2 || iName.equals("glad")) {
-	    nextRun = readUnsignedInteger(runfile, 4);
-	}
-	else{
-	    tempStrBuff = new StringBuffer(4);
-	    for (i=0; i < 4; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		//	    System.out.println( "nextrun"+tempStrBuff+"MMMM");
-	    }
-	    //	    System.out.println( "nextrun"+tempStrBuff+"MMMM");
-	    if ( tempStrBuff.toString() != null )
-		nextRun = (int)Integer.parseInt(tempStrBuff.toString().trim());
-	}
-	tempStrBuff = new StringBuffer(9);
-	for (i=0; i < 9; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	startDate = tempStrBuff.toString();
-	tempStrBuff = new StringBuffer(8);
-	for (i=0; i < 8; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	startTime = tempStrBuff.toString();
-	tempStrBuff = new StringBuffer(9);
-	for (i=0; i < 9; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	endDate = tempStrBuff.toString();
-	tempStrBuff = new StringBuffer(8);
-	for (i=0; i < 8; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	endTime = tempStrBuff.toString();
-	protStatus = (char)runfile.readByte();
-	varToMonitor = (char)runfile.readByte();
 	
-	presetMonitorCounts = readUnsignedInteger(runfile, 4);
-	elapsedMonitorCounts = readUnsignedInteger(runfile, 4);
-	numOfCyclesPreset = (short)readUnsignedInteger(runfile, 2);
-	numOfCyclesCompleted = (short)readUnsignedInteger(runfile, 2);
-	if (versionNumber >= 2 || iName.equals("glad") )
-	  runAfterFinished = readUnsignedInteger(runfile, 4);
-	else{
-	  tempStrBuff = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	  if ( tempStrBuff.toString() != null )
-	  runAfterFinished = (int)Integer.parseInt(tempStrBuff.toString());
-	  }
 
-	totalMonitorCounts = readUnsignedInteger(runfile, 4);
 
-	if (versionNumber >= 3)
-	  detCalibFile = readUnsignedInteger(runfile, 4);
-	else{
-	  tempStrBuff = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	  detCalibFile = Integer.parseInt(tempStrBuff.toString());
-	  }
-	detLocUnit = (char)runfile.readByte();
- 	pseudoTimeUnit = (char)runfile.readByte();
-	runfile.seek(292);  
-	sourceToSample = ReadVAXReal4(runfile);
-	sourceToChopper = ReadVAXReal4(runfile);
-	if (versionNumber >= 3)
-	  moderatorCalibFile = readUnsignedInteger(runfile, 4);
-	else{
-	  tempStrBuff = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-		tempStrBuff.append((char)runfile.readByte());
-		}
-	  moderatorCalibFile = Integer.parseInt(tempStrBuff.toString());
-	  }
+	}*/
 
-	groupToMonitor = (short)readUnsignedInteger(runfile, 2);
-	channelToMonitor = (short)readUnsignedInteger(runfile, 2);
-	numOfHistograms = (short)readUnsignedInteger(runfile, 2);
-	numOfTimeFields = (short)readUnsignedInteger(runfile, 2);
-	numOfControl = (short)readUnsignedInteger(runfile, 2);
-	controlFlag = (short)readUnsignedInteger(runfile, 2);
-	clockShift = (short)readUnsignedInteger(runfile, 2);
-	totalChannels = readUnsignedInteger(runfile, 4);
-	numOfPulses = readUnsignedInteger(runfile, 4);
-	sizeOfDataArea = readUnsignedInteger(runfile, 4);
-	hardwareTMin = readUnsignedInteger(runfile, 4);
-	hardwareTMax = readUnsignedInteger(runfile, 4);
-	hardTimeDelay = readUnsignedInteger(runfile, 4);
-	numOfX = (short)readUnsignedInteger(runfile, 2);
-	numOfY = (short)readUnsignedInteger(runfile, 2);
-	numOfWavelengths = (short)readUnsignedInteger(runfile, 2);
-	maxWavelength = readUnsignedInteger(runfile, 4);
-	minWavelength = readUnsignedInteger(runfile, 4);
-	dta = ReadVAXReal4(runfile);
-	dtd = ReadVAXReal4(runfile);
-	omega = ReadVAXReal4(runfile);
-	chi = ReadVAXReal4(runfile);
-	phi = ReadVAXReal4(runfile);
-	xLeft = ReadVAXReal4(runfile);
-	xRight = ReadVAXReal4(runfile);
-	yLower = ReadVAXReal4(runfile);
-	yUpper = ReadVAXReal4(runfile);
-	xDisplacement = ReadVAXReal4(runfile);
-	yDisplacement = ReadVAXReal4(runfile);
-	xLength = ReadVAXReal4(runfile);
-	areaChannelWidth = (short)readUnsignedInteger(runfile, 2);
-	areaDoubleInterval = (short)readUnsignedInteger(runfile, 2);
-	addressOf1DData = readUnsignedInteger(runfile, 4);
-	addressOf2DData = readUnsignedInteger(runfile, 4);
-	endOfOverflow = readUnsignedInteger(runfile, 4);
-	channels1D = readUnsignedInteger(runfile, 4);
-	numOfOverflows = (short)readUnsignedInteger(runfile, 2);
-	clockPeriod = ReadVAXReal4(runfile);
-	runfile.seek(462);
-	energyIn = ReadVAXReal4(runfile);
-	energyOut = ReadVAXReal4(runfile);
-	numOfSeqHist = (short)readUnsignedInteger(runfile, 2);
-	protonCurrent = ReadVAXReal4(runfile);
-	areaBinning = (short)readUnsignedInteger(runfile, 2);
-	microprocessor = (short)readUnsignedInteger(runfile, 2);
-	numOfLockouts = (short)readUnsignedInteger(runfile, 2);
-	firstOverflow = readUnsignedInteger(runfile, 4);
-	if (versionNumber >= 3){
-	  expNum = readUnsignedInteger(runfile, 4);
-	  firstRun = readUnsignedInteger(runfile, 4);
-	  lastRun = readUnsignedInteger(runfile, 4);
-	  samplePos = (short)readUnsignedInteger(runfile, 2);
-	  defaultRun = readUnsignedInteger(runfile, 4);
-	  }
-	else{
-	  tempStrBuff = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-	      temp = runfile.readByte();
-	      if ( temp != 0 ){ 
-		  tempStrBuff.append((char)temp);
-	      }
-	      else {
-		  tempStrBuff.append("0");
-	      }
-	  }
-	  if ( tempStrBuff.toString() != null && 
-	       (tempStrBuff.toString()).length() != 0 ) {
-	     expNum = Integer.parseInt(tempStrBuff.toString().trim());
-	  }
-	  else {
-	      expNum = 0;
-	  }
-	  tempStrBuff = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-	      temp = runfile.readByte();
-	      if ( temp != 0 ){ 
-		  tempStrBuff.append((char)temp);
-	      }
-	      else {
-		  tempStrBuff.append("0");
-	      }
-	      //		tempFirstRun.append((char)runfile.readByte());
-	  }
-	  if ( tempStrBuff.toString() != null )
-	     firstRun = Integer.parseInt(tempStrBuff.toString());
-	  tempStrBuff = new StringBuffer(4);
-
-	  for (i=0; i < 4; i++){
-	      temp = runfile.readByte();
-	      if ( temp != 0 ){ 
-		  tempStrBuff.append((char)temp);
-	      }
-	      else {
-		  tempStrBuff.append("0");
-	      }
-	      //		tempLastRun.append((char)runfile.readByte());
-	  }
-	  if ( tempStrBuff.toString() != null )
-	     lastRun = Integer.parseInt(tempStrBuff.toString());
-	  samplePos = (short)readUnsignedInteger(runfile, 2);
-	  tempStrBuff = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-	      temp = runfile.readByte();
-	      if ( temp != 0 ){ 
-		  tempStrBuff.append((char)temp);
-	      }
-	      else {
-		  tempStrBuff.append("0");
-	      }
-	      //		tempDefaultRun.append((char)runfile.readByte());
-		}
-	  if ( tempStrBuff.toString() != null )
-	     defaultRun = Integer.parseInt(tempStrBuff.toString());
-	  }
-	numOfHeadBlocks = (short)readUnsignedInteger(runfile, 2);
-	overflowSort = (short)readUnsignedInteger(runfile, 2);
-	runfile.seek(512);
-	messageRegion.location =readUnsignedInteger(runfile, 4);
-	messageRegion.size =readUnsignedInteger(runfile, 4);
-	discSettings.location =readUnsignedInteger(runfile, 4);
-	discSettings.size =readUnsignedInteger(runfile, 4);
-	PSD_IDMap.location =readUnsignedInteger(runfile, 4);
-	PSD_IDMap.size =readUnsignedInteger(runfile, 4);
-	if (versionNumber < 4 ) {
-		standardClock = 0.125;
-		lpsdClock = 0.5;
-
-		
-		}
-	else {
-		runfile.seek(632);
-		standardClock = ReadVAXReal4(runfile);
-		lpsdClock = ReadVAXReal4(runfile);
-		}
-
-    }
-
-    void LoadV5(RandomAccessFile runfile ) throws IOException {
-		runfile.seek(0);
-		controlParameter.location = runfile.readInt();
-		controlParameter.size = runfile.readInt();
-		detectorMapTable.location = runfile.readInt();
-		detectorMapTable.size = runfile.readInt();
-		timeFieldTable.location = runfile.readInt();
-		timeFieldTable.size = runfile.readInt();
-		timeScaleTable.location = runfile.readInt();
-		timeScaleTable.size = runfile.readInt( );
-		timeShiftTable.location = runfile.readInt();
-		timeShiftTable.size = runfile.readInt();
-		areaStartTable.location = runfile.readInt();
-		areaStartTable.size = runfile.readInt();
-		timeDelayTable.location = runfile.readInt();
-		timeDelayTable.size = runfile.readInt( );
-		histStartAddress = runfile.readInt( );
-		numOfBlocks = runfile.readInt( );
-		offsetToFree = runfile.readInt( );
-		versionNumber = runfile.readInt( );
-		detectorAngle.location = runfile.readInt( );
-		detectorAngle.size = runfile.readInt( );
-		flightPath.location = runfile.readInt( );
-		flightPath.size = runfile.readInt( );
-		detectorHeight.location = runfile.readInt( );
-		detectorHeight.size = runfile.readInt( );
-		detectorType.location = runfile.readInt( );
-		detectorType.size = runfile.readInt( );
-		controlTable.location = runfile.readInt( );
-		controlTable.size = runfile.readInt( );
-		seqHistWidth.location = runfile.readInt( );
-		seqHistWidth.size = runfile.readInt( );
-		nDet = runfile.readShort( );
+    void LoadV5(RandomAccessRunfile runfile ) throws IOException {
 		byte[] temp = new byte[20];
-		runfile.read(temp, 0, 20);
-		userName = new String(temp);
-		temp = new byte[80];
-		runfile.read(temp, 0, 80);
-		runTitle = new String(temp);
-		runNum = runfile.readInt( );
-		nextRun = runfile.readInt();
-		temp = new byte[9];
-		runfile.read(temp, 0, 9);
-		startDate = new String(temp);
-		temp = new byte[8];
-		runfile.read(temp, 0, 8);
-		startTime = new String(temp);
-		temp = new byte[9];
-		runfile.read(temp, 0, 9);
-		endDate = new String(temp);
-		temp = new byte[8];
-		runfile.read(temp, 0, 8);
-		endTime = new String(temp);
-		protStatus = (char)runfile.readByte();
-		varToMonitor = (char)runfile.readByte();
-		presetMonitorCounts = runfile.readInt( );
-		elapsedMonitorCounts = runfile.readInt( );
-		numOfCyclesPreset = runfile.readShort( );
-		numOfCyclesCompleted = runfile.readShort(  );
-		runAfterFinished = runfile.readInt( );
-		totalMonitorCounts = runfile.readInt( );
-		detCalibFile = runfile.readInt( );
-		detLocUnit = (char)runfile.readByte( );
-		pseudoTimeUnit = (char)runfile.readByte( );
-		runfile.seek(292);
-		sourceToSample = runfile.readFloat( );
-		sourceToChopper = runfile.readFloat( );
-		moderatorCalibFile = runfile.readInt( );
-		groupToMonitor = runfile.readShort( );
-		channelToMonitor = runfile.readShort( );
-		numOfHistograms = runfile.readShort( );
-		numOfTimeFields = runfile.readShort( );
-		numOfControl = runfile.readShort( );
-		controlFlag = runfile.readShort( );
-		clockShift = runfile.readShort( );
- 		totalChannels = runfile.readInt( );
-		numOfPulses = runfile.readInt( );
-		sizeOfDataArea = runfile.readInt( );
-		hardwareTMin = runfile.readInt( );
-		hardwareTMax = runfile.readInt( );
-		hardTimeDelay = runfile.readInt( );
-		numOfX = runfile.readShort( );
-		numOfY = runfile.readShort( );
-		numOfWavelengths = runfile.readShort( );
-		maxWavelength = runfile.readInt( );
-		minWavelength = runfile.readInt( );
-		dta = (double)runfile.readFloat();
-		dtd = (double)runfile.readFloat();
-		omega = (double)runfile.readFloat();
-		chi = (double)runfile.readFloat();
-		phi = (double)runfile.readFloat();
-		xLeft = (double)runfile.readFloat();
-		xRight = (double)runfile.readFloat();
-		yLower = (double)runfile.readFloat();
-		yUpper = (double)runfile.readFloat();
-		xDisplacement = (double)runfile.readFloat();
-		yDisplacement = (double)runfile.readFloat();
-		xLength = (double)runfile.readFloat();
-		areaChannelWidth = runfile.readShort( );
-		areaDoubleInterval = runfile.readShort( );
-		addressOf1DData = runfile.readInt( );
-		addressOf2DData = runfile.readInt( );
-		endOfOverflow = runfile.readInt( );
-		channels1D = runfile.readInt( );
-		numOfOverflows = runfile.readShort( );
-		clockPeriod = (double)runfile.readFloat();
-		runfile.seek(462);
-		energyIn = (double)runfile.readFloat();
-		energyOut = (double)runfile.readFloat();
-		numOfSeqHist = runfile.readShort();
-		protonCurrent = (double)runfile.readFloat();
-		areaBinning = runfile.readShort(  );
-		microprocessor = runfile.readShort( );
-		numOfLockouts = runfile.readShort( );
-		firstOverflow = runfile.readInt( );
-		expNum = runfile.readInt( );
-		firstRun = runfile.readInt( );
-		lastRun = runfile.readInt( );
-		samplePos = runfile.readShort( );
-		defaultRun = runfile.readInt( );
-		numOfHeadBlocks = runfile.readShort( );
-		overflowSort = runfile.readShort( );
-		runfile.seek( 512 );
-		messageRegion.location = runfile.readInt( );
-		messageRegion.size =  runfile.readInt( );
-		discSettings.location = runfile.readInt( );
-		discSettings.size = runfile.readInt( );
-		PSD_IDMap.location = runfile.readInt( );
-		PSD_IDMap.size = runfile.readInt( );
-		lpsdStartTable.location = runfile.readInt();
-		lpsdStartTable.size = runfile.readInt();
-		detectorStartTable.location = runfile.readInt();
-		detectorStartTable.size = runfile.readInt();
-		lpsdAngle.location = runfile.readInt();
-		lpsdAngle.size = runfile.readInt();
-		lpsdFlightPath.location = runfile.readInt();
-		lpsdFlightPath.size = runfile.readInt();
-		lpsdHeight.location = runfile.readInt();
-		lpsdHeight.size = runfile.readInt();
-		lpsdType.location = runfile.readInt();
-		lpsdType.size = runfile.readInt();
-		lpsdLength.location = runfile.readInt();
-		lpsdLength.size = runfile.readInt();
-		lpsdWidth.location = runfile.readInt();
-		lpsdWidth.size = runfile.readInt();
-		lpsdDepth.location = runfile.readInt();
-		lpsdDepth.size = runfile.readInt();
 		runfile.seek(632);
 		standardClock = (double)runfile.readFloat();
 		lpsdClock = (double)runfile.readFloat();
        		numOfElements = runfile.readInt();
 		if( numOfElements == 0 ) {
-		    //		    System.out.println("no numOfElements");
 		    numOfElements = nDet;
 		}
 		runfile.seek(700);
@@ -1154,9 +882,12 @@ public static void main(String[] args) throws IOException{
 		detectorWidth.size = runfile.readInt();
 		detectorDepth.location = runfile.readInt();
 		detectorDepth.size = runfile.readInt();
-		temp = new byte[4];
+		/*		temp = new byte[4];
 		runfile.read(temp, 0, 4);
 		iName = new String(temp);
+		*/
+
+		iName = runfile.readRunString(4);
 		detectorSGMap.location = runfile.readInt();
 		detectorSGMap.size = runfile.readInt();
 		detCoordSys.location = runfile.readInt();
@@ -1823,7 +1554,7 @@ public static void main(String[] args) throws IOException{
 	return errval;
     }
 
-    public void Write( RandomAccessFile runfile ) {
+    public void Write( RandomAccessRunfile runfile ) {
 		try {
 		runfile.seek(0);
 		runfile.writeInt( controlParameter.location );
@@ -2015,8 +1746,8 @@ public static void main(String[] args) throws IOException{
 
     public void reWrite( String runfileName) {
 	try {
-	RandomAccessFile runfile;
-	runfile = new RandomAccessFile (runfileName, "rw" );
+	RandomAccessRunfile runfile;
+	runfile = new RandomAccessRunfile (runfileName, "rw" );
 	Write( runfile );
 	runfile.close();
 	}
