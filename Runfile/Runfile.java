@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.32  2001/07/12 14:40:40  hammonds
+ * Fixed positions for GLAD and for area detectors.
+ *
  * Revision 5.31  2001/07/10 21:39:28  hammonds
  * Made changes to the offset angles for area detectors and made some changes to the flight path length for area detectors.
  *
@@ -330,7 +333,9 @@ public class Runfile implements Cloneable {
     public static void main(String[] args) throws IOException {
 	int i;
 	int[] subgroups;
+	System.setProperty("Runfile_Debug", "yes" );
 	Runfile runFile = new Runfile(args[0]);
+
 	System.out.println(runFile.UserName());
 	if (runFile.header.nDet > 0 ){
 	for (i=1; i <= runFile.header.nDet; i++){
@@ -402,13 +407,19 @@ public class Runfile implements Cloneable {
 	timeField[0] = new TimeField();
 	runfile.seek(68);  
 	if ( header.versionNumber > 4 ) {
-	    System.out.println( "Version Number > 4" );
-	    System.out.println( "Object creation passed to higher version" );
+	    if ( System.getProperty("Runfile_Debug", "no" )
+		 .equalsIgnoreCase("yes") ) {
+		System.out.println( "Version Number > 4" );
+		System.out.println( "Object creation passed to higher version" );
+	    }
 	    LoadV5( runfile );
 	}
 	else {
-	    System.out.println( "Version Number < = 4" );
-	    System.out.println( "Object creation Handled by Runfile v4" );
+	    if ( System.getProperty("Runfile_Debug", "no" )
+		 .equalsIgnoreCase("yes") ) {
+		System.out.println( "Version Number < = 4" );
+		System.out.println( "Object creation Handled by Runfile v4" );
+	    }
 	    LoadV4( runfile )
 ;
 	}
@@ -445,8 +456,9 @@ public class Runfile implements Cloneable {
 	    runfile.seek(this.header.detectorType.location);
 	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
 
-	    /*	    
-		   if ( (this.header.iName).equalsIgnoreCase("glad")) {
+	   	    
+	    
+	    if ( (this.header.iName).equalsIgnoreCase("glad")) {
 		for ( int ii = 0; ii <= header.numOfElements; ii++ ){
 		    if ( flightPath[ii] !=0.00f &&
 			 detectorAngle[ii] != 0.00f && 
@@ -456,18 +468,53 @@ public class Runfile implements Cloneable {
 			float fp = flightPath[ii];
 			float zdet = detectorHeight[ii];
 			float ang1 = detectorAngle[ii];
-			float xdet = 
-			    (float)Math.cos( ang1 * cvdr) * fp;
-			float ydet =
-			    (float)
-			float dist = 
-			    (float)Math.sqrt( fp * fp - zdet * zdet );
-			detectorAngle[ii] = (float)(Math.acos(xdet/dist) * cvrd);
+			double xdet= 0.0;
+			double ydetz= 0.0;
+			double ydet = 0.0;
+			double dist = 0.0;
+			try {
+			    xdet = Math.cos( ang1 * cvdr) * fp;
+			    ydetz = Math.sin(ang1 * cvdr) * fp;
+			    if ( Math.abs(ydetz * ydetz - zdet * zdet) < 0.001 && 
+				 ydetz * ydetz< zdet*zdet){
+				ydet = 0.0;
+			    }
+			    else {
+			    ydet = 
+				Math.sqrt( ydetz * ydetz - zdet * zdet );
+			    }
+			    dist = 
+				Math.sqrt( fp * fp - zdet * zdet );
+			}
+			catch ( Exception ex ) {
+			    ex.printStackTrace();
+			}
+			double ang2;
+			if ( xdet < ydet ) {
+			    ang2 =
+				(Math.acos(xdet/dist) * cvrd);
+			}
+			else {
+			    ang2 = 
+				(Math.asin(ydet/dist) * cvrd );
+			}
+			if ( ang2 == Double.NaN ) {
+			    System.out.println ( ii + "detAngle set to 0 ");
+			    detectorAngle[ii] = 0.0f;
+			}
+			else {
+			    detectorAngle[ii] = (float)ang2;
+			}
+			/*
+		    System.out.println( ii + "  " + ang1 + "   "  +
+					xdet + "   "  + ydet + "   " + ang2 
+					+ "  " + dist + "   " +ydetz+ "   " +zdet); 
+			*/
 		    }
 		}
 		
 	    }
-	    */
+	        
 	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
 		 (this.header.iName).equalsIgnoreCase("sad0") ||
 		 (this.header.iName).equalsIgnoreCase("sad1") ||
@@ -2090,7 +2137,7 @@ public class Runfile implements Cloneable {
 		/ header.numOfX;
 	    double fromCenter = fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100;
-	    double offsetAngle = fromCenter / (header.dtd/100.0) 
+	    double offsetAngle = Math.atan(fromCenter / (header.dtd/100.0) )
 		* ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	}
@@ -2179,7 +2226,8 @@ public class Runfile implements Cloneable {
 		/ header.numOfX;
 	    double fromCenter = fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f;
-	    double offsetAngle = fromCenter / (header.dtd/100) * ( 180 / Math.PI );
+	    double offsetAngle = Math.atan(fromCenter / (header.dtd/100)) 
+		* ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	}
     }
@@ -2219,10 +2267,10 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    float fromLeft = (float)
-		(seg.column * ( header.xLeft -header.xRight) ) 
+		(seg.column * ( header.xLeft -header.xRight)/100.0f ) 
 		/ header.numOfX;
 	    float fromCenter = (float)(fromLeft 
-		 - ( header.xDisplacement + header.xLeft ));
+		 - ( header.xDisplacement + header.xLeft )/100.0f);
 	    
 	    return Math.sqrt(flightPath[detID] + flightPath[detID] 
 			     + RawDetectorHeight(seg)*RawDetectorHeight (seg)
@@ -2275,10 +2323,10 @@ public class Runfile implements Cloneable {
 	}
 	else {
 	    float fromLeft = (float)
-		(seg.column * ( header.xLeft -header.xRight) ) 
+		(seg.column * ( header.xLeft -header.xRight)/100.0f ) 
 		/ header.numOfX;
 	    float fromCenter = (float)(fromLeft 
-		 - ( header.xDisplacement + header.xLeft ));
+		 - ( header.xDisplacement + header.xLeft )/100.0f);
 	    
 	    return Math.sqrt(flightPath[id] * flightPath[id]
 			     + RawDetectorHeight(seg)*RawDetectorHeight (seg)
