@@ -21,6 +21,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.2  2000/02/16 01:43:14  hammonds
+ * Changed code to handle glad LPSDs.  Changes will soon result in a common interface for all detectors.  Most of the Lpsd<...> classes will be removed in favor of a unified interface references have been commented out for now.  References to Header member variable numOfLpsd have been changed to nDet or numOfElements as appropriate.  Lpsds will be treated as a multi-element detector.
+ *
  * Revision 5.1  2000/02/11 23:16:45  hammonds
  * Added code to read/write discriminator levels in the new files.  Changed type for disc level methods to int.  Added many parameters to specify detector posistion in the runfile.
  *
@@ -300,7 +303,9 @@ public class Runfile implements Cloneable {
 
     void LoadV4( RandomAccessFile runfile ) throws IOException {
 	int i;
+	/*
 	if ( header.nDet > 0 ) {
+	*/
 	    detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
 					 + 1];
 	    for (i=1; i <= this.header.detectorMapTable.size/4; i++){
@@ -326,6 +331,7 @@ public class Runfile implements Cloneable {
 	    runfile.seek(this.header.detectorType.location);
 	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
 
+	    lpsdIDMap = new LpsdDetIdMap( runfile, header );
 	    float[] detectorLength = new float[header.nDet + 1];
 	    float[] detectorWidth = new float[header.nDet + 1];
 	    float[] detectorDepth = new float[header.nDet + 1];
@@ -345,18 +351,26 @@ public class Runfile implements Cloneable {
 		    case 0: {
 			if ( ii < 3 )
 			detectorType[ii] = 1;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 2;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 3;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 3: {
 			detectorType[ii] = 4;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
@@ -365,10 +379,14 @@ public class Runfile implements Cloneable {
 		    switch (detectorType[ii]){
 		    case 1: {
  			detectorType[ii] = 9;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 6;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
@@ -377,10 +395,14 @@ public class Runfile implements Cloneable {
 		    switch (detectorType[ii]){
 		    case 1: {
 			detectorType[ii] = 6;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 2: {
 			detectorType[ii] = 9;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
@@ -389,10 +411,14 @@ public class Runfile implements Cloneable {
 		    switch (detectorType[ii]){
 		    case 0: {
 			detectorType[ii] = 8;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 10;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
@@ -401,10 +427,14 @@ public class Runfile implements Cloneable {
 		    switch (detectorType[ii]){
 		    case 0: {
 			detectorType[ii] = 9;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 6;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    }
@@ -413,12 +443,28 @@ public class Runfile implements Cloneable {
 		    switch (detectorType[ii]){
 		    case 0: {
 			detectorType[ii] = 6;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
 		    case 1: {
 			detectorType[ii] = 10;
+			psdOrder[ii] = 1;
+			numSegs1[ii] = 1;
 			break;
 		    }
+		    }
+		}
+		if ( header.iName.equalsIgnoreCase( "glad" ) || 
+		     header.iName.equalsIgnoreCase( "lpsd" ) ) {
+		    int detNum = 0;
+		    for ( int ii = 0; ii < lpsdIdMap.NumOfBanks(); ii++ ) {
+			for ( int jj = 0; jj < lpsdIdMap.DetsInBank().length;
+			      jj++ ) {
+			    psdOrder[detNum] = 1;
+			    numSegs1[detNum] = 64;
+			    
+			}
 		    }
 		}
 		detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
@@ -442,7 +488,7 @@ public class Runfile implements Cloneable {
 	    }
 
 	    this.leaveOpen = false;
-	    subgroupIDList = new int[ header.nDet * header.numOfHistograms + 
+	    subgroupIDList = new int[ header.numOfElements * header.numOfHistograms + 
 				    1 ];
 	    subgroupMap = new int[1][1];
 	    for (i=0; i < subgroupIDList.length; i++ )
@@ -452,8 +498,8 @@ public class Runfile implements Cloneable {
 	    minSubgroupID = new int[ header.numOfHistograms + 1 ];
 	    for (int nHist = 1; nHist <= header.numOfHistograms; nHist++) {
 		minSubgroupID[nHist] = group + 1;
-		for (int nDet = 1; nDet <= header.nDet; nDet++ ) {
-		    int index = ( (nHist -1) * header.nDet ) + nDet;
+		for (int nDet = 1; nDet <= header.numOfElements; nDet++ ) {
+		    int index = ( (nHist -1) * header.numOfElements ) + nDet;
 		    int tfType = detectorMap[index].tfType;
 		    if ((subgroupIDList[index] == -1) && (tfType != 0)) {
 			group++;
@@ -462,8 +508,9 @@ public class Runfile implements Cloneable {
 			System.arraycopy(subgroupMap, 0, tempMap, 0, 
 					 subgroupMap.length);
 			int[] idList = {0, nDet};
-			for (int k = nDet+1; k <= header.nDet; k++) {
-			    int index2 = ( (nHist -1) * header.nDet ) + k;
+			for (int k = nDet+1; k <= header.numOfElements; k++) {
+			    int index2 = ( (nHist -1) * header.numOfElements )
+				+ k;
 			    int tfType2 = detectorMap[index2].tfType;
 			    if ( ( detectorMap[index2].address == 
 				   detectorMap[index].address) &&
@@ -484,6 +531,7 @@ public class Runfile implements Cloneable {
 		}
  		maxSubgroupID[nHist] = group;
 	    }
+	    /*	
 	}
 	else {
 	    detectorMap = new DetectorMap[0];
@@ -492,7 +540,7 @@ public class Runfile implements Cloneable {
 	    detectorHeight = new float[0];
 	    detectorType = new short[0];
 	    flightPath = new float[0];
-	}
+}
 	if (header.numOfLpsds > 0 ) {
 	    try {
 		lpsdMap = new LpsdMap[ this.header.lpsdMapTable.size/4 + 1 ];
@@ -502,7 +550,7 @@ public class Runfile implements Cloneable {
 		lpsdTimeField = 
 		    new LpsdTimeField[ this.header.lpsdTimeFieldTable.size/4
 						  + 1 ];
-		for ( i = 1; i <= this.header.lpsdTimeFieldTable.size/4; 
+ 		for ( i = 1; i <= this.header.lpsdTimeFieldTable.size/4; 
 		      i++ ) {
 		    lpsdTimeField[i] = new LpsdTimeField( runfile, i, header );
 
@@ -532,8 +580,8 @@ public class Runfile implements Cloneable {
 				    + "*****" + ex );
 	    }
 
-
 	}
+	    */
 	properties = new Properties();
 	runfile.seek( this.header.messageRegion.location );
 	byte[] messageBytes = new byte[this.header.messageRegion.size];
@@ -677,10 +725,10 @@ public class Runfile implements Cloneable {
     }
 
     /**
-       @return The number of LPSDs for this instrument
+       @return The number of detector elements for this instrument
     */
-    public int NumLpsd(){
-	return this.header.numOfLpsds;
+    public int NumElements(){
+	return this.header.numOfElements;
     }
 
     /**
@@ -1628,7 +1676,7 @@ public class Runfile implements Cloneable {
     */
     public float[] TimeChannelBoundaries(int id, int hist){
 	float us_correction;
-	if ( id > header.nDet || hist > header.numOfHistograms ) return null;
+	if ( id > header.numOfElements || hist > header.numOfHistograms ) return null;
 	int index = header.nDet * (hist - 1) + id;
 
 	if (detectorMap[index].tfType == 0 ) return null;
@@ -1719,7 +1767,7 @@ public class Runfile implements Cloneable {
 	@param id - id of the detector
 	@return Value of the lower level discriminator.
     */
-    public int LowerLevelDisc(int id) {
+     public int LowerLevelDisc(int id) {
 	if (id < 1 || id > header.nDet ) return -1;
 	if (header.versionNumber < 4 ) return (short)0;
 	return discriminator[id].lowerLevel;
@@ -1896,13 +1944,14 @@ public class Runfile implements Cloneable {
        @param detID The detector ID.
        @return The scattering angle.
     */
+    /*
     public double LpsdAngle(int detID) throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
 	}
 	return this.lpsdAngle[detID];
     }
-
+    */
     /**
        This method retrieves the scattering angle for a given lpsd. 
        @param bank The detector bank.
@@ -1910,6 +1959,7 @@ public class Runfile implements Cloneable {
        @param element The element number in the detector
        @return The scattering angle.
     */
+    /*
     public double LpsdAngle(int bank, int det, int element) 
 	throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
@@ -1918,19 +1968,20 @@ public class Runfile implements Cloneable {
 	int lpsdId = LpsdMapToId( bank, det, element, 1 );
 	return this.lpsdAngle[lpsdId];
     }
-
+    */
     /**
        This method retrieves the flight path length for a given lpsd. 
        @param detID The detector ID.
        @return The flight path length.
     */
+    /*
     public double LpsdFlightPath(int detID) throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
 	}
 	return this.lpsdFlightPath[detID];
     }
-
+    */
     /**
        This method retrieves the flight path length for a given lpsd. 
        @param bank The detector bank.
@@ -1938,6 +1989,7 @@ public class Runfile implements Cloneable {
        @param element The element number in the detector
        @return The flight path length.
     */
+    /*
     public double LpsdFlightPath(int bank, int det, int element) 
 	throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
@@ -1946,20 +1998,21 @@ public class Runfile implements Cloneable {
 	int lpsdId = LpsdMapToId( bank, det, element, 1 );
 	return this.lpsdFlightPath[lpsdId];
     }
-
+    */
     /**
        This method retrieves the height above the scattering plane for a 
        given lpsd. 
        @param detID The detector ID.
        @return The height of the detecor above the scattering plane.
     */
+    /*
     public double LpsdHeight(int detID) throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
 	}
 	return this.lpsdHeight[detID];
     }
-
+    */
     /**
        This method retrieves the height above the scattering plane for a 
        given lpsd. 
@@ -1968,6 +2021,7 @@ public class Runfile implements Cloneable {
        @param element The element number in the detector
        @return The height of the detecor above the scattering plane.
     */
+    /*
     public double LpsdHeight( int bank, int det, int element ) 
 	throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
@@ -1976,19 +2030,20 @@ public class Runfile implements Cloneable {
 	int lpsdId = LpsdMapToId( bank, det, element, 1 );
 	return this.lpsdHeight[lpsdId];
     }
-
+    */
     /**
        This method retrieves the detector type of the LPSD.  
        @param detID The detector ID.
        @return The lpsd type.
     */
+    /*
     public short LpsdType(int detID) throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
 	}
 	return this.lpsdType[detID];
     }
-
+    */
     /**
        This method retrieves the detector type of the LPSD.  
        @param bank The detector bank.
@@ -1996,6 +2051,7 @@ public class Runfile implements Cloneable {
        @param element The element number in the detector
         @return The lpsd type.
     */
+    /*
     public short LpsdType(int bank, int det, int element) throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
@@ -2003,27 +2059,29 @@ public class Runfile implements Cloneable {
 	int lpsdId = LpsdMapToId( bank, det, element, 1 );
 	return this.lpsdType[lpsdId];
     }
-
+    */
     /**
        @return The Number of LPSD banks
     */
+    /*
     public int NumOfLpsdBanks() throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
 	}
 	return lpsdIDMap.NumOfBanks();
     }
-
+    */
     /**
        @return The Number of LPSD banks
     */
+    /*
     public int NumOfLpsdsInBank( int bankNum ) throws LpsdNotFound {
 	if ( header.numOfLpsds <= 0 ) {
 	    throw new LpsdNotFound();
 	}
 	return ( lpsdIDMap.DetsInBank( bankNum )).length;
     }
-
+    */
     /**
        Retrieves the spectrum of a Linear Position Sensitive Detector.  This 
        method opens and closes the file on each call unless LeaveOpen() has 
@@ -2032,6 +2090,7 @@ public class Runfile implements Cloneable {
        @param hist
        @return the retrieved spectrum
     */
+    /*
     public float[] GetLpsdSpectrum( int lpsdId, int hist )     
 	throws LpsdNotFound, IOException {
 	float[] data;
@@ -2158,4 +2217,5 @@ public class Runfile implements Cloneable {
 	    throw new CloneNotSupportedException ( "Error Cloning Runfile Object" );
 	}
     }
+    */
 }
