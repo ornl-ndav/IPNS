@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.17  2001/11/26 15:19:29  hammonds
+ * Added printStackTrace in caught exceptions.
+ *
  * Revision 5.16  2001/11/02 16:33:01  hammonds
  * Take out name extracted from filename in main.
  *
@@ -1896,6 +1899,7 @@ public static void main(String[] args) throws IOException{
 	    return copy;
 
 	} catch (CloneNotSupportedException ex ) { 
+	    ex.printStackTrace();
 	    throw new Error ( "Error Cloning Header Object" );
 	}
     }
