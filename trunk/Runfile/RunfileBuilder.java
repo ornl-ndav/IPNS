@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.29  2001/11/07 19:19:53  hammonds
+ * Added groupIdsSeparate for scripting purposes.
+ *
  * Revision 5.28  2001/11/05 20:23:13  hammonds
  * Change groupAllSeparate to use 4 bytes for word instead of one.
  *
@@ -1755,6 +1758,60 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			   maxSubgroupID[hist] );
 	return (rval);
     }
+
+
+    /**
+       Makes a separate subgroup for all IDs listed
+       @param tf The time Field to associate with all detectors.
+       @param hist The histogram that the ids will be binned in
+       @return an error code.
+     */
+    public int groupIdsSeparate( int tf, int hist, int[] list ) {
+	int rval = 0;
+	int numBogusSegs = 0;
+	if ( !timeField[tf].isUsed() ) {
+	    System.out.println( "Error in groupAllSeparate: Time Field " + 
+				tf + " is not valid.");
+	}
+	
+	for (int ii = 0; ii < list.length; ii++ ) {
+	    if ( list[ii] != 0 ) {
+		for ( int jj = list[ii]; jj <= header.numOfElements; jj++) {
+		    int index = (hist - 1) * (header.numOfElements + 1) + jj;
+		    if ( segments[index] != null ) {
+			int segID = segments[index].segID;
+			if ( segments[index].detID == list[ii]) {
+			    int[][] tempMap = 
+				new int[subgroupMap.length + 1][];
+			    System.arraycopy( subgroupMap, 0, tempMap, 0, 
+					      subgroupMap.length);
+			    
+			    tempMap[subgroupMap.length ] = new int[1];
+			    tempMap[subgroupMap.length ][0] = segID;
+			    
+			    detectorMap[index].tfType= tf;
+			    detectorMap[index].address = header.channels1D;
+			    header.channels1D += timeField[tf].numOfChannels *
+				4;
+			    subgroupMap = tempMap;
+			    if (minSubgroupID[hist ] > (subgroupMap.length -1)
+				|| minSubgroupID[hist] == 0 ) 
+				minSubgroupID[hist] = subgroupMap.length -1;
+			    if (maxSubgroupID[hist] < (subgroupMap.length -1)) 
+				maxSubgroupID[hist] = subgroupMap.length -1;
+			    
+			}
+		    }
+		}
+	    }
+	    else {
+		System.out.println( "ID " + list[ii] + " is not a detector " +
+				    "and will not be grouped." );
+	    }
+	}
+	return (rval);
+    }
+
     public Object clone() {
 	try {
 	    RunfileBuilder copy = (RunfileBuilder)super.clone();
