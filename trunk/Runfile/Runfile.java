@@ -22,6 +22,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.19  2001/02/27 21:07:28  hammonds
+ * add fujnction to return the instrument type.
+ *
  * Revision 5.18  2000/10/04 21:58:10  hammonds
  * Added routines IsPulseHeight to determine if a detector or subgroup has been binned pulse height data.
  *
@@ -2107,6 +2110,12 @@ public class Runfile implements Cloneable {
 	return false;
     }
     
+    /** Returns Instrument Type
+     */
+    public int InstrumentType() {
+	return InstrumentType.getIPNSInstType( header.iName );
+    }
+
     /**
        Compares this runfile to another Runfile object to see if they have 
        the same structure.  i.e. detector map and time field table are the 
