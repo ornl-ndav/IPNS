@@ -9,11 +9,8 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
- * Revision 5.36  2001/11/28 19:08:41  hammonds
- * Fixed problem with Start addresses for detectors.
- *
- * Revision 5.35  2001/11/28 16:31:49  hammonds
- * Fixed problem with final data size.
+ * Revision 5.37  2001/12/03 17:31:11  chatterjee
+ * Added a method to group detectors by angles, groupIdsByAngle.
  *
  * Revision 5.34  2001/11/26 15:23:55  hammonds
  * Removed some printlns that clutter output.
@@ -931,7 +928,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	header.totalChannels = header.channels1D;
 	header.histStartAddress = offsetToFree;
 	header.offsetToFree = header.histStartAddress + 
-	    header.totalChannels;
+	    header.totalChannels * 4;
 	header.sizeOfDataArea = header.totalChannels;
 
 	runfile.seek( 56 );
@@ -1787,7 +1784,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		
 		detectorMap[index].tfType= tf;
 		detectorMap[index].address = header.channels1D;
-		header.channels1D += timeField[tf].numOfChannels * 4 + 4;
+		header.channels1D += timeField[tf].numOfChannels * 4;
  		
 	    }
 	    else {
@@ -1884,7 +1881,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			    detectorMap[index].tfType= tf;
 			    detectorMap[index].address = header.channels1D;
 			    header.channels1D += timeField[tf].numOfChannels *
-				4 + 4;
+				4;
 			    subgroupMap = tempMap;
 			    if (minSubgroupID[hist ] > (subgroupMap.length -1)
 				|| minSubgroupID[hist] == 0 ) 
@@ -2173,6 +2170,38 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	headerSet( element, value );
         header.reWrite(runfileName);
 	return (0);
+    }
+
+/**
+       Returns an integer array of IDs in a specified detector angle range
+       @param tf The time Field to associate with all detectors.
+       @param hist The histogram that the ids will be binned in
+       @return an error code.
+     */
+    public int groupIdsByAngle( int tf, int hist, float[] lowerValue, float[] upperValue ) 
+    {
+	int[] list = new int[0];
+      int n = 0;
+	for ( int i = 1; i <= header.nDet; i++ )
+	{
+	  if(lowerValue.length == upperValue.length)
+	  {
+          for ( int j = 0; j < lowerValue.length; j++)
+          {
+	     float angle = (float)detectorAngle[i];
+	     if(angle >= lowerValue[j] && angle <= upperValue[j])
+           {
+	       int[] trange = new int[list.length + 1];
+	       System.arraycopy(list,0,trange,0,list.length);
+	       trange[list.length]=i;
+	       list = trange;
+           }
+	   }
+    // System.out.println("the ids in the range are...   " +range[i]);
+	  }
+	}
+      int rval = groupIdsSeparate(tf, hist, list);
+	return (rval);
     }
 
 }
