@@ -1,5 +1,5 @@
 /*
- * File: RFBGroupAllSeparate.java 
+ * File: RFBGroupIdsSeparate.java 
  *
  * Copyright (C) 2001, Alok Chatterjee,
  *                     Ruth Mikkelson, 
@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2001/12/03 17:32:31  chatterjee
+ *  Uses two arrays of low and high angles to do the detector groupings
+ *
  *  Revision 1.2  2001/11/19 22:45:02  hammonds
  *  Take out debug prints.
  *
