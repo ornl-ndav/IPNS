@@ -12,6 +12,13 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.20  2002/01/08 19:57:00  hammonds
+ * Added code to support the following parameters:
+ * 	filterType
+ * 	sampleEnv
+ * 	detectorConfig
+ * 	runType
+ *
  * Revision 5.19  2002/01/03 19:48:40  hammonds
  * Added instrument type to runfile header
  *
@@ -210,6 +217,12 @@ public class Header implements Cloneable {
     protected TableType dataSource = new TableType();
     protected TableType minID = new TableType();
     int instrumentType = 0;
+    int filterType = 0;
+    int sampleEnv = 0;
+    int detectorConfig = 0;
+    int runType = 0;
+
+
     // --------------------------- readUnsignedInteger -------------------
 
     protected int readUnsignedInteger(RandomAccessFile inFile,
@@ -579,6 +592,14 @@ public static void main(String[] args) throws IOException{
 				", " + header.minID.size);
 	System.out.println("instrumentType:                " +
 			        header.instrumentType );
+	System.out.println("filterType:                    " +
+			        header.filterType );
+	System.out.println("sampleEnv:                     " +
+			        header.sampleEnv );
+	System.out.println("detectorConfig:                " +
+			        header.detectorConfig );
+	System.out.println("runType:                       " +
+			        header.runType );
 
 	}
 
@@ -1107,6 +1128,10 @@ public static void main(String[] args) throws IOException{
 		minID.size = runfile.readInt();
 		if (versionNumber >= 6 ) {
 		    instrumentType = runfile.readInt();
+		    filterType = runfile.readInt();
+		    sampleEnv = runfile.readInt();
+		    detectorConfig = runfile.readInt();
+		    runType = runfile.readInt();
 		}
     }
 
@@ -1229,6 +1254,10 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "defaultRun") ||
 	    element.equalsIgnoreCase( "numOfElements") ||
 	    element.equalsIgnoreCase( "instrumentType") ||
+	    element.equalsIgnoreCase( "filterType") ||
+	    element.equalsIgnoreCase( "sampleEnv") ||
+	    element.equalsIgnoreCase( "detectorConfig") ||
+	    element.equalsIgnoreCase( "runType") ||
 	    element.equalsIgnoreCase( "MagicNumber") ) &&
 		  (val >= -2147483648 && val <= 2147483647)) {
 	    set (element, (int) val);
@@ -1321,6 +1350,10 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "defaultRun") ||
 	    element.equalsIgnoreCase( "numOfElements") ||
 	    element.equalsIgnoreCase( "instrumentType") ||
+	    element.equalsIgnoreCase( "filterType") ||
+	    element.equalsIgnoreCase( "sampleEnv") ||
+	    element.equalsIgnoreCase( "detectorConfig") ||
+	    element.equalsIgnoreCase( "runType") ||
 	    element.equalsIgnoreCase( "MagicNumber")) &&
 		  (val > -2147483648 && val < 2147483647)) {
 	    set (element, (int) val);
@@ -1429,6 +1462,18 @@ public static void main(String[] args) throws IOException{
 	}
 	else if( element.equalsIgnoreCase( "instrumentType") ) {
 	    instrumentType = val;
+	}
+	else if( element.equalsIgnoreCase( "filterType") ) {
+	    filterType = val;
+	}
+	else if( element.equalsIgnoreCase( "sampleEnv") ) {
+	    sampleEnv = val;
+	}
+	else if( element.equalsIgnoreCase( "detectorConfig") ) {
+	    detectorConfig = val;
+	}
+	else if( element.equalsIgnoreCase( "runType") ) {
+	    runType = val;
 	}
 
 	else if (element.equalsIgnoreCase( "sourceToSample") ||
@@ -1670,6 +1715,10 @@ public static void main(String[] args) throws IOException{
 	    element.equalsIgnoreCase( "defaultRun") ||
 	    element.equalsIgnoreCase( "numOfElements") ||
 	    element.equalsIgnoreCase( "instrumentType") ||
+	    element.equalsIgnoreCase( "filterType") ||
+	    element.equalsIgnoreCase( "sampleEnv") ||
+	    element.equalsIgnoreCase( "detectorConfig") ||
+	    element.equalsIgnoreCase( "runType") ||
 	    element.equalsIgnoreCase( "MagicNumber") ) {
 	    set (element, (int) val);
 	}
@@ -1892,6 +1941,10 @@ public static void main(String[] args) throws IOException{
 		runfile.writeInt( minID.location );
 		runfile.writeInt( minID.size );
 		runfile.writeInt( instrumentType );
+		runfile.writeInt( filterType );
+		runfile.writeInt( sampleEnv );
+		runfile.writeInt( detectorConfig );
+		runfile.writeInt( runType );
 		runfile.seek(1532);
 		runfile.writeInt( (int)0 );
 		
