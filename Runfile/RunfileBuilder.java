@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.28  2001/11/05 20:23:13  hammonds
+ * Change groupAllSeparate to use 4 bytes for word instead of one.
+ *
  * Revision 5.27  2001/11/02 19:10:54  hammonds
  * Initialize timeScale if time focusing is used.
  *
@@ -1736,7 +1739,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		
 		detectorMap[index].tfType= tf;
 		detectorMap[index].address = header.channels1D;
-		header.channels1D += timeField[tf].numOfChannels;
+		header.channels1D += timeField[tf].numOfChannels * 4;
  		
 	    }
 	    else {
