@@ -4,6 +4,7 @@ from IPNS.Runfile import Runfile
 class PrintSchedule(GenericOperator):
 
     def setDefaultParameters(self):
+        self.super__clearParametersVector()
         defInst = System.getProperty("Default_Instrument")
         instChoice = ChoiceListPG("Instrument Name",defInst)
         instChoice.addItem("hrcs")
@@ -78,6 +79,24 @@ class PrintSchedule(GenericOperator):
                     fName = "%s/%s%s.run"%(dataDir,inst,sRun)
                     runfile = Runfile(fName)
 
-    def __init__(self):
-        Operator.__init__(self,"PrintSchedule")
+# Override Category to dictate where this appears in the Macro menu
+    def getCategoryList(self):
+        cat = ["Operator","DAS","Print"]
+        return cat
+    
+    def getDocumentration(self):
+        docs = StringBuffer()
+        docs.append("@overview This Operator is intended for use by the ")
+        docs.append("instrument account.  This operator assumes that there ")
+        docs.append("is a file xxxx.dat (xxxx is the instrument prefix) ")
+        docs.append("which contains a line such as dataDir=/home/xxxx/data")
+        docs.append(" that gives the location of runfiles.  This operator ")
+        docs.append("looks at the firstRun element in the header of the ")
+        docs.append("specified run file.  It then starts at firstRun and ")
+        docs.append("steps through each run in the sequence (looking at each ")
+        docs.append("nextRun) and prints out the schedule paramenters for ")
+        docs.append("run.")
 
+
+    def __init__(self):
+        Operator.__init__(self,"Print Schedule")
