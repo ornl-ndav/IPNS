@@ -9,6 +9,11 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.34  2001/11/26 15:23:55  hammonds
+ * Removed some printlns that clutter output.
+ * Also added printStackTrace to caught exceptions.
+ * Fixed small problem with endDateAndTimeToCurrent.
+ *
  * Revision 5.33  2001/11/21 22:21:00  hammonds
  * Check Constant delay bit for added focused time fields if hardTimeDelay is nonzero.
  *
@@ -306,12 +311,12 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     public void setNumberOfHistograms ( short numOfHistograms ) {
 	header.numOfHistograms = numOfHistograms;
 	if ( header.numOfElements > 0){
-	    System.out.println( "numElements != 0: "  + header.numOfElements);
+	    //	    System.out.println( "numElements != 0: "  + header.numOfElements);
 	    detectorMap = 
 		new DetectorMap[numOfHistograms * (header.numOfElements) + 1];
 	}
 	else {
-	    System.out.println( "numElements == 0: "  + header.numOfElements);
+	    //	    System.out.println( "numElements == 0: "  + header.numOfElements);
 	    detectorMap = 
 		new DetectorMap[numOfHistograms * (header.numOfElements + 1)];
 	}
@@ -945,6 +950,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	catch ( IOException ex ) {
 	    System.out.println("Error writ ing file " + runfileName );
+	    ex.printStackTrace();
 	}
     }
 
@@ -966,6 +972,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	catch ( IOException ex ) {
 	    System.out.println("Error writing IntTable: " + runfileName );
+	    ex.printStackTrace();
 	    throw new IOException();
 	}
 	return offsetToFree;
@@ -990,6 +997,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	catch ( IOException ex ) {
 	    System.out.println("Error writing ShortTable: " + runfileName );
+	    ex.printStackTrace();
 	    throw new IOException();
 	}
 	return offsetToFree;
@@ -1014,6 +1022,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
 	catch ( IOException ex ) {
 	    System.out.println("Error writing FloatTable: " + runfileName );
+	    ex.printStackTrace();
 	    throw new IOException();
 	}
 	return offsetToFree;
@@ -1208,6 +1217,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException e) {
             System.out.println("Can't open file " + filename);
+	    e.printStackTrace();
             return(-1);
         }
 	this.header.sourceToSample = 
@@ -1283,6 +1293,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException ex) {
             System.out.println(" Trouble opening detector calibration file");
+	    ex.printStackTrace();
         }
         this.addDetectorCoordSys(dCalib.CoordSys());
         this.addDetectorAngle(dCalib.Angles());
@@ -1332,7 +1343,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    }
 	}
 	header.numOfElements = segments.length - 1;
-	System.out.println("numOfSegment: " + header.numOfElements);
+	//	System.out.println("numOfSegment: " + header.numOfElements);
 	return rval;
     }
 
@@ -1357,6 +1368,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException ex) {
             System.out.println(" Trouble opening discriminator file");
+	    ex.printStackTrace();
 	    rval = 1;
 	    return (rval);
         }
@@ -1388,8 +1400,6 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				   + date.substring(0,3)
 				   + "-" + date.substring(9,11) );
 	}
-      	System.out.println( "Date: " + date + "   " + fixedDate );
-      	System.out.println( "Time: " + time );
 	header.startDate = fixedDate;
 	header.startTime = time;
 	return (0);
@@ -1408,9 +1418,17 @@ public class RunfileBuilder extends Runfile implements Cloneable{
             new Date())).toUpperCase();
         String time = timeFormat.format(
             new Date());
-	String fixedDate = new String(date.substring(4,6) + "-" 
-				      + date.substring(0,3)
-				      + "-" + date.substring(9,11) );
+	String fixedDate = new String();
+	if (date.length() == 12 ) {
+	    fixedDate = new String(date.substring(4,6) + "-" 
+				   + date.substring(0,3)
+				   + "-" + date.substring(10,12) );
+	}
+	else {
+	    fixedDate = new String("0" +date.substring(4,5) + "-" 
+				   + date.substring(0,3)
+				   + "-" + date.substring(9,11) );
+	}
 	header.endDate = fixedDate;
 	header.endTime = time;
 	return (0);
@@ -1887,6 +1905,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    return copy;
 
 	} catch (CloneNotSupportedException ex ) { 
+	    ex.printStackTrace();
 	    throw new Error ( "Error Cloning RunfileBuilder Object" );
 	}
     }
@@ -1911,6 +1930,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException e) {
             System.out.println("Can't open file " + datFileName);
+	    e.printStackTrace();
             System.exit(0);
         }
 	filename = new String (iDat.getProperty("instDir") + 
@@ -1939,6 +1959,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException e) {
             System.out.println("Can't open file " + datFileName);
+	    e.printStackTrace();
             System.exit(0);
         }
 	filename = new String (instDir + fileSep + header.iName + 
@@ -1967,6 +1988,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException e) {
             System.out.println("Can't open file " + datFileName);
+	    e.printStackTrace();
             System.exit(0);
         }
         String paramFileName = new String(instDir + fileSep + header.iName + 
@@ -1978,6 +2000,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         }
         catch (IOException e) {
             System.out.println("Can't open file " + paramFileName);
+	    e.printStackTrace();
             System.exit(0);
         }
 	int CalNum = Integer.parseInt(params.getProperty("DetectorCal"));
