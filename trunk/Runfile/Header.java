@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.10  2001/07/20 21:34:30  hammonds
+ * Made changes to default username and runtitle so that everything writes OK without other setups.
+ *
  * Revision 5.9  2001/07/20 20:03:56  hammonds
  * Added methods for setting the values in the Header from the Runfile.  Setting these involves.  Also made some small changes that will allow a runfile with a header to be constructed from the main method of RunfileBuilder.
  *
@@ -66,8 +69,11 @@ public class Header implements Cloneable {
     protected TableType controlTable = new TableType();
     protected TableType seqHistWidth = new TableType();
     protected short nDet;
-    protected String userName = new String("");
-    protected String runTitle = new String("");
+    protected String userName = new String("          " +"          " );
+    protected String runTitle = new String("          "+"          "+
+					   "          "+"          "+
+					   "          "+"          "+
+					   "          "+"          ");
     protected int runNum;
     protected int nextRun;
     protected String startDate = new String("01-JAN-80");
