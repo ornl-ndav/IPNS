@@ -3,6 +3,9 @@
  *
  *
  *  $Log$
+ *  Revision 1.4  2003/10/15 01:41:28  hammonds
+ *  Fix spelling for reflectometer.
+ *
  *  Revision 1.3  2002/04/24 14:50:50  hammonds
  *  Fixed some instrument names for IPNS instruments
  *
@@ -52,7 +55,7 @@ public class InstrumentType implements Serializable
   public static final int  TOF_DIFFRACTOMETER        = 1;
   public static final int  TOF_SCD                   = 2;    
   public static final int  TOF_SAD                   = 3;    
-  public static final int  TOF_REFLECTROMETER        = 4;
+  public static final int  TOF_REFLECTOMETER        = 4;
   public static final int  TOF_DG_SPECTROMETER       = 5;    // direct geometry
   public static final int  TOF_IDG_SPECTROMETER      = 6;   // inverse geometry
 
@@ -60,7 +63,7 @@ public class InstrumentType implements Serializable
   public static final int  MONO_CHROM_DIFFRACTOMETER = 8;
   public static final int  MONO_CHROM_SCD            = 9;    
   public static final int  MONO_CHROM_SAD            = 10;    
-  public static final int  MONO_CHROM_REFLECTROMETER = 11;
+  public static final int  MONO_CHROM_REFLECTOMETER = 11;
 
 
 
@@ -103,7 +106,7 @@ public class InstrumentType implements Serializable
 
     else if ( inst_name.equalsIgnoreCase( "POSY" )  ||   // ##### fix this
               inst_name.equalsIgnoreCase( "PNE0" )    )
-      return TOF_REFLECTROMETER;
+      return TOF_REFLECTOMETER;
 
     else if ( inst_name.equalsIgnoreCase( "HRCS" )  ||
               inst_name.equalsIgnoreCase( "LRCS" )  ||
