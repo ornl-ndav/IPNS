@@ -22,6 +22,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.24  2001/06/29 18:57:59  hammonds
+ * Added segment code.
+ * Started changes to allow area detectors to be read as spectra.
+ *
  * Revision 5.23  2001/06/27 20:45:23  hammonds
  * Added code for adding segment information to expand the use of this package for use with area detectors.
  * Added a number of new detector types including area detectors used on SAD, SAND and SCD.
@@ -535,6 +539,7 @@ public class Runfile implements Cloneable {
 		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii] = new Segment();
 		    segments[ii].detID = ii; 
 		    segments[ii].row = 1; 
 		    segments[ii].column = 1; 
@@ -561,6 +566,7 @@ public class Runfile implements Cloneable {
 		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii] = new Segment();
 		    segments[ii].detID = ii; 
 		    segments[ii].row = 1; 
 		    segments[ii].column = 1; 
@@ -587,6 +593,7 @@ public class Runfile implements Cloneable {
 		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii] = new Segment();
 		    segments[ii].detID = ii; 
 		    segments[ii].row = 1; 
 		    segments[ii].column = 1; 
@@ -607,20 +614,21 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-			segments[ii].detID = ii; 
-			segments[ii].row = 1; 
-			segments[ii].column = 1; 
-			segments[ii].length = LENGTH[detectorType[ii]]; 
-			segments[ii].width = WIDTH[detectorType[ii]]; 
-			segments[ii].depth = DEPTH[detectorType[ii]]; 
-			segments[ii].efficiency = 
-			    EFFICIENCY[detectorType[ii]]; 
+		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii] = new Segment();
+		    segments[ii].detID = ii; 
+		    segments[ii].row = 1; 
+		    segments[ii].column = 1; 
+		    segments[ii].length = LENGTH[detectorType[ii]]; 
+		    segments[ii].width = WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].efficiency = 
+			EFFICIENCY[detectorType[ii]]; 
 		}
 		else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
 		    switch (detectorType[ii]){
@@ -633,23 +641,25 @@ public class Runfile implements Cloneable {
 			break;
 		    }
 		    }
-			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
-			segments[ii].detID = ii; 
-			segments[ii].row = 1; 
-			segments[ii].column = 1; 
-			segments[ii].length = LENGTH[detectorType[ii]]; 
-			segments[ii].width = WIDTH[detectorType[ii]]; 
-			segments[ii].depth = DEPTH[detectorType[ii]]; 
-			segments[ii].efficiency = 
-			    EFFICIENCY[detectorType[ii]]; 
+		    psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
+		    detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
+		    segments[ii] = new Segment();
+		    segments[ii].detID = ii; 
+		    segments[ii].row = 1; 
+		    segments[ii].column = 1; 
+		    segments[ii].length = LENGTH[detectorType[ii]]; 
+		    segments[ii].width = WIDTH[detectorType[ii]]; 
+		    segments[ii].depth = DEPTH[detectorType[ii]]; 
+		    segments[ii].efficiency = 
+			EFFICIENCY[detectorType[ii]]; 
 		}
 		if ( header.iName.equalsIgnoreCase( "scd0") ) {
 		    switch (detectorType[ii]){
+		    case 0:
 		    case 1:{
 			detectorType[ii] = 1;
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
@@ -680,7 +690,6 @@ public class Runfile implements Cloneable {
 			for ( int segY = 0; segY < header.numOfY; segY++) {
 			    for ( int segX = 0; segX < header.numOfX; segX++) {
 				int index = ii + segX + segY *( header.numOfX);
-				System.out.println("index: " + index );
 				segments[index] = new Segment();
 				segments[index].detID = ii; 
 				segments[index].row = segX; 
@@ -831,7 +840,7 @@ public class Runfile implements Cloneable {
 				numSegs1[tminID] = 1;
 				numSegs2[tminID] = 1;
 				segments[tminID] = new Segment();
-				segments[tminID].detID = detNum; 
+				segments[tminID].detID = tminID; 
 				segments[tminID].row = 1;
  				segments[tminID].column = 1; 
 				segments[tminID].length = LENGTH[1]; 
@@ -851,7 +860,7 @@ public class Runfile implements Cloneable {
 				    numSegs1[tminID + ll] = 1;
 				    numSegs2[tminID + ll] = 1;
 				    segments[tminID + ll] = new Segment();
-				    segments[tminID + ll].detID = detNum; 
+				    segments[tminID + ll].detID = tminID + ll; 
 				    segments[tminID + ll].row = ll; 
 				    segments[tminID + ll].column = 1; 
 				    segments[tminID + ll].length = 
@@ -988,9 +997,10 @@ public class Runfile implements Cloneable {
 				    }
 				}
 				subgroupMap = tempMap;
-				subgroupMap[group] = new int[idList.length - 1];
-				System.arraycopy(idList, 1, subgroupMap[group], 0, 
-						 idList.length-1);
+				subgroupMap[group] = 
+				    new int[idList.length - 1];
+				System.arraycopy(idList, 1, subgroupMap[group],
+						 0, idList.length-1);
 				segmentMap = tsegMap;
 				segmentMap[group] = segList;
 			    }
@@ -1015,13 +1025,13 @@ public class Runfile implements Cloneable {
 				segmentMap = tsegmentMap;
 				 for ( int ny = 0; ny < segY; ny++ ) {
 				    for ( int nx=0; nx < segX; nx++ ) {
-					 int aindex = nx + ny*(segX);
+				 	 int aindex = nx + ny*(segX);
 					 int[] idList = { nDet,nx, ny};
-					 subgroupMap[group + aindex + 1] = 
-					      new int[2]; 
+					 subgroupMap[group + aindex +1] = 
+					      new int[1]; 
 					 subgroupMap[group+aindex+1][0] = nDet;
 					 segmentMap[group+aindex+1][0] = 
-					     segments[header.nDet - 1+ aindex];
+					     segments[header.nDet + aindex];
 					 }
 				    }
 				group = group + segX * segY;
@@ -1967,6 +1977,64 @@ public class Runfile implements Cloneable {
 
     /**
        This method retrieves the effective scattering angle for a given 
+       segment.  For a detector that is not time foused this routine 
+       retrieves the actual angle.  For a time focuesed detector this 
+       retrieves the average angle of the focused group of detectors.
+       @param seg The detector segment.
+       @return The scattering angle.
+    */
+    public double DetectorAngle(Segment seg, int hist ){
+	int detID = seg.detID;
+	double dAngle;
+	double angle_sum= 0.0, angleSign;
+	int nDetsThisType = 0;
+	int index = (hist - 1) * header.nDet + detID;
+	int tfType = detectorMap[index].tfType;
+
+	if (tfType == 0) return detectorAngle[detID];
+
+	if ((timeField[tfType].timeFocusBit > 0)) { 
+	    if (header.pseudoTimeUnit == 'D') { 
+		for ( int nid = 1; nid <= header.nDet; nid++ ) {
+		    int nindex = (hist - 1) * header.nDet + nid;
+		    int tempType = detectorMap[nindex].tfType;
+		    
+		    if ( tempType == tfType )
+			{
+			    angle_sum += Math.abs(detectorAngle[nid]);
+			    nDetsThisType++;
+			}
+		}
+	    }
+	    else if (header.pseudoTimeUnit == 'I') { 
+		for ( int nid = 1; nid <= header.nDet; nid++ ) {
+		    int nindex = (hist - 1) * header.nDet + nid;
+		    int tempType = detectorMap[nindex].tfType;
+
+		    //		    System.out.println( "Sizeof subgroupIDList = " + 
+		    //		subgroupIDList.length );
+		    if ( tempType == tfType && 
+			 subgroupIDList[index] == 
+			 subgroupIDList[nindex] )
+			{
+			    angle_sum += Math.abs(detectorAngle[nid]);
+			    nDetsThisType++;
+			}
+		}
+	    }
+	    angleSign = detectorAngle[detID]/
+		Math.abs(detectorAngle[detID]);
+	    dAngle = angle_sum / nDetsThisType * angleSign;
+	    
+	}
+	else {
+	    dAngle = this.detectorAngle[detID];
+	}
+	return dAngle;
+    }
+
+    /**
+       This method retrieves the effective scattering angle for a given 
        detector.  For a detector that is not time foused this routine 
        retrieves the actual angle.  For a time focuesed detector this 
        retrieves the average angle of the focused group of detectors.
@@ -2032,6 +2100,49 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       This method retrieves the actual scattering angle for a given detector
+       segment. 
+       @param detID The detector segment.
+       @return The scattering angle.
+    */
+    public double RawDetectorAngle(Segment seg){
+	return this.detectorAngle[seg.detID];
+    }
+
+    /**
+       This method retrieves the effective flight path length for a given 
+       detector segment.  For a detector that is not time foused this routine 
+       retrieves the actual length.  For a time focuesed detector this 
+       retrieves the focused flight path length.
+       @param seg The segment.
+       @return The focused flight path length if pseudoUnit = I.
+       The raw flight path length otherwise.
+    */
+    public double FlightPath(Segment seg, int hist){
+	double fp;
+	int detID = seg.detID;
+	int index = (hist - 1) * header.nDet + detID;
+	int tfType = detectorMap[index].tfType;
+
+	if (tfType == 0) return flightPath[detID];
+
+	if ((timeField[tfType].timeFocusBit > 0) && 
+	    (header.pseudoTimeUnit == 'I')) { 
+	    if (flightPath[detID] > 3.0 ) {
+		fp = 4.0;
+	    }
+	    else {
+		fp = 2.5;
+	    }
+	}
+	else {
+	    fp = flightPath[detID];
+	}
+ 
+	return fp;
+    }
+
+    /**
        This method retrieves the effective flight path length for a given 
        detector.  For a detector that is not time foused this routine 
        retrieves the actual length.  For a time focuesed detector this 
@@ -2065,6 +2176,17 @@ public class Runfile implements Cloneable {
 
     /**
        This method retrieves the actual flight path length for a given 
+       detector segment.  
+       @param seg The segment.
+       @return The flight path length.
+    */
+    public double RawFlightPath(Segment seg){
+	int detID = seg.detID;
+	return this.flightPath[detID];
+    }
+
+    /**
+       This method retrieves the actual flight path length for a given 
        detector.  
        @param detID The detector ID.
        @return The flight path length.
@@ -2084,6 +2206,24 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       This method retrieves the height of the segment above the scattering 
+       plane.  
+       @param seg The detector segment.
+       @return The height of the detector above the scattering plane.
+    */
+    public double DetectorHeight(Segment seg){
+	int id = seg.detID;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	    return this.detectorHeight[id];
+	}
+	else {
+	    double height = header.yDisplacement - header.yLower + 
+		(seg.row * 2 * header.yLower) / header.numOfY;
+	    return height;
+	}
+    }
+
+    /**
        This method retrieves the height of the detector above the scattering 
        plane.  
        @param detID The detector ID.
@@ -2091,6 +2231,24 @@ public class Runfile implements Cloneable {
     */
     public double RawDetectorHeight(int detID){
 	return this.detectorHeight[detID];
+    }
+
+    /**
+       This method retrieves the height of the segment above the scattering 
+       plane.  
+       @param seg The detector segment.
+       @return The height of the detector above the scattering plane.
+    */
+    public double RawDetectorHeight(Segment seg){
+	int id = seg.detID;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	return this.detectorHeight[seg.detID];
+	}
+	else {
+	    double height = header.yDisplacement - header.yLower + 
+		(seg.row * 2 * header.yLower) / header.numOfY;
+	    return height;
+	}
     }
 
     /**
@@ -2103,12 +2261,30 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       This method retrieves the detector type.  
+       @param seg The detector segment.
+       @return The detector type.
+    */
+    public short DetectorType(Segment seg){
+	return this.detectorType[seg.detID];
+    }
+
+    /**
        This method retrieves the detector data Source.  
        @param detID The detector ID.
        @return The detector dataSource.
      */
     public int DataSource( int detID ) {
 	return this.dataSource[detID];
+    }
+
+    /**
+       This method retrieves the detector data Source.  
+       @param seg The detector segment.
+       @return The detector dataSource.
+     */
+    public int DataSource( Segment seg ) {
+	return this.dataSource[seg.detID];
     }
 
     /**
@@ -2121,6 +2297,15 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       This method retrieves the detector minimum ID.  
+       @param seg The detector segment.
+       @return The detector minimum ID.
+     */
+    public int MinID( Segment seg ) {
+	return this.minID[seg.detID];
+    }
+
+    /**
        Retrieves the spectrum of a 1D detector.  This method opens and closes 
        the file on each call.
        @param subgroup Subgroup ID to be retrieved.
@@ -2130,9 +2315,9 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return null;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
-	if ( !((psdOrder[segmentMap[subgroup][0].detID] == 2) && (header.versionNumber < 5 )) ) {
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	int id = segsInSg[0].detID;
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    for (int i = 1; i <= header.numOfHistograms; i++) {
 		if ( subgroup <= MaxSubgroupID(i) 
 		     && subgroup >= MinSubgroupID(i)) hist =  i;
@@ -2155,13 +2340,13 @@ public class Runfile implements Cloneable {
     }
 
     /**
-       Retrieves the spectrum of a 1D detector.  This method opens and closes 
-       the file on each call.
-       @param detID Detector ID to be retrieved.
+       Retrieves the spectrum of a detector segment.  This method opens and 
+       closes the file on each call.
+       @param seg Segment to be retrieved.
        @param hist Histogram number for data to retrieved.
        @return The retrieved spectrum.
     */
-    public float[] Get1DSpectrum(int detID, int hist) throws IOException{
+    public float[] Get1DSpectrum(Segment seg, int hist) throws IOException {
 	int numOfTimeChannels;
 	int i;
 	float[] data;
@@ -2174,7 +2359,7 @@ public class Runfile implements Cloneable {
 	    System.out.println("GetSpectrum1D opening file");
 	    runfile = new RandomAccessFile(runfileName, "r");
 	}
-
+	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
 	    index = detID + (hist-1) * this.header.nDet;
 	    if (detectorMap[index].tfType == 0 ) {
@@ -2253,6 +2438,93 @@ public class Runfile implements Cloneable {
 	    return data;
 	}
     }
+    
+
+    /**
+       Retrieves the spectrum of a 1D detector.  This method opens and closes 
+       the file on each call.
+       @param detID Detector ID to be retrieved.
+       @param hist Histogram number for data to retrieved.
+       @return The retrieved spectrum.
+    */
+    public float[] Get1DSpectrum(int detID, int hist) throws IOException{
+	int numOfTimeChannels;
+	int i;
+	float[] data;
+	byte[] bdata;
+	int tfType;
+	int index, offset;
+	int wordLength;
+
+	if ( leaveOpen == false){
+	    System.out.println("GetSpectrum1D opening file");
+	    runfile = new RandomAccessFile(runfileName, "r");
+	}
+
+	index = detID + (hist-1) * this.header.nDet;
+	if (detectorMap[index].tfType == 0 ) {
+	    System.out.println( "invalid id in Get1DSpectrum(id,hist), " +
+				"returning null");
+	    return null;
+	}
+	
+	tfType = this.detectorMap[index].tfType;
+	numOfTimeChannels = this.timeField[tfType].NumOfChannels();
+	data = new float[numOfTimeChannels];
+	if (header.numOfWavelengths > 0) {
+	    offset = this.detectorMap[index].address 
+		+ this.header.totalChannels * 2 
+		+ this.header.histStartAddress + 4;
+	}
+	else {
+	    offset = this.detectorMap[index].address + 
+		this.header.histStartAddress + 4;
+	}
+	
+	runfile.seek(offset);
+	if (numOfTimeChannels !=0){
+	    
+	    if (this.header.versionNumber < 4){
+		wordLength = 2;
+	    }
+	    else{
+		wordLength = 4;
+	    }
+	    if ( this.header.versionNumber < 5 ) {
+		bdata = new byte[numOfTimeChannels * wordLength];
+		int nbytes = runfile.read( bdata, 0, 
+					   numOfTimeChannels * wordLength);
+		for (i = 0; i < numOfTimeChannels; i++){
+		    for (int j = 0; j < wordLength; j++) {
+			int byteIndex = i * wordLength + j;
+			if ( bdata[byteIndex] < 0 ) {
+			    data[i] += (bdata[byteIndex] + 256) * 
+				Math.pow(256.0, j);
+			}
+			else {
+			    data[i] += bdata[byteIndex] * Math.pow(256.0, j);
+			}
+		    }
+		}
+	    }
+	    else {
+		byte[] bArray = new byte[ 4 * numOfTimeChannels ];
+		runfile.read( bArray );
+		ByteArrayInputStream bArrayIS = 
+		    new ByteArrayInputStream( bArray );
+		DataInputStream dataStream = new DataInputStream( bArrayIS );
+		for ( i = 0; i < numOfTimeChannels; i++ ) {
+		    data[i] = dataStream.readInt();
+		}
+		bArrayIS.close();
+		dataStream.close();
+	    }
+	}
+	if (!leaveOpen ){
+	    runfile.close();
+	}
+	return data; 
+    }
 
     /**
        Retrieves the sum of counts in a 1D detector.  This method opens and 
@@ -2264,19 +2536,14 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return -1;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
-	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    for (int i = 1; i <= header.numOfHistograms; i++) {
-		if ( subgroup <= MaxSubgroupID(i) 
-		     && subgroup >= MinSubgroupID(i)) hist =  i;
-	    }
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) 
+		 && subgroup >= MinSubgroupID(i)) hist =  i;
+	}
 	    
-	    return Get1DSum(id, hist);
-	}
-	else {
-	    return 2.0f;
-	}
+	return Get1DSum(seg, hist);
     }
 
     /**
@@ -2286,7 +2553,7 @@ public class Runfile implements Cloneable {
        @param hist Histogram number for data to retrieved.
        @return The sum.
     */
-    public float Get1DSum(int detID, int hist) throws IOException{
+    public float Get1DSum(Segment seg, int hist) throws IOException{
 	int numOfTimeChannels;
 	int i;
 	float data;
@@ -2298,7 +2565,7 @@ public class Runfile implements Cloneable {
 	if ( leaveOpen == false){
 	    runfile = new RandomAccessFile(runfileName, "r");
 	}
-
+	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
 	    index = detID + (hist-1) * this.header.nDet;
 	    tfType =  this.detectorMap[index].tfType;
@@ -2350,6 +2617,71 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       Retrieves the sum of counts in a 1D detector.  This method opens and 
+       closes the file on each call.
+       @param detID Detector ID to be retrieved.
+       @param hist Histogram number for data to retrieved.
+       @return The sum.
+    */
+    public float Get1DSum(int detID, int hist) throws IOException{
+	int numOfTimeChannels;
+	int i;
+	float data;
+	byte[] bdata;
+	int tfType;
+	int index, offset;
+	int wordLength;
+
+	if ( leaveOpen == false){
+	    runfile = new RandomAccessFile(runfileName, "r");
+	}
+
+	index = detID + (hist-1) * this.header.nDet;
+	tfType =  this.detectorMap[index].tfType;
+	numOfTimeChannels = this.timeField[tfType].NumOfChannels();
+	data = -1;
+	if (header.numOfWavelengths > 0) {
+	    offset = this.detectorMap[index].address 
+		+ this.header.totalChannels * 2 
+		+ this.header.histStartAddress;
+	}
+	else {
+	    offset = this.detectorMap[index].address + 
+		this.header.histStartAddress;
+	}
+	
+	runfile.seek(offset);
+	if (this.header.versionNumber <= 4) {
+	    if (numOfTimeChannels !=0){
+		data = 0;
+		wordLength = 4;
+		
+		bdata = new byte[wordLength];
+		int nbytes = runfile.read( bdata, 0, 
+					   wordLength);
+		for (int j = 0; j < wordLength; j++) {
+		    int byteIndex = j;
+		    if ( bdata[byteIndex] < 0 ) {
+			data  += (bdata[byteIndex] + 256) * 
+			    Math.pow(256.0, j);
+		    }
+		    else {
+			data += bdata[byteIndex] * Math.pow(256.0, j);
+		    }
+		}
+	    }
+	}
+	else {
+	    int idata = runfile.readInt();
+	    data = (float)idata;
+	}
+	if (!leaveOpen ){
+	    runfile.close();
+	}
+	return data; 
+    }
+
+    /**
        Check to see if a detector is binned in the specified histogram.
        @param id - Detector to be checked.
        @param hist - Histogram to be checked.
@@ -2376,19 +2708,34 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return -1;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) 
+		 && subgroup >= MinSubgroupID(i)) hist =  i;
+	}
+	
+	return NumChannelsBinned(seg, hist);
+    }
+
+    /**
+       Get number of data channels for a given detector.
+       @param id - Detector ID.
+       @param hist - Histogram number.
+       @return Number of channels binned.
+    */
+    public int NumChannelsBinned( Segment seg, int hist )  {
+	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    for (int i = 1; i <= header.numOfHistograms; i++) {
-		if ( subgroup <= MaxSubgroupID(i) 
-		     && subgroup >= MinSubgroupID(i)) hist =  i;
-	    }
-	    
-	    return NumChannelsBinned(id, hist);
+	    int index = ( hist - 1 ) * header.nDet + id;
+	    int tfType = detectorMap[index].tfType;
+	    int nch = (int)(timeField[tfType].NumOfChannels());
+	    return nch;
 	}
 	else {
 	    return header.numOfWavelengths;
 	}
+
     }
 
     /**
@@ -2419,30 +2766,24 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return -9999;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
-	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
 	for (int i = 1; i <= header.numOfHistograms; i++) {
 	    if ( subgroup <= MaxSubgroupID(i) 
 		 && subgroup >= MinSubgroupID(i)) hist =  i;
 	}
 	    
-	return MinBinned(id, hist);
-	}
-	else {
-	    float minWave = header.minWavelength;
-	    float maxWave = header.maxWavelength;
-	    return minWave;
-	}
+	return MinBinned(seg, hist);
     }
 
     /**
        Minimum Binned time in time field table.
-       @param id - Detector ID.
+       @param id - Detector segment.
        @param hist - Histogram number.
        @return Raw minumum time in the time field table.
     */
-    public double MinBinned( int id, int hist ) {
+    public double MinBinned( Segment seg, int hist ) {
+	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    int index = ( hist - 1 ) * header.nDet + id;
 	    int tfType = detectorMap[index].tfType;
@@ -2456,6 +2797,18 @@ public class Runfile implements Cloneable {
     }
    
     /**
+       Minimum Binned time in time field table.
+       @param id - Detector ID.
+       @param hist - Histogram number.
+       @return Raw minumum time in the time field table.
+    */
+    public double MinBinned( int id, int hist ) {
+	int index = ( hist - 1 ) * header.nDet + id;
+	int tfType = detectorMap[index].tfType;
+	return timeField[tfType].tMin;
+    }
+   
+    /**
        Maximum Binned time in time field table.
        @param subgroup Subgroup ID to be retrieved.
        @return Raw maxumum time in the time field table.
@@ -2464,15 +2817,29 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return -9999.;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) 
+		 && subgroup >= MinSubgroupID(i)) hist =  i;
+	}
+	
+	return MaxBinned(seg, hist);
+    }
+
+    /**
+       Maximum Binned time in time field table.
+       @param id - Detector segment.
+       @param hist - Histogram number.
+       @return Raw maxumum time in the time field table.
+    */
+
+    public double MaxBinned( Segment seg, int hist ) {
+	int id = seg.detID;
 	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
-	    for (int i = 1; i <= header.numOfHistograms; i++) {
-		if ( subgroup <= MaxSubgroupID(i) 
-		     && subgroup >= MinSubgroupID(i)) hist =  i;
-	    }
-	    
-	    return MaxBinned(id, hist);
+	    int index = ( hist - 1 ) * header.nDet + id;
+	    int tfType = detectorMap[index].tfType;
+	    return timeField[tfType].tMax;
 	}
 	else {
 	    float minWave = header.minWavelength;
@@ -2480,7 +2847,7 @@ public class Runfile implements Cloneable {
 	    return maxWave;
 	}
     }
-
+   
     /**
        Maximum Binned time in time field table.
        @param id - Detector ID.
@@ -2544,29 +2911,15 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return null;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
 
- 	if ( !((psdOrder[segmentMap[subgroup][0].detID] == 2) && (header.versionNumber < 5 )) ) {
-	    for (int i = 1; i <= header.numOfHistograms; i++) {
-		if ( subgroup <= MaxSubgroupID(i) 
-		     && subgroup >= MinSubgroupID(i)) hist =  i;
-	    }
+	for (int i = 1; i <= header.numOfHistograms; i++) {
+	    if ( subgroup <= MaxSubgroupID(i) 
+		 && subgroup >= MinSubgroupID(i)) hist =  i;
+	}
 	    
-	    return TimeChannelBoundaries(id, hist);
-	}
-	else {
-	    float minWave = header.minWavelength;
-	    float maxWave = header.maxWavelength;
-	    int numWaves = header.numOfWavelengths;
-	    float stepWave = (maxWave - minWave)/numWaves;
-
-	    float[] channel = new float[header.numOfWavelengths + 1];
-		for ( int ii = 0; ii < header.numOfWavelengths + 1; ii++ ) {
-		    channel[ii] = (minWave + ii* stepWave);
-		}
-	    return channel;
-	}
+	return TimeChannelBoundaries(seg, hist);
     }
 
     /**
@@ -2577,18 +2930,20 @@ public class Runfile implements Cloneable {
        @param hist - Histogram number.
        @return Array of boundaries with 1 + number of channels values.
     */
-    public float[] TimeChannelBoundaries(int id, int hist){
+    public float[] TimeChannelBoundaries(Segment seg, int hist){
 	float us_correction;
-	if ( id > header.numOfElements || hist > header.numOfHistograms ) return null;
+	int id = seg.detID;
+	if ( id > header.numOfElements || 
+	     hist > header.numOfHistograms ) return null;
 	int index = header.nDet * (hist - 1) + id;
 
-	if ( !((psdOrder[0] == 2) && (header.versionNumber < 5 )) ) {
+	if ( !((psdOrder[id] == 2) && (header.versionNumber < 5 )) ) {
 	    if (detectorMap[index].tfType == 0 ) {
 		System.out.println( "invalid id in TimeChannelBoundaries" +
 				    "(id,hist), returning null");
 		return null;
 	    }
-	
+     
 	    int tfType = detectorMap[index].tfType;
 	    int numberOfChannels = timeField[tfType].NumOfChannels();
 	    float[] channel = new float[numberOfChannels + 1];
@@ -2646,6 +3001,69 @@ public class Runfile implements Cloneable {
     }
 
     /**
+       Retrieves the time channel boundaries for a given spectrum.  Note that 
+       since this is histogram data, there is one more boundary value than 
+       there are elements in a spectrum.
+       @param id - Detector ID.
+       @param hist - Histogram number.
+       @return Array of boundaries with 1 + number of channels values.
+    */
+    public float[] TimeChannelBoundaries(int id, int hist){
+	float us_correction;
+	if ( id > header.numOfElements || hist > header.numOfHistograms ) return null;
+	int index = header.nDet * (hist - 1) + id;
+
+	if (detectorMap[index].tfType == 0 ) {
+	    System.out.println( "invalid id in TimeChannelBoundaries" +
+				"(id,hist), returning null");
+	    return null;
+	}
+	
+	int tfType = detectorMap[index].tfType;
+	int numberOfChannels = timeField[tfType].NumOfChannels();
+	float[] channel = new float[numberOfChannels + 1];
+	
+	float min = (float)timeField[tfType].tMin;
+	float max = (float)timeField[tfType].tMax;
+	float step = (float)timeField[tfType].tStep;
+	
+	float timeToSample = (float)(header.sourceToSample / 
+				     Math.sqrt( header.energyIn/MEV_FROM_VEL));
+	
+	switch (header.pseudoTimeUnit ) {
+	    
+	case ('I'): {
+	    if ( timeField[tfType].timeFocusBit == 0 ) {  //Det not focused
+		if ( header.versionNumber < 5 ) {
+		    us_correction = - (float)(header.hardTimeDelay * 
+					      header.standardClock) + 
+			(float)(Math.floor(timeToSample/header.standardClock) *
+				header.standardClock);
+		}
+		else {
+		    us_correction = 0;
+		}
+	    }
+	    else {						//Det focused
+		us_correction = timeToSample;
+	    }
+	    min = min + us_correction;
+	    max = max + us_correction;
+	    break;
+	}
+	default: {
+	    min = min;
+	    max = max;
+	}
+	}
+	for (int chan = 0; chan <= numberOfChannels; chan++) {
+	    channel[chan] = (float)( min + chan * step );
+	}
+	return channel;
+    }
+
+
+    /**
        Retrieves the energy channel boundaries for a given spectrum.  Note 
        that since this is histogram data, there is one more boundary value 
        than there are elements in a spectrum.
@@ -2656,16 +3074,38 @@ public class Runfile implements Cloneable {
 	int hist=0;
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet) 
 	    return null;
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	Segment seg = segsInSg[0];
 	for (int i = 1; i <= header.numOfHistograms; i++) {
 	    if ( subgroup <= MaxSubgroupID(i) 
 		 && subgroup >= MinSubgroupID(i)) hist =  i;
 	}
 	    
-	return EnergyChannelBoundaries(id, hist);
+	return EnergyChannelBoundaries(seg, hist);
     }
 
+    /**
+       Retrieves the energy channel boundaries for a given segment.  Note 
+       that since this is histogram data, there is one more boundary value 
+       than there are elements in a spectrum.
+       @param seg - Detector segment.
+       @param hist - Histogram number.
+       @return Array of boundary values with 1 + number of channels values.
+    */
+    public float[] EnergyChannelBoundaries( Segment seg, int hist ) {
+	float[] timeBounds;
+	timeBounds = TimeChannelBoundaries( seg, hist );
+	float[] energyChannels = new float[timeBounds.length];
+	float timeToSample = (float)(header.sourceToSample / 
+				     Math.sqrt( header.energyIn/MEV_FROM_VEL));
+   
+	for (int i = 0; i < timeBounds.length; i++ ) {
+	    energyChannels[i] = (float)(header.energyIn - MEV_FROM_VEL * 
+					Math.pow(FlightPath(seg, hist) 
+				     / (timeBounds[i] - timeToSample), 2.0)); 
+	}
+	return energyChannels;
+    }
     /**
        Retrieves the energy channel boundaries for a given spectrum.  Note 
        that since this is histogram data, there is one more boundary value 
@@ -2767,6 +3207,17 @@ public class Runfile implements Cloneable {
 	return subgroupMap[sg];
     }
 
+    /**
+       Retrieves a list of Segments mapped to a subgroup.  Note that this is 
+       a 0 indexed array since there is no reference to a paticular group or 
+       ID for this array.
+       @param int sg - subgroup number
+       @return A list of Segments
+    */
+    public Segment[] SegsInSubgroup( int sg ) {
+	return segmentMap[sg];
+    }
+
    /**
        Checks to see if an ID is a beam monitor.
        @param id - detector ID.
@@ -2781,6 +3232,20 @@ public class Runfile implements Cloneable {
 	}
    
    /**
+       Checks to see if an ID is a beam monitor.
+       @param id - detector segment.
+       @return boolean true if ID is a beam monitor.
+   */
+   public boolean IsIDBeamMonitor( Segment seg ) {
+       int id = seg.detID;
+       if (detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
+	   detectorAngle[id] == -180.0 ) 
+	   return true;
+       else
+	   return false;
+   }
+    
+   /**
        Checks to see if a subgroup is a beam monitor.
        @param sg - detector subgroup.
        @return boolean true if subgroup is a beam monitor.
@@ -2788,7 +3253,8 @@ public class Runfile implements Cloneable {
    public boolean IsSubgroupBeamMonitor( int sg ) {
 
        if ( !(header.iName).equalsIgnoreCase("glad"))
-	if ( header.versionNumber < 5 && psdOrder[segmentMap[sg][0].detID] > 1 ) return false;
+	if ( header.versionNumber < 5 && 
+	     psdOrder[segmentMap[sg][0].detID] > 1 ) return false;
 	for ( int ii = 0; ii < subgroupMap[sg].length; ii++ ) {
 	    int id = subgroupMap[sg][ii];
 	    if (detectorAngle[id] == 0 || detectorAngle[id] == 180 ||
@@ -2798,6 +3264,12 @@ public class Runfile implements Cloneable {
 	    return false;
 	}
 
+   /**
+       Checks to see if an ID is binned for Pulse height.
+       @param id - detector ID.
+       @param hist - Histogram.
+       @return boolean true if subgroup is a beam monitor.
+   */
    public boolean IsPulseHeight( int id, int hist ) {
        if ( !(header.iName).equalsIgnoreCase("glad"))
        if ( header.versionNumber < 5 && psdOrder[id] > 1 ) return false;
@@ -2813,7 +3285,28 @@ public class Runfile implements Cloneable {
 	}
    
    /**
-       Checks to see if a subgroup is a beam monitor.
+       Checks to see if an ID is binned for Pulse height.
+       @param seg - detector segment.
+       @param hist - Histogram.
+       @return boolean true if subgroup is a beam monitor.
+   */
+   public boolean IsPulseHeight( Segment seg, int hist ) {
+       int id = seg.detID;
+       if ( !(header.iName).equalsIgnoreCase("glad"))
+       if ( header.versionNumber < 5 && psdOrder[id] > 1 ) return false;
+	int index = header.nDet * (hist - 1) + id;
+	if (detectorMap[index].tfType == 0 ) return false;
+   	int tfType = detectorMap[index].tfType;
+	if ( timeField[tfType].pulseHeightBit > 0 ) {
+	    return true;
+	}
+       
+	else
+	   return false;
+	}
+   
+   /**
+       Checks to see if a subgroup is binned for Pulse height.
        @param sg - detector subgroup.
        @return boolean true if subgroup is a beam monitor.
    */
@@ -2915,7 +3408,14 @@ public class Runfile implements Cloneable {
        a subgroup
     */
     public float SolidAngle( int subgroup ) {
-	return (float)subgroupMap[subgroup].length;
+	return (float)segmentMap[subgroup].length;
+    }
+
+    /**
+       Returns the solid angle for a given detector segment
+    */
+    public float SolidAngle( Segment seg, int hist ) {
+	return 1.0f;
     }
 
     /**
@@ -2936,15 +3436,17 @@ public class Runfile implements Cloneable {
 	if (subgroup > MaxSubgroupID(header.numOfHistograms)* header.nDet)
 	    return -1;
 	
-	int[] idsInSg = IdsInSubgroup(subgroup);
-	int id = idsInSg[0];
-	if ( !((psdOrder[segmentMap[subgroup][0].detID] == 2) && (header.versionNumber < 5 )) ) {
+	Segment[] segsInSg = SegsInSubgroup(subgroup);
+	int id = segsInSg[0].detID;
+	if ( !( (psdOrder[id] == 2) && 
+		(header.versionNumber < 5 ) ) ) {
 	    for (int i = 1; i <= header.numOfHistograms; i++) {
-		if ( subgroup <= MaxSubgroupID(i) && subgroup >= MinSubgroupID(i))
+		if ( subgroup <= MaxSubgroupID(i) && 
+		     subgroup >= MinSubgroupID(i))
 		    hist =  i;
 	    }
 	    
-	    return TimeFieldType(id, hist);
+	    return TimeFieldType(segsInSg[0], hist);
 	}
 	else {
 	    return -1;
@@ -2954,9 +3456,10 @@ public class Runfile implements Cloneable {
     /**
        Returns the time field type for a given detector ID
     */
-    public int TimeFieldType( int detID, int hist) throws IOException
+    public int TimeFieldType( Segment seg, int hist) throws IOException
     {
 	int  index;
+	int detID = seg.detID;
 	if ( !((psdOrder[detID] == 2) && (header.versionNumber < 5 )) ) {
 	
 	    index  = detID + (hist-1) * this.header.nDet;
@@ -2965,6 +3468,17 @@ public class Runfile implements Cloneable {
 	else {
 	    return -1;
 	    }
+    }
+
+    /**
+       Returns the time field type for a given detector ID
+    */
+    public int TimeFieldType( int detID, int hist) throws IOException
+    {
+	int  index;
+	
+	index  = detID + (hist-1) * this.header.nDet;
+	return this.detectorMap[index].tfType;
     }
 
     /**
