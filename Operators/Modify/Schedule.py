@@ -7,6 +7,9 @@
 # Argonne IL, 60439
 #
 # $Log$
+# Revision 1.3  2004/01/29 17:55:29  hammonds
+# Override default category
+#
 # Revision 1.2  2003/09/18 20:40:50  hammonds
 # Fix problem with doubling parameters
 #
@@ -147,6 +150,11 @@ class Schedule(GenericOperator):
         numOut = e.getSource().getText()
         self.chkText(numOut)
         
+# Override Category to dictate where this appears in the Macro menu
+    def getCategoryList(self):
+        cat = ["Operator","DAS","Modify"]
+        return cat
+    
     def __init__(self):
         Operator.__init__(self,"Schedule")
 
