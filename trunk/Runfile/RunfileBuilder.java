@@ -3,9 +3,13 @@ package IPNS.Runfile;
 import java.io.*;
 import java.util.*;
 import java.text.*;
+import IPNS.Calib.*;
 /*
  *
  * $Log$
+ * Revision 5.16  2001/07/23 21:18:38  hammonds
+ * Added to support newrun type scripts without iCame
+ *
  * Revision 5.15  2001/07/23 16:02:21  hammonds
  * Added routine to add information from the instrument paramenter file to the runfile.
  * Also added method to set the Current Date and time to the runfile.
@@ -1123,6 +1127,47 @@ public class RunfileBuilder extends Runfile implements Cloneable{
         rfb.header.moderatorCalibFile =
 	    Integer.parseInt(params.getProperty("ModeratorCal"));
 	return (0);
+    }
+
+    
+    /**
+       This method will set values in the runfile header that are normally 
+       from the detector calibration table.
+       @param rfb the runfile to modify
+       @param paramfilename = filename from which calibration data should be 
+       taken.
+       @return a return error code
+    */
+    public int headerSetFromDCalib(RunfileBuilder rfb, String filename){
+	int rval = 0;
+	DC5 dCalib = new DC5();
+        try {
+            dCalib = new DC5(filename);
+        }
+        catch (IOException ex) {
+            System.out.println(" Trouble opening detector calibration file");
+        }
+        rfb.addDetectorCoordSys(dCalib.CoordSys());
+        rfb.addDetectorAngle(dCalib.Angles());
+        rfb.addFlightPath(dCalib.FlightPath());
+        rfb.addDetectorHeight(dCalib.Height());
+        rfb.addDetectorRot1(dCalib.Rot1());
+        rfb.addDetectorRot2(dCalib.Rot1());
+        rfb.addDetectorType(dCalib.Type());
+        rfb.addDetectorLength(dCalib.Length());
+        rfb.addDetectorWidth(dCalib.Width());
+        rfb.addDetectorDepth(dCalib.Depth());
+        rfb.addDetectorEfficiency(dCalib.Efficiency());
+        rfb.addDetectorPsdOrder(dCalib.PsdOrder());
+        rfb.addDetectorNumSegs1(dCalib.NumSegs1());
+        rfb.addDetectorNumSegs2(dCalib.NumSegs2());
+        rfb.addDetectorCrateNum(dCalib.Crate());
+        rfb.addDetectorSlotNum(dCalib.Slot());
+        rfb.addDetectorInputNum(dCalib.Input());
+        rfb.addDetectorDataSource(dCalib.DataSource());
+        rfb.addDetectorMinID(dCalib.MinID());
+	
+	return rval;
     }
 
     /**

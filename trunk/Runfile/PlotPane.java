@@ -95,6 +95,9 @@ public void run(){
      runFile.LeaveOpen();
      System.out.println( (new Date()).toString() );
      if ( runFile.header.numOfWavelengths == 0 ) {
+     //     if (true){
+	 System.out.println( "minSubgroup, maxSubgroup: " + runFile.MinSubgroupID(1) + ", " + 
+			     runFile.MaxSubgroupID( 1 ) );
 	 System.out.println( "  run has no area detectors" );
 	 for (int id = runFile.MinSubgroupID(1); 
 	      id <= runFile.MaxSubgroupID( 1 ); id++) {
@@ -120,14 +123,14 @@ public void run(){
 	 int numY = runFile.header.numOfY;
 
 	 float[][] slice = new float[1][1];
-	 float[][] sliceSum = new float[numX][numY];
+	 float[][] sliceSum = new float[numY][numX];
 
 	 for ( int sliceNum = 1; sliceNum <= runFile.header.numOfWavelengths; 
 	       sliceNum++ ) {
 	     slice = runFile.AreaTimeSlice( sliceNum );
 	     for ( int ix = 0; ix < numX; ix++ ) {
 		 for ( int iy = 0; iy < numY; iy ++ ) {
-		     sliceSum[ix][iy] += slice[ix][iy];
+		     sliceSum[iy][ix] += slice[iy][ix];
  		 }
 	     }
 	 }
