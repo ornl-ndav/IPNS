@@ -51,17 +51,23 @@ class TimeField{
 	numTimeTableEntries = header.timeFieldTable.size / 16;
 	System.out.println("Number of Time Field entries in the table: " +
 			   numTimeTableEntries);
+        System.out.println("              tMin   tMax    tStep   tLngth "
+                           +"chnNum              used");
 	TimeField[] timeField = new TimeField[numTimeTableEntries+1];
 	for (i=1; i <= numTimeTableEntries; i++) {
 	    timeField[i]  = new TimeField(runfile, i, header);
-	    System.out.println( "Time Field " + i + " " 
-				+ timeField[i].tMin + " "
-				+ timeField[i].tMax + " " 
-				+ timeField[i].tStep + " " 
-				+ timeField[i].numOfChannels + " "
-				+ timeField[i].tDoubleLength + " "
-				+ timeField[i].NumOfChannels() + " " 
-				+ timeField[i].timeFocusBit + " "
+            System.out.print( "Time Field "  );
+            if(i<10){ System.out.print( " " ); }
+            System.out.print( i + " " + timeField[i].tMin + " "
+                              + timeField[i].tMax + " " );
+            if(timeField[i].tStep<10.0f){ System.out.print( " " ); }
+            System.out.print( timeField[i].tStep 
+                              + "  " + timeField[i].numOfChannels + " "
+                              + timeField[i].tDoubleLength + "   " );
+            if(timeField[i].NumOfChannels()<1000)
+                System.out.print( " " );
+            System.out.println( timeField[i].NumOfChannels() + "  " 
+                                + timeField[i].timeFocusBit + " "
 				+ timeField[i].emissionDelayBit + " " 
 				+ timeField[i].constantDelayBit + " "
 				+ timeField[i].energyBinBit + " " 
