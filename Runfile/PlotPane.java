@@ -136,7 +136,7 @@ public void run(){
 	 }
 	 x_scale = new UniformXScale( 1, numX, numX );
 	 for ( int ii = 0; ii < numY; ii++ ) {
-	     spectrum = Datai.getInstance ( x_scale, sliceSum[ii], ii);
+	     spectrum = Data.getInstance ( x_scale, sliceSum[ii], ii);
 	     data_set.addData_entry ( spectrum );
 	 }
      }
