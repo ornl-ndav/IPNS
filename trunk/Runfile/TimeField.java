@@ -1,6 +1,7 @@
 package IPNS.Runfile;
 
-import java.io.*;
+//import java.io.RandomAccessRunfile;
+import java.io.IOException;
 
 /**
 This class is a utility class for the IPNS.Runfile package.  This class sets
@@ -42,7 +43,7 @@ class TimeField{
 	int i;
 	int numTimeTableEntries;
 
-        RandomAccessFile runfile = new RandomAccessFile(
+        RandomAccessRunfile runfile = new RandomAccessRunfile(
 							args[0], "r");
 	int slashIndex = args[0]
 	    .lastIndexOf( System.getProperty( "file.separator"));
@@ -79,7 +80,7 @@ class TimeField{
 	runfile.close();
     }
 
-    protected  TimeField(RandomAccessFile runfile, int iType,
+    protected  TimeField(RandomAccessRunfile runfile, int iType,
 			 Header header ) throws IOException{
 	long startingPosition;
         long maskChanWord, minWord, rangeWord, widthWord, doubleWord;
@@ -91,11 +92,11 @@ class TimeField{
 	versionNumber = header.versionNumber;
 
 	if ( header.versionNumber <= 4 ) {
-	    maskChanWord = header.readUnsignedInteger( runfile, 4);
-	    minWord = header.readUnsignedInteger( runfile, 4);
-	    rangeWord = header.readUnsignedInteger( runfile, 4);
+	    maskChanWord = runfile.readRunInt();
+	    minWord = runfile.readRunInt();
+	    rangeWord = runfile.readRunInt();
 	    //	    System.out.println( "widthWord");
-	    widthWord = header.readUnsignedInteger( runfile, 4);
+	    widthWord = runfile.readRunInt();
 	    
 	    //	    System.out.println( widthWord ); 
 	    if ( (iName.equalsIgnoreCase( "glad" ) ||
@@ -152,7 +153,7 @@ class TimeField{
 	}
     }
 
-    protected void Write ( RandomAccessFile runfile ) throws IOException {
+    protected void Write ( RandomAccessRunfile runfile ) throws IOException {
 
 	int flagword;
 	int chwword;

@@ -1,14 +1,27 @@
 package IPNS.Runfile;
 
 import java.io.*;
-import java.util.*;
-import java.text.*;
-import javax.swing.*;
+//import java.util.*;
+import java.util.Properties;
+import java.util.Date;
+import java.util.Locale;
+//import java.text.*;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+//import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.JDialog;
 import IPNS.Calib.*;
-import IPNS.Control.*;
+//import IPNS.Control.*;
+import IPNS.Control.Parameter;
+import IPNS.Control.ParameterFile;
+import IPNS.Control.ParamPane;
 /*
  *
  * $Log$
+ * Revision 5.50  2003/03/30 04:10:09  hammonds
+ * Switch reading to use the new RunfileInputStream and RandomAccessRunfile so that changes can be made to offload the differences in data types.
+ *
  * Revision 5.49  2003/03/04 15:58:30  hammonds
  * Add method to add ancillary parameters by supplying a parameter array.
  *
@@ -813,10 +826,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
     }
  
     public void Write () {
-	RandomAccessFile runfile;
+	RandomAccessRunfile runfile;
 	 int offsetToFree = header.numOfHeadBlocks * 512;
 	try {
-	runfile = new RandomAccessFile (runfileName, "rw" );
+	runfile = new RandomAccessRunfile (runfileName, "rw" );
 	//      	header.numOfElements = 0;
 
 	header.Write( runfile );
@@ -1000,7 +1013,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	}
     }
 
-    private int writeIntTable( RandomAccessFile runfile, int[] intList, 
+    private int writeIntTable( RandomAccessRunfile runfile, int[] intList, 
 			       int offsetToFree, int headLoc ) 
     throws IOException {
 	try {
@@ -1025,7 +1038,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
  
     }
 
-    private int writeShortTable( RandomAccessFile runfile, short[] intList, 
+    private int writeShortTable( RandomAccessRunfile runfile, short[] intList, 
 			       int offsetToFree, int headLoc ) 
     throws IOException {
 	try {
@@ -1050,7 +1063,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
  
     }
 
-    private int writeFloatTable( RandomAccessFile runfile, float[] floatList, 
+    private int writeFloatTable( RandomAccessRunfile runfile, float[] floatList, 
 			       int offsetToFree, int headLoc ) 
 	throws IOException{
 	try {
@@ -2209,7 +2222,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	return (size);
     }
 
-    void writeAncFileToRunfile( RandomAccessFile runfile, 
+    void writeAncFileToRunfile( RandomAccessRunfile runfile, 
 				ParameterFile par ) throws IOException {
 	try {
 	    runfile.writeBytes( fixLength( par.getDeviceName(), 16));

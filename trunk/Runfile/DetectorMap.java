@@ -1,6 +1,9 @@
 package IPNS.Runfile;
 
-import java.io.*;
+//import java.io.DataInputStream;
+import java.io.ByteArrayInputStream;
+//import java.io.RandomAccessRunfile;
+import java.io.IOException;
 
 /**
 This class is a utility class for the IPNS.Runfile package.  This class sets
@@ -32,7 +35,7 @@ class DetectorMap{
 	int i;
 	int numEntries;
 
-        RandomAccessFile runfile = new RandomAccessFile(
+        RandomAccessRunfile runfile = new RandomAccessRunfile(
 							args[0], "r");
  	int slashIndex = args[0]
 	    .lastIndexOf( System.getProperty( "file.separator"));
@@ -46,7 +49,7 @@ class DetectorMap{
 	byte[] bArray = new byte[header.detectorMapTable.size];
 	runfile.read(bArray);
 	ByteArrayInputStream bArrayIS = new ByteArrayInputStream( bArray );
-	DataInputStream dataStream = new DataInputStream( bArrayIS );
+	RunfileInputStream dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
         for (i=1; i <= numEntries; i++) {
 	    detectorMap[i]  = new DetectorMap(dataStream, i, header);
 	    System.out.println( detectorMap[i].address + " " +
@@ -58,7 +61,7 @@ class DetectorMap{
         runfile.close();
     }
 
-    protected  DetectorMap(RandomAccessFile runfile, int id, 
+    protected  DetectorMap(RandomAccessRunfile runfile, int id, 
 			   Header header ) throws IOException{
 	long startingPosition;
 	int temp = 0;
@@ -69,11 +72,13 @@ class DetectorMap{
 	//runfile.seek( header.detectorMapTable.location + (id - 1) 
 	//	      * DetectorMap.mapSize(versionNumber));
 		      
-	if ( header.versionNumber <= 4 ) {
-	    temp = header.readUnsignedInteger(runfile, 4);
+	/*	if ( header.versionNumber <= 4 ) {
+	    temp = runfile.readRunInt();
 	}
-	else if ( header.versionNumber < 6 ){
-	    temp = runfile.readInt();
+	else 
+	  */
+	if ( header.versionNumber < 6 ){
+	    temp = runfile.readRunInt();
 	}
 	else {
 	    address = runfile.readInt();
@@ -102,7 +107,7 @@ class DetectorMap{
 	//runfile.seek(startingPosition);
     }
 
-    protected  DetectorMap(DataInputStream runfile, int id, 
+    protected  DetectorMap(RunfileInputStream runfile, int id, 
 			   Header header ) throws IOException{
 	long startingPosition;
 	int temp = 0;
@@ -113,11 +118,12 @@ class DetectorMap{
 	//runfile.seek( header.detectorMapTable.location + (id - 1) 
 	//	      * DetectorMap.mapSize(versionNumber));
 		      
-	if ( header.versionNumber <= 4 ) {
+	/*	if ( header.versionNumber <= 4 ) {
 	    temp = header.readUnsignedInteger(runfile, 4);
 	}
-	else if ( header.versionNumber < 6 ){
-	    temp = runfile.readInt();
+	else */
+	if ( header.versionNumber < 6 ){
+	    temp = runfile.readRunInt();
 	}
 	else {
 	    address = runfile.readInt();
@@ -158,7 +164,7 @@ class DetectorMap{
 	this.versionNumber = versionNumber;
     }
 
-    protected void Write ( RandomAccessFile runfile ) throws IOException {
+    protected void Write ( RandomAccessRunfile runfile ) throws IOException {
 	int tfEntry;
 	if ( versionNumber < 6) {
 	    if ( (!iName.equalsIgnoreCase("glad") &&
