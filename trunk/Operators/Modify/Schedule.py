@@ -1,3 +1,29 @@
+# File: Schedule.py
+#
+# Copyright 2003 John P. Hammonds 
+# Intense Pulsed Neutron Source
+# Argonne National Laboratory
+# 9700 S. Cass Ave.
+# Argonne IL, 60439
+#
+# $Log$
+# Revision 1.2  2003/09/18 20:40:50  hammonds
+# Fix problem with doubling parameters
+#
+#
+# Script Schedule modifies the schedule parameters for a specified sequence of
+#   runs.  Sets the sequence up so that the runs can be collected automatically
+#   one after the other.
+# User is first prompted for instrument name and a list of run numbers.
+# The user is then prompted to input schedule parameters for each of the
+# specified runs.
+#
+# Assumptions:
+#    This script is intended for use by the instrument account.  It assumes
+#    that the file ~user/inst/xxxx.dat (xxxx holds the instrument prefix)
+#    contains a line that defines the directory where instruments run files
+#    are.
+# 
 from IPNS.Operators import *
 from javax.swing import JOptionPane
 from javax.swing import JLabel
@@ -10,10 +36,10 @@ from java.awt import Dimension
 from java.awt.event import ActionEvent
 from IPNS.Runfile import RunfileBuilder
 from IPNS.Runfile import Runfile
-from IPNS.Runfile import RandomAccessRunfile
 
 class Schedule(GenericOperator):
     def setDefaultParameters(self):
+        self.super__clearParametersVector()
         defInst = System.getProperty("Default_Instrument")
         instChoice = ChoiceListPG("Instrument Name",defInst)
         instChoice.addItem("hrcs")
@@ -26,6 +52,7 @@ class Schedule(GenericOperator):
         instChoice.addItem("posy")
         instChoice.addItem("pne0")
         instChoice.addItem("sad1")
+        instChoice.addItem("sasi")
         instChoice.addItem("hipd")
         instChoice.addItem("gppd")
         instChoice.addItem("chex")
@@ -109,6 +136,9 @@ class Schedule(GenericOperator):
         except ValueError:
             JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "Integer input Only")
             
+#    def getDocumentation():
+#        strOut = 
+        
     def actionPerformed(self, e):
         numOut = e.getSource().getText()
         self.chkText(numOut)
