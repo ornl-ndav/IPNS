@@ -10,7 +10,7 @@ import java.io.*;
 class LpsdDetIdMap {
 MapElement[][] map = new MapElement[0][0];
 
-    public static void main(String[] args) throws IOException, LpsdNotFound {
+    public static void main(String[] args) throws IOException {
 	int i;
 	int numTimeTableEntries;
 
@@ -20,34 +20,26 @@ MapElement[][] map = new MapElement[0][0];
 	    .lastIndexOf( System.getProperty( "file.separator"));
 	String iName = args[0].substring( slashIndex+1, slashIndex + 5 );
 	Header header = new Header(runfile, iName );
-	try {
-	    LpsdDetIdMap idMap = new LpsdDetIdMap( runfile, header );
-	    for ( int ii = 0; ii < idMap.NumOfBanks(); ii++ ) {
-		int[] dets = idMap.DetsInBank(ii);
-		System.out.println( "Bank " + ii + " has " );
-		for ( int jj = 0; jj < dets.length; jj++ ) {
-		    int crate = idMap.CrateForDet( ii, dets[jj] );
-		    int slot = idMap.SlotForDet( ii, dets[jj] );
-		    int input = idMap.InputForDet( ii, dets[jj] );
-		    int minid = idMap.MinIdForDet( ii, dets[jj] );
-		    System.out.println( dets[jj] + ":" + crate + ":" + slot + 
-					":" + input + ":" + minid );
-		}
+	LpsdDetIdMap idMap = new LpsdDetIdMap( runfile, header );
+	for ( int ii = 0; ii < idMap.NumOfBanks(); ii++ ) {
+	    int[] dets = idMap.DetsInBank(ii);
+	    System.out.println( "Bank " + ii + " has " );
+	    for ( int jj = 0; jj < dets.length; jj++ ) {
+		int crate = idMap.CrateForDet( ii, dets[jj] );
+		int slot = idMap.SlotForDet( ii, dets[jj] );
+		int input = idMap.InputForDet( ii, dets[jj] );
+		int minid = idMap.MinIdForDet( ii, dets[jj] );
+		System.out.println( dets[jj] + ":" + crate + ":" + slot + 
+				    ":" + input + ":" + minid );
 	    }
 	}
-	catch ( LpsdNotFound ex ) {
-	    System.out.println( ex );
-	}	
 
     }
 
 
     protected LpsdDetIdMap( RandomAccessFile runfile, Header header ) 
-	throws IOException, LpsdNotFound {
+	throws IOException {
 	
-	if ( header.numOfLpsds <= 0 ) {
-	    throw new LpsdNotFound( "LpsdDetIdMap: LpsdNotFound" );
-	}
 
 	long startingPosition = runfile.getFilePointer();
 	runfile.seek( header.PSD_IDMap.location );
