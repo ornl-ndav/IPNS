@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.10  2003/03/11 22:12:06  hammonds
+ * Fix length of GLAD detectors.
+ *
  * Revision 1.9  2002/12/11 19:46:48  hammonds
  * Update size info for new SCD anger camera.
  *
@@ -80,7 +83,7 @@ public class DC5 {
     int[] minID;
 
     public static final float[] 
-	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 38.1F,
+	LENGTH = {0.0F, 7.62F, 45.72F, 22.86F, 11.43F, 91.44F, 38.1F, 60.96F,
 		  12.7F, 3.81F, 12.7F, 30.0F, 20.0F, 40.0F, 40.0F, 10.0F,
 	          20.0F, 20.32F, 15.0F, 15.0F};
     public static final float[] 
@@ -113,7 +116,7 @@ public class DC5 {
 						    "1\" x 4.5\"",
 						    "1\" x 36\" LPSD",
 						    "0.5\" x 15\"",
-						    "0.5\" x 15\" LPSD",
+						    "0.5\" x 24\" LPSD",
 						    "0.25\" x 5\"",
 						    "1.5\" pancake monitor",
 						    "OrdellaBeam Monitor",
