@@ -27,30 +27,28 @@ class PrunHead{
     boolean used;
     String iName;
     int versionNumber;
-    /**
-       This function provides a test method for this class' functionality.  It
-       will provide a sampling of the information that is retrieved as a new 
-       PrunHead Object is created.  It accepts a filename as the first command
-       line argument.
+    static String eol=System.getProperty("line.separator");
 
-       @param args - The first command line parameter is the runfile name.  
-               This parameter should contain the file path unless the file is
-	       in the current directory.
+     /**
+     * This method does all of the work to create the fixed width
+     * format header, copying the format in the VAX version.
+     *
+     * @param filename The name of the file to be parsed
+     */
+    public static String getHeader(String filename) throws IOException{
+        String rs="";
 
-    */
-    public static void main(String[] args) throws IOException {
 	int i,j,k;
 	int numTimeTableEntries;
         int numDetMapEntries;
         double temp;
         int itemp;
 
-        RandomAccessFile runfile = new RandomAccessFile(
-							args[0], "r");
-        Runfile run = new Runfile( args[0] );
-	int slashIndex = args[0]
+        RandomAccessFile runfile = new RandomAccessFile(filename, "r");
+        Runfile run = new Runfile( filename );
+	int slashIndex = filename
 	    .lastIndexOf( System.getProperty( "file.separator"));
-	String iName = args[0].substring( slashIndex+1, slashIndex + 5 );
+	String iName = filename.substring( slashIndex+1, slashIndex + 5 );
 	Header header = new Header(runfile, iName );
 
         // Set up time fields
@@ -69,58 +67,54 @@ class PrunHead{
         }
 
         // Generic information
-        System.out.println( header.iName + " RUN " + header.runNum
-                            +": " + header.userName );
-        System.out.println( header.runTitle );
-        System.out.println( header.iName + " First started at " 
-                            + header.startTime + " on " + header.startDate );
-        System.out.println( "Total of Monitored Variable in file = " 
-                            + header.totalMonitorCounts );
+        rs+=header.iName + " RUN " + header.runNum+": " + header.userName +eol;
+        rs+=header.runTitle+eol;
+        rs+=header.iName + " First started at " 
+            + header.startTime + " on " + header.startDate +eol;
+        rs+="Total of Monitored Variable in file = " 
+                            + header.totalMonitorCounts +eol;
         // code for when a run has bee stopped is hidden somewhere in
         // the runfile that John needs to extract and interpret
-        System.out.println( "??? last stopped at " + header.endTime + " on " 
-                            + header.endDate );
-        System.out.println( header.numOfCyclesCompleted + " of " 
-                            + header.numOfCyclesPreset + " cycles completed" );
-        System.out.println( header.numOfOverflows 
-                            + " Channels have overflowed" );
-        System.out.println("");
+        rs+=header.iName + " ??? last stopped at " + header.endTime + " on " 
+            + header.endDate +eol;
+        rs+=header.numOfCyclesCompleted + " of " + header.numOfCyclesPreset 
+            + " cycles completed" +eol;
+        rs+=header.numOfOverflows + " Channels have overflowed" +eol;
+        rs+=eol;
 
         // Conrolled Devices - NOT accessable (yet)
-        /* System.out.println("Controlled Devices and Parameter Settings");
-           System.out.println("<SKIPPING THIS SECTION>");
-           System.out.println(""); */
+        /* rs+="Controlled Devices and Parameter Settings"+eol;
+           rs+="<SKIPPING THIS SECTION>"+eol;
+           rs+=eol; */
 
         // Headers
-        System.out.println("******************** TAKING DATA FROM FILE FOR "
-                           + "RUN " + header.runNum + " ********************");
-        System.out.println("");
-        System.out.println("******************** LPSDs or Standard Detectors "
-                           + "********************");
-        System.out.println("");
+        rs+="******************** TAKING DATA FROM FILE FOR RUN"
+            + header.runNum + " ********************" +eol;
+        rs+=eol;
+        rs+="******************** LPSDs or Standard Detectors "
+            + "********************" +eol;
+        rs+=eol;
 
         // distances and settings
-        System.out.println("LI= " + header.sourceToSample + " LC= " 
-                           + header.sourceToChopper +", Hardware time range= " 
-                           + header.hardwareTMin + " - " 
-                           + header.hardwareTMax + " microseconds");
-        System.out.println("EIN = " + header.energyIn + " meV :   EOUT= " 
-                           + header.energyOut + " meV :   NUMDET = " 
-                           + header.nDet );
+        rs+="LI= " + header.sourceToSample + " LC= " + header.sourceToChopper 
+            +", Hardware time range= " + header.hardwareTMin + " - " 
+            + header.hardwareTMax + " microseconds" +eol;
+        rs+="EIN = " + header.energyIn + " meV :   EOUT= " + header.energyOut 
+            + " meV :   NUMDET = " + header.nDet +eol;
         // something funny is comming into the variables that are
         // printed here, John will fix them in Header
-        System.out.println("Detector Calibration: " + header.detCalibFile 
-                           + "???, Moderator Calibration: " 
-                           + header.moderatorCalibFile + "???");
+        rs+="Detector Calibration: " + header.detCalibFile 
+            + "???, Moderator Calibration: " + header.moderatorCalibFile 
+            + "???" +eol;
 
         // loop over the histograms
         for( i=0 ; i<header.numOfHistograms ; i++ ){
-            System.out.println("");
-            System.out.println("  Histogram "+ (i+1) );
-            System.out.println("");
-            System.out.println("  ID  ANGLE  LF(m)  Range:Time(microseconds)"
-                               +"     CHW0:    CHAN   NCH     COUNTS");
-            System.out.println("");
+            rs+=eol;
+            rs+="  Histogram "+ (i+1) +eol;
+            rs+=eol;
+            rs+="  ID  ANGLE  LF(m)  Range:Time(microseconds)     CHW0:    "
+                +"CHAN   NCH     COUNTS"+eol;
+            rs+=eol;
             int numIDs=0;
             int numChan=0;
             // loop over number of groups
@@ -129,90 +123,101 @@ class PrunHead{
                 Segment segs[]=run.SegsInSubgroup(j);
                 numIDs+=ids.length;
                 if(ids.length>1){
-                    System.out.println("");
-                    System.out.print("          The following detector IDs "
-                                     + "are grouped together:");
+                    rs+=eol;
+                    rs+="          The following detector IDs are grouped "
+                        + "together:";
                     for( k=0 ; k<ids.length ; k++ ){
                         if(k==0 || k%10==0){
-                            System.out.println("");
-                            System.out.print("                ");
+                            rs+=eol;
+                            rs+="                ";
                         }
-                        space_hundred(ids[k]);
-                        System.out.print( ids[k]+"  ");
+                        rs+=space_hundred(ids[k]) + ids[k] + "  ";
                     }
-                    System.out.println("");
+                    rs+=eol;
                     // slightly different from vax version because of
                     // error in converting a vax float to an IEEE float
                     temp=run.DetectorAngle(segs[0],i+1);
-                    System.out.print("     Reference Angle ");
-                    space_hundred(temp);
-                    System.out.print(format(temp,4)
-                                     +"     Reference Total Length");
+                    rs+="     Reference Angle ";
+                    rs+=space_hundred(temp) + format(temp,4) 
+                        + "     Reference Total Length";
                     temp=run.FlightPath(segs[0],i+1)+run.SourceToSample();
-                    space_hundred(temp);
-                    System.out.println(format(temp,4));
+                    rs+=space_hundred(temp) + format(temp,4) +eol;
                 }
-                space_hundred(ids[0]);
-                System.out.print(ids[0]+" ");
+                rs+=space_hundred(ids[0]) + ids[0]+" ";
                 temp=run.RawDetectorAngle(ids[0]);
-                space_hundred(temp);
-                System.out.print(format(temp,2) + " ");
+                rs+=space_hundred(temp) + format(temp,2) + " ";
                 temp=run.RawFlightPath(ids[0]);
-                if(temp>=0.) System.out.print(" ");
-                System.out.print(format(temp,2)+"    ");
+                if(temp>=0.) rs+=" ";
+                rs+=format(temp,2)+"    ";
                 temp=run.MinBinned(j);
-                System.out.print(format(temp,3)+" - ");
+                rs+=format(temp,3)+" - ";
                 temp=run.MaxBinned(j);
-                System.out.print(format(temp,3)+"    ");
+                rs+=format(temp,3)+"    ";
                 itemp=run.TimeFieldType(segs[0],i+1);
                 temp=timeField[itemp].tStep;
-                space_thousand(temp);
-                System.out.print(format(temp,3)+" ");
+                rs+=space_thousand(temp) + format(temp,3)+" ";
                 itemp=detectorMap[ids[0]].address; // it is not the address
-                System.out.print("    ??? ");
+                rs+="    ??? ";
                 itemp=run.TimeFieldType(segs[0],i+1);
                 // this is two less than in the vax version b/c this
                 // does not include the sum check bits
                 temp=timeField[itemp].NumOfChannels();
                 numChan+=temp;
-                space_thousand(temp);
-                if(temp<10000) System.out.print(" ");
-                System.out.print((int)temp+" ");
+                rs+=space_thousand(temp);
+                if(temp<10000) rs+=" ";
+                rs+=(int)temp+" ";
                 temp=run.Get1DSum(j);
-                space_thousand(temp);
+                rs+=space_thousand(temp);
                 if(temp<1000){
-                    System.out.print("      ");
+                    rs+="      ";
                 }else if(temp<10000){
-                    System.out.print("      ");
+                    rs+="      ";
                 }else if(temp<100000){
-                    System.out.print("     ");
+                    rs+="     ";
                 }else if(temp<1000000){
-                    System.out.print("    ");
+                    rs+="    ";
                 }else if(temp<10000000){
-                    System.out.print("   ");
+                    rs+="   ";
                 }else if(temp<100000000){
-                    System.out.print("  ");
+                    rs+="  ";
                 }else if(temp<1000000000){
-                    System.out.print(" ");
+                    rs+=" ";
                 }
-                System.out.println((int)temp);
+                rs+=(int)temp+eol;
 
-                /*System.out.println("TimeField("+itemp+")="
-                  +timeField[itemp].tStep+"  "
-                  +timeField[itemp].NumOfChannels());*/
+                /*rs+="TimeField("+itemp+")="+timeField[itemp].tStep+"  "
+                  +timeField[itemp].NumOfChannels();*/
             }
             // end looping over groups
-            System.out.println("There are " + header.numOfHistograms 
-                               + " standard detector histograms using "
-                               + header.totalChannels + " channels total");
+            rs+="There are " + header.numOfHistograms 
+                + " standard detector histograms using "
+                + header.totalChannels + " channels total" +eol;
             int numGrp=1+run.MaxSubgroupID(i+1)-run.MinSubgroupID(i+1);
-            System.out.println("Histogram " + (i+1) + " bins " + numIDs 
-                               + " IDs in " + numGrp
-                               +" groups, using "+numChan+" of the channels");
+            rs+="Histogram " + (i+1) + " bins " + numIDs 
+                + " IDs in " + numGrp
+                +" groups, using "+numChan+" of the channels" +eol;
         } // end looping over histograms
 
 	runfile.close();
+
+        return rs;
     }
+
+   /**
+       This function provides a test method for this class' functionality.  It
+       will provide a sampling of the information that is retrieved as a new 
+       PrunHead Object is created.  It accepts a filename as the first command
+       line argument.
+
+       @param args - The first command line parameter is the runfile name.  
+               This parameter should contain the file path unless the file is
+	       in the current directory.
+
+    */
+    public static void main(String[] args) throws IOException {
+        System.out.print("*****\n"+createHeader(args[0])+"*****\n");
+    }
+
     static private String format( double number, int sigfig){
         NumberFormat nf=NumberFormat.getInstance();
         nf.setMaximumFractionDigits(sigfig);
@@ -235,23 +240,31 @@ class PrunHead{
 
         return result;
     }
-    static private void space_hundred(double number){
+    static private String space_hundred(double number){
+        String rs="";
+
         if(number>=0.){
-            System.out.print(" ");
+            rs+=" ";
         }
         if(Math.abs(number)<10){
-            System.out.print("  ");
+            rs+="  ";
         }else if(Math.abs(number)<100){
-            System.out.print(" ");
+            rs+=" ";
         }
+
+        return rs;
     }
-    static private void space_thousand(double number){
+    static private String space_thousand(double number){
+        String rs="";
+
         if(number<10){
-            System.out.print("   ");
+            rs+="   ";
         }else if(number<100){
-            System.out.print("  ");
+            rs+="  ";
         }else if(number<1000){
-            System.out.print(" ");
+            rs+=" ";
         }
+
+        return rs;
     }
 }
