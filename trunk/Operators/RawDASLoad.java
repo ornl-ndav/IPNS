@@ -31,6 +31,9 @@
  * Modified:
  *
  * $Log$
+ * Revision 1.4  2002/07/08 14:35:57  hammonds
+ * Use byte buffers to speed up file access.
+ *
  * Revision 1.3  2002/03/15 00:38:45  hammonds
  * Made changes to reflect change of Data Object.  Now use Data.getInstance()
  *
@@ -152,8 +155,12 @@ public class RawDASLoad extends GenericLoad
 
     try
     {
-      RandomAccessFile f = new RandomAccessFile( file_name,"r" );
+      RandomAccessFile ff = new RandomAccessFile( file_name,"r" );
       
+      byte[] bArray = new byte[(int)ff.length()];
+      ff.read(bArray);
+      ByteArrayInputStream bArrayIS = new ByteArrayInputStream(bArray);
+      DataInputStream f = new DataInputStream(bArrayIS);
 
       String title   = new String(file_name);
       String x_units = new String("");
