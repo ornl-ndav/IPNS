@@ -27,13 +27,14 @@ class LpsdTimeField{
 
 
     /**
-       This function provides a test method for this class' functionality.  It will
-       provide a sampling of the information that is retrieved as a new TimeField
-       Object is created.  It accepts a filename as the first command line argument.
+       This function provides a test method for this class' functionality.  It
+       will provide a sampling of the information that is retrieved as a new 
+       TimeField Object is created.  It accepts a filename as the first command
+       line argument.
 
-       @param args - The first command line parameter is the runfile name.  This
-       parameter should contain the file path unless the file is in
-       the current directory.
+       @param args - The first command line parameter is the runfile name.  
+               This parameter should contain the file path unless the file is
+	       in the current directory.
 
     */
     public static void main(String[] args) throws IOException {
@@ -77,7 +78,7 @@ class LpsdTimeField{
     }
 
     protected  LpsdTimeField(RandomAccessFile runfile, int iType,
-			 Header header ) throws IOException, LpsdNotFound {
+			     Header header ) throws IOException, LpsdNotFound {
 	long startingPosition;
         int maskChanWord, minWord, rangeWord, widthWord;
 
@@ -90,8 +91,6 @@ class LpsdTimeField{
 	startingPosition = runfile.getFilePointer();
 	runfile.seek(header.lpsdTimeFieldTable.location + 
 		     (iType - 1) * 16);
-
-	
 
 	if ( header.versionNumber <= 4 ) {
 	    maskChanWord = header.readUnsignedInteger( runfile, 4);
@@ -139,29 +138,23 @@ class LpsdTimeField{
     }
 
     protected void Write ( RandomAccessFile runfile ) throws IOException {
-		System.out.println( "Time Field "  + tMin + " "
-		+ tMax + " " + tStep + " " + tDoubleLength + " "
-		+ numOfChannels + " " + timeFocusBit + " "
-		+ emissionDelayBit + " " + constantDelayBit + " " 
-		+ energyBinBit + " " + wavelengthBinBit + " "
-				    + pulseHeightBit );
 
-		int flagword;
+	int flagword;
 		
-		int chwword;
+	int chwword;
 		
-		flagword = ( (timeFocusBit << 31) & 0x80000000 ) |
-		    ( (emissionDelayBit << 30)    & 0x40000000 ) |
-		    ( (constantDelayBit << 29)    & 0x20000000 ) |
-		    ( (energyBinBit << 28)        & 0x10000000 ) |
-		    ( (wavelengthBinBit << 27)    & 0x08000000 ) |
-		    ( (pulseHeightBit << 26)      & 0x04000000 ) |
-		    ( numOfChannels               & 0x0000ffff );
+	flagword = ( (timeFocusBit << 31) & 0x80000000 ) |
+	    ( (emissionDelayBit << 30)    & 0x40000000 ) |
+	    ( (constantDelayBit << 29)    & 0x20000000 ) |
+	    ( (energyBinBit << 28)        & 0x10000000 ) |
+	    ( (wavelengthBinBit << 27)    & 0x08000000 ) |
+	    ( (pulseHeightBit << 26)      & 0x04000000 ) |
+	    ( numOfChannels               & 0x0000ffff );
 
-		runfile.writeInt( flagword );
-		runfile.writeFloat( (float)tMin );
-		runfile.writeFloat( (float)tMax );
-		runfile.writeFloat( (float)tStep );
+	runfile.writeInt( flagword );
+	runfile.writeFloat( (float)tMin );
+	runfile.writeFloat( (float)tMax );
+	runfile.writeFloat( (float)tStep );
 
     }
 
