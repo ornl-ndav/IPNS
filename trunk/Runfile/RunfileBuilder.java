@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.31  2001/11/19 16:50:34  hammonds
+ * added setting the hardwareTimeDelay to the headerSetFromParams
+ *
  * Revision 5.30  2001/11/16 19:52:40  hammonds
  * Fixed writeShortTable.  It was reserving enough space for ints.  This was causing short tables to grow if files were written from default runs.
  *
@@ -1239,6 +1242,10 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 	    Integer.parseInt(params.getProperty("DetectorCal"));
         this.header.moderatorCalibFile =
 	    Integer.parseInt(params.getProperty("ModeratorCal"));
+	int td = (int)(-1*
+		       (new Double(params.getProperty("hardTimeDelay", "0.0")))
+		       .doubleValue()/header.standardClock);
+	this.header.hardTimeDelay = td;
 	return (0);
     }
 
