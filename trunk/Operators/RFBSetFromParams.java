@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2001/11/01 20:03:14  chatterjee
+ *  Takes empty string for path of the Params fileand uses default file.
+ *
  *  Revision 1.2  2001/08/01 20:57:32  chatter
  *  Added GPL license statement
  *
@@ -95,7 +98,7 @@ public RFBSetFromParams()
   {
      parameters = new Vector();  // must do this to create empty list of 
                                  // parameters
-    Parameter parameter= new Parameter("New RunfileBuilder", new RunfileBuilder() );
+    Parameter parameter= new Parameter("RunfileBuilder", new RunfileBuilder() );
     addParameter( parameter );
     parameter= new Parameter("File Name", null);
     addParameter( parameter );
@@ -109,12 +112,14 @@ public RFBSetFromParams()
 
   public Object getResult()
   {
+    int rval = 0;
     RunfileBuilder rfb = (RunfileBuilder) (getParameter(0).getValue());
     String val = (String)(getParameter(1).getValue());
-    int rval = 0;
-    rval = rfb.headerSetFromParams(val);    
-    return new Integer(rval);
-         
+    if(val.equalsIgnoreCase(""))
+    	rval = rfb.headerSetFromParams();  
+    else    
+    	rval = rfb.headerSetFromParams(val);
+    return new Integer(rval);         
   }  
 
 }
