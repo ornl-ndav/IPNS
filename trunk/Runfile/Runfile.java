@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.44  2003/09/19 03:19:20  hammonds
+ * Remove some messages printing when loading a runfile
+ *
  * Revision 6.43  2003/09/16 02:07:12  hammonds
  * Fix FirstRun() and add LastRun()
  *
@@ -1449,7 +1452,7 @@ public class Runfile implements Cloneable {
 	int colonIndex;
 	String key =new String();
 	String value = new String();
-	System.out.println(new String(messageBytes));
+	//	System.out.println(new String(messageBytes));
 	for ( int ii = 0; ii < messageBytes.length - 1; ii++ ) {
 	    if ( messageBytes[ii] == 13 && messageBytes[ii+1] == 10 ) {
 		line = new String( messageBytes, lastStart, 
