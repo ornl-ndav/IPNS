@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2001/11/01 20:03:39  chatterjee
+ *  Takes empty string for path of the DCalib file and uses default file.
+ *
  *  Revision 1.2  2001/08/01 20:57:32  chatter
  *  Added GPL license statement
  *
@@ -109,12 +112,13 @@ public RFBSetFromDCalib()
 
   public Object getResult()
   {
+    int rval = 0;
     RunfileBuilder rfb = (RunfileBuilder) (getParameter(0).getValue());
     String val = (String)(getParameter(1).getValue());
-    int rval = 0;
-    rval = rfb.headerSetFromDCalib(val);    
+    if(val.equalsIgnoreCase(""))
+    	rval = rfb.headerSetFromDCalib();  
+    else    
+    	rval = rfb.headerSetFromDCalib(val);
     return new Integer(rval);
-         
-  }  
-
+  }
 }
