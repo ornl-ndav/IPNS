@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.39  2001/12/03 18:13:38  chatterjee
+ * Changed name of method groupIdsByAngle to groupIdsSeparateByAngle
+ *
  * Revision 5.38  2001/12/03 18:02:49  hammonds
  * Refix problem with start addresses for detectors.
  *
@@ -2181,7 +2184,7 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @param hist The histogram that the ids will be binned in
        @return an error code.
      */
-    public int groupIdsByAngle( int tf, int hist, float[] lowerValue, float[] upperValue ) 
+    public int groupIdsSeparateByAngle( int tf, int hist, float[] lowerValue, float[] upperValue ) 
     {
 	int[] list = new int[0];
       int n = 0;
