@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.15  2002/07/11 18:15:17  hammonds
+ * Fixed problem reading area detector data in old files.
+ *
  * Revision 6.14  2002/07/02 14:43:34  hammonds
  * Fixed problem where detector ID 1 must be binned.
  * Fixed problem with SAD/SAND transmission runs.
@@ -804,6 +807,7 @@ public class Runfile implements Cloneable {
 		    case 11: {
 			detectorType[ii] = 11;
 			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 			}
@@ -827,11 +831,13 @@ public class Runfile implements Cloneable {
 			if ((header.numOfX == 64) && (header.numOfY == 64)) {
 			    detectorType[ii] = 12;
 			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			}
 			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
 			    detectorType[ii] = 13;
 			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			}
 			else if ((header.numOfX == 1) && (header.numOfY == 1)) {
@@ -855,11 +861,13 @@ public class Runfile implements Cloneable {
 			if ((header.numOfX == 64) && (header.numOfY == 64)) {
 			    detectorType[ii] = 12;
 			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			}
 			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
 			    detectorType[ii] = 13;
 			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			}
 			else if ((header.numOfX == 1) && (header.numOfY == 1)) {
@@ -1218,12 +1226,12 @@ public class Runfile implements Cloneable {
 
 	// Correct GLAD detector angles to be in plane angles
 	if ( (this.header.iName).equalsIgnoreCase("glad")) {
+	    double cvdr = Math.PI/ 180.0;
+	    double cvrd = 180.0/Math.PI;
 	    for ( int ii = 0; ii <= header.numOfElements; ii++ ){
 		if ( flightPath[ii] !=0.00f &&
 		     detectorAngle[ii] != 0.00f && 
 		     detectorHeight[ii] !=0.00f ) {
-		    double cvdr = Math.PI/ 180.0;
-		    double cvrd = 180.0/Math.PI;
 		    float fp = flightPath[ii];
 		    float zdet = detectorHeight[ii];
 		    float ang1 = detectorAngle[ii];
@@ -1657,7 +1665,7 @@ public class Runfile implements Cloneable {
 
  	// Read Control Parameters
 	if (header.numOfControl > 0 && header.controlTable.size > 0 ) {
-	    System.out.println ( "Reading Control Parameters" );
+	    //	    System.out.println ( "Reading Control Parameters" );
 	    int numOfControl = header.numOfControl;
 	    params = new ParameterFile[numOfControl];
 	    runfile.seek( this.header.controlTable.location );
@@ -1665,7 +1673,7 @@ public class Runfile implements Cloneable {
 		params[ii] = new ParameterFile();
 		readParamFileFromRunfile(runfile, params[ii]);
 	    }
-	    System.out.println ( "Done Reading Control Parameters" );
+	    //	    System.out.println ( "Done Reading Control Parameters" );
 	    
 	}
 
