@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.21  2002/12/09 15:54:20  hammonds
+ * Flip detector x-axis.  This affects new runfiles only.  All V4 & earlier should remain the same.
+ *
  * Revision 6.20  2002/10/28 22:58:50  hammonds
  * Speed/memory improvements.  This is from change of code structure.
  *
@@ -2559,7 +2562,7 @@ public class Runfile implements Cloneable {
 		return this.detectorAngle[seg.detID];
 	    }
 	    else{
-		float relX = -detectorWidth[detID]/200.0f +
+		float relX = detectorWidth[detID]/200.0f -
 		    ((float)(seg.column-0.5f )/numSegs2[detID]) * 
 		    detectorWidth[detID]/100.0f;
 		float relY = -detectorLength[detID]/200.0f +
