@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 5.48  2001/12/20 22:04:50  hammonds
+ * Made changes to how POSY1&2 detectors are set up.
+ * Changed routines that check if a det/seg/group is a beam monitor.  Added a check to make sure that the detector is in the scattering plane and is at zero angle.
+ *
  * Revision 5.47  2001/12/11 22:13:59  hammonds
  * Fixed problem with segments in old GLAD files.
  *
@@ -728,6 +732,7 @@ public class Runfile implements Cloneable {
 		    case 11: {
 			detectorType[ii] = 11;
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 			}
 		    }
@@ -744,6 +749,7 @@ public class Runfile implements Cloneable {
 		    case 12: {
 			detectorType[ii] = 12;
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -758,6 +764,7 @@ public class Runfile implements Cloneable {
 		    case 13: {
 			detectorType[ii] = 13;
 			psdOrder[ii] = Runfile.PSD_DIMENSION[detectorType[ii]];
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -769,9 +776,10 @@ public class Runfile implements Cloneable {
 			detectorType[ii] = 1;
 			break;
 		    }
-		    case 13: {
+		    case 15: {
 			detectorType[ii] = 15;
 			psdOrder[ii] = 2;
+			numSegs2[ii] = 2;
 			break;
 		    }
 		    }
@@ -783,9 +791,10 @@ public class Runfile implements Cloneable {
 			detectorType[ii] = 1;
 			break;
 		    }
-		    case 13: {
+		    case 16: {
 			detectorType[ii] = 16;
 			psdOrder[ii] = 2;
+			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
 		    }
 		    }
@@ -793,6 +802,8 @@ public class Runfile implements Cloneable {
 		if (header.iName.equalsIgnoreCase( "scd0" ) ||
 		    header.iName.equalsIgnoreCase( "sad0" )||
 		    header.iName.equalsIgnoreCase( "sad1" )||
+		    header.iName.equalsIgnoreCase( "posy" )||
+		    header.iName.equalsIgnoreCase( "pne0" )||
 		    header.iName.equalsIgnoreCase( "sand" ) ){
 		    switch (detectorType[ii]) {
 		    case 0:
@@ -823,7 +834,6 @@ public class Runfile implements Cloneable {
 		    case 15:
 		    case 16: {
 			numSegs1[ii] = Runfile.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = Runfile.NUM_OF_SEGS_2[detectorType[ii]];
 			detectorLength[ii] = Runfile.LENGTH[detectorType[ii]];
 			detectorWidth[ii] = Runfile.WIDTH[detectorType[ii]];
 			detectorDepth[ii] = Runfile.DEPTH[detectorType[ii]];
@@ -954,6 +964,8 @@ public class Runfile implements Cloneable {
 		if((!(this.header.iName).equalsIgnoreCase("scd0")&&
 		    !(this.header.iName).equalsIgnoreCase("sad0")&&
 		    !(this.header.iName).equalsIgnoreCase("sad1")&&
+		    !(this.header.iName).equalsIgnoreCase("posy")&&
+		    !(this.header.iName).equalsIgnoreCase("pne0")&&
 		    !(this.header.iName).equalsIgnoreCase("sand")) ){
 		    for (int nDet = 1; nDet <= header.numOfElements; nDet++ ) {
 			int index = ( (nHist -1) * header.numOfElements ) + nDet;
@@ -974,7 +986,8 @@ public class Runfile implements Cloneable {
 				
 				int index2 = 
 				    ( (nHist -1) * header.numOfElements ) + k;
-				int tfType2 = detectorMap[index2].tfType;
+
+ 				int tfType2 = detectorMap[index2].tfType;
 				if ( ( detectorMap[index2].address == 
 				       detectorMap[index].address) &&
 				     (tfType2 != 0) ){
@@ -3490,8 +3503,8 @@ public class Runfile implements Cloneable {
        @return boolean true if ID is a beam monitor.
    */
    public boolean IsIDBeamMonitor( int id ) {
-	if (detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
-	    detectorAngle[id] == -180.0 ) { 
+	if ((detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
+	    detectorAngle[id] == -180.0) && (detectorHeight[id] == 0.0) ) { 
 	    if ( header.iName.equalsIgnoreCase( "glad" )
 		 && header.versionNumber < 4 ) {
 		if ( crateNum[id] == 1 && slotNum[id] == 20 ) {
@@ -3512,8 +3525,8 @@ public class Runfile implements Cloneable {
    */
    public boolean IsIDBeamMonitor( Segment seg ) {
        int id = seg.detID;
-       if (detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
-	   detectorAngle[id] == -180.0 ) {
+       if ((detectorAngle[id] == 0.0 || detectorAngle[id] == 180.0 || 
+	   detectorAngle[id] == -180.0 ) && (detectorHeight[id] == 0.0)) {
 	   if ( header.iName.equalsIgnoreCase( "glad" )
 		&& header.versionNumber < 4 ) {
 	       if ( crateNum[id] == 1 && slotNum[id] == 20 ) {
