@@ -15,6 +15,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.7  2003/02/27 19:52:08  pfpeterson
+ * Changed default directory to look in to be '.' rather than '..'
+ *
  * Revision 1.6  2002/12/13 14:23:45  hammonds
  * Took out println's.  Make necessary diagnostics go into the File Summary
  *
@@ -147,7 +150,7 @@ public class FileSummary {
 
 
     public static void main (String [] args) throws IOException {
-	if ( args.length == 0) args = new String[] {".."};
+	if ( args.length == 0) args = new String[] {"."};
 	FileSummary  fileSum = new FileSummary( args[0]);
 	System.out.println( fileSum.getSummary());
     }
