@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.5  2003/08/02 14:46:07  hammonds
+ *  Fix constructor with iName argument.  Fix main method
+ *
  *  Revision 1.4  2003/03/12 02:30:26  hammonds
  *  Trim up imports.
  *
@@ -78,11 +81,8 @@ public class IncNextRun extends  GenericBatch
   String infileName;
   public IncNextRun( String iName  )
   {
-	
     super( "IncNextRun" );
-    Parameter parameter= new Parameter("filename", new String());
-    addParameter( parameter );
-
+    getParameter(0).setValue(iName);
   }
 
 public IncNextRun()
@@ -107,8 +107,7 @@ public IncNextRun()
   {
      parameters = new Vector();  // must do this to create empty list of 
                                  // parameters
-     Parameter parameter= new Parameter("iName", 
-                                         new String());
+     Parameter parameter= new Parameter("iName", new String());
      addParameter( parameter );
 
   }
@@ -196,11 +195,8 @@ public IncNextRun()
   public static void main(String[] arg)
   {
 
-  //  try{ Class O = Class.forName( "Operators.RFBWrapper");
-  //   }
-  //  catch(Exception s)
-  //    {System.out.println("Error = "+s);
-  //    }
+    IncNextRun op = new IncNextRun(arg[0]);
+    System.out.println( op.getResult().toString());
   }
 
 }
