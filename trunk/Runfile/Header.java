@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.7  2001/06/27 20:43:04  hammonds
+ * Added code to allow for area detector data.
+ *
  * Revision 5.6  2001/04/03 20:45:07  hammonds
  * added detector dataSource and minID tables.
  *
@@ -551,6 +554,14 @@ public static void main(String[] args) throws IOException{
 		    numDets += lpsdDetIdMap.DetsInBank( ii ).length;
 		}
 	        this.nDet = (short)numDets;
+	    }
+	    else if ( (this.iName).equalsIgnoreCase("scd0") ||
+		      (this.iName).equalsIgnoreCase("sad0") ||
+		      (this.iName).equalsIgnoreCase("sad1") ||
+		      (this.iName).equalsIgnoreCase("sand") )
+	    {
+		this.numOfElements = this.nDet + this.numOfX * this.numOfY;
+		this.nDet = (short)(this.nDet + 1);
 	    }
 	    else {
 		this.numOfElements = this.nDet;
