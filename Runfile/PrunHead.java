@@ -79,7 +79,9 @@ class PrunHead{
             + header.endDate +eol;
         rs+=header.numOfCyclesCompleted + " of " + header.numOfCyclesPreset 
             + " cycles completed" +eol;
-        rs+=header.numOfOverflows + " Channels have overflowed" +eol;
+        if(header.numOfOverflows>0){
+            rs+=header.numOfOverflows + " Channels have overflowed" +eol;
+        }
         rs+=eol;
 
         // Conrolled Devices - NOT accessable (yet)
@@ -100,9 +102,14 @@ class PrunHead{
             + format(header.sourceToChopper,2) +", Hardware time range= " 
             + header.hardwareTMin + " - " + header.hardwareTMax 
             + " microseconds" +eol;
-        rs+="EIN = " + format(header.energyIn,2) + " meV :   EOUT= " 
-            + format(header.energyOut,2) + " meV :   NUMDET = " 
+        rs+="EIN = " + format(header.energyIn,4) + " meV :   EOUT= " 
+            + format(header.energyOut,4) + " meV :   NUMDET = " 
             + header.nDet +eol;
+        // stuff just for choppers
+        if(run.InstrumentType()==InstrumentType.TOF_DG_SPECTROMETER){
+            rs+="Hardware Time delay:  "+header.hardTimeDelay
+                +",  LOF,LA1D =   ???   ???"+eol;
+        }
         // something funny is comming into the variables that are
         // printed here, John will fix them in Header
         rs+="Detector Calibration: " + header.detCalibFile 
@@ -161,9 +168,9 @@ class PrunHead{
                 itemp=detectorMap[ids[0]].address; // it is not the address
                 rs+="    ??? ";
                 itemp=run.TimeFieldType(segs[0],i+1);
-                // this is two less than in the vax version b/c this
-                // does not include the sum check bits
-                temp=timeField[itemp].NumOfChannels();
+                // This is two less than in the vax version b/c this
+                // does not include the sum check bits. 
+                temp=timeField[itemp].NumOfChannels()+2;
                 numChan+=temp;
                 rs+=space_thousand(temp);
                 if(temp<10000) rs+=" ";
