@@ -2,7 +2,7 @@ package IPNS.Control;
 import java.util.*;
 import java.io.*;
 
-class Parameter {
+public class Parameter {
 
     String type;
     int index;

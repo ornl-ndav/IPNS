@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-class ParamPane extends JPanel implements ActionListener {
+public class ParamPane extends JPanel implements ActionListener {
     Parameter[] params = new Parameter[0];
     ParameterEntry[] paramEntry = new ParameterEntry[0];
 
