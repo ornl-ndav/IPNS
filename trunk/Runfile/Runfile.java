@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.38  2003/07/07 20:11:40  hammonds
+ * Fixed time field for area detectors.  Was dividing channel starting times by hardware clock period.  This should not affect SCD (clock period = 1 us) but will affect others SAND (clock period = .5 us)
+ *
  * Revision 6.37  2003/04/22 21:40:31  hammonds
  * Fix problem Loading a new SCD file with no control parameters.
  *
@@ -1426,6 +1429,7 @@ public class Runfile implements Cloneable {
 	int colonIndex;
 	String key =new String();
 	String value = new String();
+	System.out.println(new String(messageBytes));
 	for ( int ii = 0; ii < messageBytes.length - 1; ii++ ) {
 	    if ( messageBytes[ii] == 13 && messageBytes[ii+1] == 10 ) {
 		line = new String( messageBytes, lastStart, 
@@ -1470,7 +1474,7 @@ public class Runfile implements Cloneable {
 	    areaStartTime = new float[numStart];
 	    for (int ii = 0; ii < numStart; ii++) {
 		areaStartTime[ii] = 
-		    iareaStartTime[ii+1]/(float)header.clockPeriod;
+		    iareaStartTime[ii+1]*(float)header.clockPeriod;
 	    }
 	    
 	}
