@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.7  2002/04/22 18:07:52  hammonds
+ * Changes to accomodate SAD w/ 128x128 or 64x64
+ *
  * Revision 6.6  2002/03/04 20:57:57  hammonds
  * Updates to psd detector positions.  Getting better fplength, angle & height for segments.
  *
@@ -273,13 +276,13 @@ public class Runfile implements Cloneable {
 		      1.00F, 0.001F, 0.001F, 1.00F, 1.00F, 1.00F, 1.00F, 
 		      1.00F, 1.00F, 1.0F};
     public static final int[]
-	PSD_DIMENSION = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1,
+	PSD_DIMENSION = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1,
 			  1 };
     public static final int[]
-	NUM_OF_SEGS_1 = { 0, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
+	NUM_OF_SEGS_1 = { 1, 1, 1, 1, 1, 16, 1, 32, 1, 1, 1, 85, 64, 128, 128,
 			  256, 256,8 };
     public static final int[]
-	NUM_OF_SEGS_2 = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128, 
+	NUM_OF_SEGS_2 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 85, 64, 128, 128, 
 			  1, 1,1  };
     public static final int[] SEGMENT_SELECT = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256 };
@@ -610,7 +613,12 @@ public class Runfile implements Cloneable {
 		}
 		else if ( (this.header.iName).equalsIgnoreCase("sad0") ||
 			  (this.header.iName).equalsIgnoreCase("sad1")){
-		    detectorType[ detectorType.length - 1 ] = 12;
+		    if ((header.numOfX == 64) && (header.numOfY == 64)) {
+			detectorType[ detectorType.length - 1 ] = 12;
+		    }
+		    else if ((header.numOfX == 128) && (header.numOfY == 128)) {
+			detectorType[ detectorType.length - 1 ] = 13;
+		    }
 
 		}
 		else if ( (this.header.iName).equalsIgnoreCase("sand") ){
@@ -780,8 +788,18 @@ public class Runfile implements Cloneable {
 			detectorType[ii] = 9;
 			break;
 		    }
-		    case 12: {
-			detectorType[ii] = 12;
+		    case 2: {
+			detectorType[ii] = 9;
+			break;
+		    }
+		    case 12: 
+		    case 13: {
+			if ((header.numOfX == 64) && (header.numOfY == 64)) {
+			    detectorType[ii] = 12;
+			}
+			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
+			    detectorType[ii] = 13;
+			}
 			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
 			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 			break;
