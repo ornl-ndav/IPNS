@@ -59,7 +59,8 @@ class DetectorMap{
 	versionNumber= header.versionNumber;
 
 	startingPosition = runfile.getFilePointer();
-	runfile.seek( header.detectorMapTable.location + (id - 1) * 4);
+	runfile.seek( header.detectorMapTable.location + (id - 1) 
+		      * DetectorMap.mapSize(versionNumber));
 	
 	if ( header.versionNumber <= 4 ) {
 	    temp = header.readUnsignedInteger(runfile, 4);
