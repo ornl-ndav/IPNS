@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.28  2003/03/12 22:38:17  hammonds
+ * Fix trailing characters at the end of username.
+ *
  * Revision 6.27  2003/03/12 03:43:44  hammonds
  * Remove references to LENGTH, WIDTH,... in this file and redirect to those in
  * IPNS.Calib.DC5.  Also removed these static variables
@@ -1950,14 +1953,14 @@ public class Runfile implements Cloneable {
        @return The title stored for this run.
     */
     public String RunTitle(){
-	return this.header.runTitle;
+	return this.header.runTitle.trim();
     }
 
     /**
        @return The user name that was stored in the run file header.
     */ 
     public String UserName(){
-	return this.header.userName;
+	return this.header.userName.trim();
     }
 
     /**
