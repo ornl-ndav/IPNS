@@ -2,13 +2,8 @@ package IPNS.Runfile;
 
 import java.util.*;
 import javax.swing.*;
-import webproject.*;
-import webproject.dataset.*;
-import webproject.viewer.*;
-import webproject.components.display.image.*;
-import webproject.retriever.*;
-import webproject.util.*;
-
+import DataSetTools.dataset.*;
+import DataSetTools.viewer.*;
 import IPNS.Runfile.*;
 import java.io.*;
 
