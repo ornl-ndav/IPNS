@@ -4,6 +4,9 @@ import java.io.*;
 /*
  *
  * $Log$
+ * Revision 5.14  2001/07/20 21:41:43  hammonds
+ * added setHeader methods with double and short arguments
+ *
  * Revision 5.13  2001/07/20 20:04:38  hammonds
  * Added methods for setting the values in the Header from the RunfileBuilder.  Also made some small changes that will allow a runfile with a header to be constructed from the main method of RunfileBuilder.
  *
@@ -1001,6 +1004,18 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @param val The value to be placed in the field.
        @return A return error code
      */
+    public int headerSet( RunfileBuilder rfb, String element, double val ) {
+	int rval = rfb.header.set(element, val);
+	return rval;
+    }
+
+    /**
+       This method sets a value in the runfile header. 
+       @param rfb the runfile to modify
+       @param element The String code for the element to be modified
+       @param val The value to be placed in the field.
+       @return A return error code
+     */
     public int headerSet( RunfileBuilder rfb, String element, float val ) {
 	int rval = rfb.header.set(element, val);
 	return rval;
@@ -1014,6 +1029,18 @@ public class RunfileBuilder extends Runfile implements Cloneable{
        @return A return error code
      */
     public int headerSet( RunfileBuilder rfb, String element, int val ) {
+	int rval = rfb.header.set(element, val);
+	return rval;
+    }
+
+    /**
+       This method sets a value in the runfile header. 
+       @param rfb the runfile to modify
+       @param element The String code for the element to be modified
+       @param val The value to be placed in the field.
+       @return A return error code
+     */
+    public int headerSet( RunfileBuilder rfb, String element, short val ) {
 	int rval = rfb.header.set(element, val);
 	return rval;
     }
