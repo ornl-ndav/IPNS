@@ -23,6 +23,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.9  2002/04/24 14:58:01  hammonds
+ * Reading Control Parameters out of the old Runfiles.
+ * For SCD Copy chi, phi and omega from control parameters to header.
+ *
  * Revision 6.8  2002/04/23 13:52:06  hammonds
  * Changed bad mapping of LRMECS short detectors.
  * Changed bad mapping of Area detector positions.
@@ -1210,9 +1214,9 @@ public class Runfile implements Cloneable {
 			detectorAngle[ii] = 0.0f;
 		    }
 		    else {
-			detectorAngle[ii] = (float)ang2;
+	       	detectorAngle[ii] = (float)ang2;
 		    }
-		    if (gladbank[ii] > 6 ) {
+ 		    if (gladbank[ii] > 6 ) {
 			detectorAngle[ii] = -1.0f * detectorAngle[ii];
 		    }
 		    else if (gladbank[ii] == 6 && gladdetinbank[ii] > 14 ) {
@@ -1244,6 +1248,31 @@ public class Runfile implements Cloneable {
 		lastStart = ii + 2;
 	    }
 	}
+ 	// Read Control Parameters
+	if (header.controlTable.size > 0 ) {
+	    System.out.println ( "Reading Control Parameters" );
+	    int numOfControl = 15;
+	    params = new ParameterFile[numOfControl];
+	    runfile.seek( this.header.controlTable.location );
+	    int numRead = 0;
+	    int ii = 0;
+ 	    do {
+		params[ii] = new ParameterFile();
+
+		readParamFileFromRunfile(runfile, params[ii]);
+		numRead += 16 + 4 + 4 * params[ii].getUserParameters().length;
+		ii++;
+	    }while ( numRead < header.controlTable.size );
+	    header.numOfControl = (short)ii;
+	    System.out.println ( "Done Reading Control Parameters" );
+	    if ( header.instrumentType == InstrumentType.TOF_SCD ) {
+		Parameter[] upar = params[0].getUserParameters();
+		header.chi = upar[0].Value();
+		header.phi = upar[1].Value();
+		header.omega = upar[2].Value();
+	    }
+	}
+
     }
 
     void LoadV5( RandomAccessFile runfile ) throws IOException {
@@ -1570,13 +1599,13 @@ public class Runfile implements Cloneable {
 	bArrayIS.close();
 	dataStream.close();
 
-	// Read Control Parameters
+ 	// Read Control Parameters
 	if (header.numOfControl > 0 && header.controlTable.size > 0 ) {
 	    System.out.println ( "Reading Control Parameters" );
 	    int numOfControl = header.numOfControl;
 	    params = new ParameterFile[numOfControl];
 	    runfile.seek( this.header.controlTable.location );
-	    for (int ii = 0; ii < numOfControl; ii++ ) {
+ 	    for (int ii = 0; ii < numOfControl; ii++ ) {
 		params[ii] = new ParameterFile();
 		readParamFileFromRunfile(runfile, params[ii]);
 	    }
@@ -4110,81 +4139,102 @@ public class Runfile implements Cloneable {
     
     void readParamFileFromRunfile( RandomAccessFile runfile, 
 				   ParameterFile par ) throws IOException {
-	try {
-	    byte[] temp = new byte[16];
-	    runfile.read( temp, 0, 16);
-	    par.setDeviceName(new String(temp));
-	    runfile.read( temp, 0, 16);
-	    par.setDeviceNameDbSignal(new String(temp));
-	    runfile.read( temp, 0, 16);
-	    par.setControllerName( new String(temp) );
-	    runfile.read( temp, 0, 16);
-	    par.setDbDevice( new String(temp) );
-	    runfile.read( temp, 0, 16);
-	    par.setVetoSignal( new String(temp) );
-	    int numUserParams = runfile.readShort();
-	    int numInstParams = runfile.readShort();
-	    temp = new byte[16];
-	    runfile.read( temp, 0, 1);
-	    par.setAncIoc( new String(temp) );
-	    Parameter[] userPars = new Parameter[numUserParams];
-	    for ( int ii = 0; ii < numUserParams; ii++ ) {
-		System.out.println("Reading UserParameter " + ii );
-		userPars[ii] = new Parameter();
-		runfile.read( temp, 0, 16 );
-		System.out.println("Reading UserParameter " + ii );
-		userPars[ii].setName( new String(temp) );
-		userPars[ii].setValue( runfile.readFloat() );
-		System.out.println("Reading UserParameter " + ii );
-		runfile.read( temp, 0, 16 );
-		userPars[ii].setDbSignal( new String(temp) );
-		System.out.println("Reading UserParameter " + ii );
-
-		int numUserOpts = runfile.readShort(); 
-		System.out.println("Reading UserParameter " + ii );
-		System.out.println(" Reading " + numUserOpts + 
-				   " for parameter " + ii );
-		if (numUserOpts > 0 ) {
-		System.out.println("Reading UserParameter " + ii );
-		    String[] topts = new String[numUserOpts];
-		    for (int jj = 0; jj < numUserOpts; jj++ ) {
-			runfile.read( temp, 0, 16 );
-			topts[jj] = new String(temp);
+	if ( header.versionNumber >=5 ) {
+	    try {
+		byte[] temp = new byte[16];
+		runfile.read( temp, 0, 16);
+		par.setDeviceName(new String(temp));
+		runfile.read( temp, 0, 16);
+		par.setDeviceNameDbSignal(new String(temp));
+		runfile.read( temp, 0, 16);
+		par.setControllerName( new String(temp) );
+		runfile.read( temp, 0, 16);
+		par.setDbDevice( new String(temp) );
+		runfile.read( temp, 0, 16);
+		par.setVetoSignal( new String(temp) );
+		int numUserParams = runfile.readShort();
+		int numInstParams = runfile.readShort();
+		temp = new byte[16];
+		runfile.read( temp, 0, 1);
+		par.setAncIoc( new String(temp) );
+		Parameter[] userPars = new Parameter[numUserParams];
+		for ( int ii = 0; ii < numUserParams; ii++ ) {
+		    userPars[ii] = new Parameter();
+		    runfile.read( temp, 0, 16 );
+		    userPars[ii].setName( new String(temp) );
+		    userPars[ii].setValue( runfile.readFloat() );
+		    runfile.read( temp, 0, 16 );
+		    userPars[ii].setDbSignal( new String(temp) );
+		    
+		    int numUserOpts = runfile.readShort(); 
+		    System.out.println("Reading UserParameter " + ii );
+		    System.out.println(" Reading " + numUserOpts + 
+				       " for parameter " + ii );
+		    if (numUserOpts > 0 ) {
+			System.out.println("Reading UserParameter " + ii );
+			String[] topts = new String[numUserOpts];
+			for (int jj = 0; jj < numUserOpts; jj++ ) {
+			    runfile.read( temp, 0, 16 );
+			    topts[jj] = new String(temp);
+			}
+			userPars[ii].setOptions(topts);
 		    }
-		    userPars[ii].setOptions(topts);
 		}
-		System.out.println("Reading UserParameter " + ii );
-		System.out.println("Reading UserParameter " + ii );
-	    }
-	    par.setUserParameters(userPars);
-
-	    Parameter[] instPars = new Parameter[numInstParams];
-	    for ( int ii = 0; ii < numInstParams; ii++ ) {
-		System.out.println("Reading InstParameter " + ii );
-		instPars[ii] = new Parameter();
-		runfile.read( temp, 0, 16 );
-		instPars[ii].setName( new String(temp) );
-		instPars[ii].setValue( runfile.readFloat() );
-		runfile.read( temp, 0, 16 );
-		instPars[ii].setDbSignal( new String(temp) );
-		int numInstOpts = runfile.readShort(); 
-		if (numInstOpts > 0 ) {
-		    String[] topts = new String[numInstOpts];
-		    for (int jj = 0; jj < numInstOpts; jj++ ) {
-			runfile.read( temp, 0, 16 );
-			topts[jj] = new String(temp);
+		par.setUserParameters(userPars);
+		
+		Parameter[] instPars = new Parameter[numInstParams];
+		for ( int ii = 0; ii < numInstParams; ii++ ) {
+		    System.out.println("Reading InstParameter " + ii );
+		    instPars[ii] = new Parameter();
+		    runfile.read( temp, 0, 16 );
+		    instPars[ii].setName( new String(temp) );
+		    instPars[ii].setValue( runfile.readFloat() );
+		    runfile.read( temp, 0, 16 );
+		    instPars[ii].setDbSignal( new String(temp) );
+		    int numInstOpts = runfile.readShort(); 
+		    if (numInstOpts > 0 ) {
+			String[] topts = new String[numInstOpts];
+			for (int jj = 0; jj < numInstOpts; jj++ ) {
+			    runfile.read( temp, 0, 16 );
+			    topts[jj] = new String(temp);
+			}
+			instPars[ii].setOptions(topts);
 		    }
-		    instPars[ii].setOptions(topts);
 		}
+		par.setInstParameters(instPars);
+		
 	    }
-	    par.setInstParameters(instPars);
-
+	    catch (IOException ex) {
+		System.out.println("Problem reading control parameters from "+
+				   "runfile");
+		ex.printStackTrace();
+		throw new IOException();
+	    }
 	}
-	catch (IOException ex) {
-	    System.out.println("Problem reading control parameters from "+
-			       "runfile");
-	    ex.printStackTrace();
-	    throw new IOException();
+	else {
+	    try {
+		byte[] temp = new byte[16];
+		 runfile.read(temp, 0, 16);
+		 par.setDeviceName(new String(temp));
+		 System.out.println( "Reading Parrameter:" + (new String(temp)));
+		 int numUserParams = (int)header.ReadVAXReal4(runfile);
+		 Parameter[] userPars = new Parameter[numUserParams];
+		 for (int ii = 0; ii < numUserParams; ii++) {
+		     userPars[ii] = new Parameter();
+		     userPars[ii].setName((new String ("uParam" + ii)));
+		     float ftemp = (float)header.ReadVAXReal4(runfile);
+		     userPars[ii].setValue(ftemp);
+		     userPars[ii].setDbSignal((new String("undefined")));
+		     
+		 }
+		 par.setUserParameters(userPars);
+		 }
+	    catch ( IOException ex ) {
+		System.out.println("Problem reading control parameters from "+
+				   "runfile");
+		ex.printStackTrace();
+		throw new IOException();
+	    }
 	}
 	return;
     }
