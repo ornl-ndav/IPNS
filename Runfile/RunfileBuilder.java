@@ -9,6 +9,9 @@ import IPNS.Control.*;
 /*
  *
  * $Log$
+ * Revision 5.42  2002/01/03 18:53:45  hammonds
+ * fixed problem with data size in runfile.  Up til now total Channels is off.
+ *
  * Revision 5.41  2002/01/02 19:48:15  hammonds
  * Changes to push a version number into the detector map so that version 6 can get a larger size to allow for a bigger data area.
  *
@@ -1802,8 +1805,8 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 		tempMap[subgroupMap.length +ii -1 - numBogusSegs][0] = segID;
 		
 		detectorMap[index].tfType= tf;
-		detectorMap[index].address = header.channels1D;
-		header.channels1D += timeField[tf].numOfChannels * 4 +4;
+		detectorMap[index].address = header.channels1D * 4;
+		header.channels1D += timeField[tf].numOfChannels  + 1;
  		
 	    }
 	    else {
@@ -1898,9 +1901,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 			    tempMap[subgroupMap.length ][0] = segID;
 			    
 			    detectorMap[index].tfType= tf;
-			    detectorMap[index].address = header.channels1D;
+			    detectorMap[index].address = header.channels1D *4;
 			    header.channels1D += timeField[tf].numOfChannels *
-				4 + 4;
+				1 + 1;
 			    subgroupMap = tempMap;
 			    if (minSubgroupID[hist ] > (subgroupMap.length -1)
 				|| minSubgroupID[hist] == 0 ) 
@@ -2362,9 +2365,9 @@ public class RunfileBuilder extends Runfile implements Cloneable{
 				    else {
 					detectorMap[kindex].tfType= tf;
 					detectorMap[kindex].address = 
-					    header.channels1D;
+					    header.channels1D *4;
 					header.channels1D += 
-					    timeField[tf].numOfChannels *4 + 4;
+					    timeField[tf].numOfChannels  + 1;
 				    }
 				    
 				}  
