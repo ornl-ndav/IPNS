@@ -134,7 +134,7 @@ class TimeField{
 
     }
     protected int NumOfChannels(){
-	return (int)((tMax-tMin)/tStep -1);
+	return (int)((tMax-tMin)/tStep);
     }
 
     protected void Write ( RandomAccessFile runfile ) throws IOException {
