@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.25  2003/03/10 21:24:46  hammonds
+ * Removed pesky debug messages.
+ *
  * Revision 6.24  2003/03/10 20:54:52  hammonds
  * Clean up imports.
  * Add methods to get Rotation angles.
@@ -2667,10 +2670,8 @@ public class Runfile implements Cloneable {
 			else {
 
 			    twoDCorr = (float)RawFlightPath(seg)/(float)flightPath[detID];
-			    System.out.println("twoDCorr in if" + twoDCorr );
 			}
 		    }
-		    System.out.println("twoDCorr out of if" + twoDCorr );
 		    fp = fp * twoDCorr;
 
 		}
