@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.13  2002/04/25 14:55:17  hammonds
+ * remove one more comment.
+ *
  * Revision 6.12  2002/04/25 14:33:14  hammonds
  * Removed debug message
  *
@@ -4236,7 +4239,7 @@ public class Runfile implements Cloneable {
 		byte[] temp = new byte[16];
 		 runfile.read(temp, 0, 16);
 		 par.setDeviceName(new String(temp));
-		 System.out.println( "Reading Parrameter:" + (new String(temp)));
+		 //		 System.out.println( "Reading Parrameter:" + (new String(temp)));
 		 int numUserParams = (int)header.ReadVAXReal4(runfile);
 		 Parameter[] userPars = new Parameter[numUserParams];
 		 for (int ii = 0; ii < numUserParams; ii++) {
