@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.26  2003/03/11 19:14:35  hammonds
+ * Fix problems with detector Rotations in v4 and below files.
+ *
  * Revision 6.25  2003/03/10 21:24:46  hammonds
  * Removed pesky debug messages.
  *
@@ -662,8 +665,9 @@ public class Runfile implements Cloneable {
 	inputNum = new int[header.nDet + 1];
 	dataSource = new int[header.nDet + 1];
 	minID = new int[header.nDet + 1];
-	
-	
+	detectorRot1 = new float[header.nDet + 1];
+	detectorRot2 = new float[header.nDet + 1];
+   
 	if ( (this.header.iName).equalsIgnoreCase("scd0") ||
 	     (this.header.iName).equalsIgnoreCase("sad0") ||
 	     (this.header.iName).equalsIgnoreCase("sad1") ||
@@ -832,6 +836,8 @@ public class Runfile implements Cloneable {
 		detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
 		detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
 		detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
+		detectorRot1[ii] = 0.0f;
+		detectorRot2[ii] = 0.0f;
 		minID[ii] = ii;
 		segments[ii] = new Segment();
 		segments[ii].detID = ii; 
@@ -1074,6 +1080,8 @@ public class Runfile implements Cloneable {
 	    inputNum = new int[header.numOfElements + 1];
 	    dataSource = new int[header.numOfElements + 1];
 	    minID = new int[header.numOfElements + 1];
+	    detectorRot1 = new float[header.numOfElements +1];
+	    detectorRot2 = new float[header.numOfElements +1];
 	    gladbank = new int[header.numOfElements + 1];
 	    gladdetinbank = new int[header.numOfElements + 1];
 	    int detNum = 0;
@@ -1097,6 +1105,8 @@ public class Runfile implements Cloneable {
 			    crateNum[tminID] = tcrate;
 			    slotNum[tminID] = tslot;
 			    inputNum[tminID] = tinput;
+			    detectorRot1[tminID] = 0.0f;
+			    detectorRot2[tminID] = 0.0f;
 			    segments[tminID] = new Segment();
 			    segments[tminID].detID = tminID; 
 			    segments[tminID].row = 1;
@@ -1120,6 +1130,8 @@ public class Runfile implements Cloneable {
 				psdOrder[tminID + ll] = 1;
 				numSegs1[tminID + ll] = 1;
 				numSegs2[tminID + ll] = 1;
+				detectorRot1[tminID + ll] = 0.0f;
+				detectorRot2[tminID + ll] = 0.0f;
 				segments[tminID + ll] = new Segment();
 				segments[tminID + ll].detID = tminID + ll; 
 				segments[tminID + ll].row = ll; 
