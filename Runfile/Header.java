@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.8  2001/07/18 18:41:46  hammonds
+ * Added a request for debug messages to be printed.  Added extra output in the main method.
+ *
  * Revision 5.7  2001/06/27 20:43:04  hammonds
  * Added code to allow for area detector data.
  *
@@ -251,6 +254,7 @@ public class Header implements Cloneable {
 
 
 public static void main(String[] args) throws IOException{
+    System.setProperty( "Runfile_Debug", "yes" );
 	System.out.println("Runfile Name is " + args[0]);
 	RandomAccessFile runfile = new RandomAccessFile(
 		args[0], "r");
@@ -531,6 +535,12 @@ public static void main(String[] args) throws IOException{
 	System.out.println("numSegs2:             " +  
 				header.numSegs2.location +
 				", " + header.numSegs2.size);
+	System.out.println("dataSource:             " +  
+				header.dataSource.location +
+				", " + header.dataSource.size);
+	System.out.println("minID:             " +  
+				header.minID.location +
+				", " + header.minID.size);
 
 	}
 
@@ -577,9 +587,11 @@ public static void main(String[] args) throws IOException{
 
 	runfile.seek(68);
 	int vers = runfile.readInt();
-	//	System.out.println( "Version: " + vers );
-	
-	System.out.println( "Version " + vers + " file" );
+	if ( (System.getProperty("Runfile_Debug", "no" ))
+	     .equalsIgnoreCase("yes") ) {
+	    System.out.println( "Version: " + vers );
+	    System.out.println( "Version " + vers + " file" );
+	}
 	if ( vers > 16777215 ) {       // Version < 4 was little endian
 	    LoadV4(runfile);
 	}
