@@ -23,6 +23,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.20  2002/10/28 22:58:50  hammonds
+ * Speed/memory improvements.  This is from change of code structure.
+ *
  * Revision 6.19  2002/09/16 14:43:17  hammonds
  * Changed detector position code for version 5 & up. This better reflects positions for lpsds and area detectors.
  * Added crate, slot, input info for old area detectors.
@@ -360,6 +363,7 @@ public class Runfile implements Cloneable {
     int c[] = new int[length];
     int nBytesRead = inFile.read(b, 0, length);
     int num = 0;
+    
     for (int i = 0; i < length; ++i) {
        if(b[i] < 0) {
         c[i] = b[i] + 256;
@@ -367,7 +371,8 @@ public class Runfile implements Cloneable {
       else {
         c[i] = b[i];
       }
-      num += c[i] * (int)Math.pow(256.0, (double)i);
+       /*      num += c[i] * (int)Math.pow(256.0, (double)i);*/
+       num += c[i] << (8*i);
     }
     return num;
   }
@@ -378,19 +383,29 @@ public class Runfile implements Cloneable {
 	throws IOException {
 	int[] data = new int[numWords+1];
 	byte[] bdata = new byte[numWords * wordSize];
+	int[] cdata = new int[wordSize];
 
 	int nbytes = inFile.read(bdata, 0, numWords * wordSize);
-	for (int i=0; i<numWords; i++){
-	    for (int j=0; j<wordSize; j++) {
-		int byteIndex = i * wordSize + j;
-		if ( bdata[byteIndex] < 0 ) {
-		    data[i+1] += (int)(bdata[byteIndex] + 256) * 
-			(int)Math.pow(256.0, j);
-		}
-		else {
-		    data[i+1] += (int)(bdata[byteIndex] * Math.pow(256.0, j));
-		}
+	int byteIndex;
+	int i, j;
+	int tInt;
+	for (i=0; i<numWords; i++){
+	    byteIndex = i*wordSize;
+	    cdata[0] = bdata[byteIndex + 0];
+	    cdata[1] = bdata[byteIndex + 1];
+	    if ( cdata[0] < 0 ) cdata[0]+=256;
+	    if ( cdata[1] < 0 ) cdata[1]+=256;
+	    data[i+1] += (cdata[0] );
+	    data[i+1] += (cdata[1] << 8);
+	    if ( wordSize == 4 ) {
+		cdata[2] = bdata[byteIndex + 2];
+		cdata[3] = bdata[byteIndex + 3];
+		if ( cdata[2] < 0 ) cdata[2]+=256;
+		if ( cdata[3] < 0 ) cdata[3]+=256;
+		data[i+1] += (cdata[2] << 16);
+		data[i+1] += (cdata[3] << 24);
 	    }
+
 	}
 	return data;
     }
@@ -403,12 +418,13 @@ public class Runfile implements Cloneable {
 	float[] fdata = new float[numWords+1];
 	data = ReadIntegerArray (inFile, 4, numWords);
 
+	long hi_mant, low_mant, exp, sign;
+	double f_val;
+	long val;
 	for (int iword = 1; iword < numWords + 1; iword++) {
-	    long hi_mant, low_mant, exp, sign;
-	    double f_val;
-	    long val = (long)data[iword];
+	    val = (long)data[iword];
 	    if (val < 0) {
-		val = val + (long)Math.pow(2.0, (double)32);
+		val = val + (long)4294967296L;
 	    }
 	    /* add 128 to put in the implied 1 */
 	    hi_mant  = (val & 127) + 128;
@@ -472,7 +488,7 @@ public class Runfile implements Cloneable {
 	int[] subgroups;
 	System.setProperty("Runfile_Debug", "yes" );
 	Runfile runFile = new Runfile(args[0]);
-
+	/*
 	System.out.println(runFile.UserName());
 	if (runFile.header.nDet > 0 ){
 	for (i=1; i <= runFile.header.nDet; i++){
@@ -521,6 +537,7 @@ public class Runfile implements Cloneable {
 	    String key = (String)propNames.nextElement();
 	    System.out.println( key + ":" + runFile.getProperty( key ) );
 	}
+	*/
     }
 
 
@@ -575,211 +592,406 @@ public class Runfile implements Cloneable {
 	int i;
 	int[] gladbank = new int[0];
 	int[] gladdetinbank = new int[0];
+	byte[] bArray = new byte[0];
+	ByteArrayInputStream bArrayIS;
+	DataInputStream dataStream;
 	/*
-	if ( header.nDet > 0 ) {
+	  if ( header.nDet > 0 ) {
 	*/
-	    detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
-					 + 1];
-	    for (i=1; i <= this.header.detectorMapTable.size/4; i++){
-		detectorMap[i] = new DetectorMap(runfile, i, header);
-	    }
-
-	    timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
-	    for (i=1; i <= this.header.timeFieldTable.size/16; i++){
-		timeField[i] = new TimeField(runfile, i, header);
-	    }
-
-	    runfile.seek(this.header.detectorAngle.location);
-	    detectorAngle = ReadVAXReal4Array(runfile, 
-					      header.detectorAngle.size/4);
-
-	    runfile.seek(this.header.flightPath.location);
-	    flightPath = ReadVAXReal4Array(runfile, header.flightPath.size/4);
-
-	    runfile.seek(this.header.detectorHeight.location);
-	    detectorHeight = ReadVAXReal4Array(runfile, 
-					       header.detectorHeight.size/4);
-
-	    runfile.seek(this.header.detectorType.location);
-	    detectorType = ReadShortArray(runfile, header.detectorType.size/2);
-
-	   	    
-	    detectorLength = new float[header.nDet + 1];
-	    detectorWidth = new float[header.nDet + 1];
-	    detectorDepth = new float[header.nDet + 1];
-	    detectorEfficiency = new float[header.nDet + 1];
-	    psdOrder = new int[header.nDet + 1];
-	    numSegs1 = new int[header.nDet + 1];
-	    numSegs2 = new int[header.nDet + 1];
-	    crateNum = new int[header.nDet + 1];
-	    slotNum = new int[header.nDet + 1];
-	    inputNum = new int[header.nDet + 1];
-	    dataSource = new int[header.nDet + 1];
-	    minID = new int[header.nDet + 1];
+	detectorMap = new DetectorMap[this.header.detectorMapTable.size/4
+				      + 1];
+	runfile.seek(  header.detectorMapTable.location );
+	bArray = new byte[header.detectorMapTable.size];
+	runfile.read(bArray);
+	bArrayIS = new ByteArrayInputStream(bArray);
+	dataStream = new DataInputStream(bArrayIS);
+	for (i=1; i <= this.header.detectorMapTable.size/4; i++){
+	    detectorMap[i] = new DetectorMap(dataStream, i, header);
+	}
+	dataStream.close();
+	bArrayIS.close();
+	bArray = new byte[0];
+	timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
+	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
+	    timeField[i] = new TimeField(runfile, i, header);
+	}
+	
+	runfile.seek(this.header.detectorAngle.location);
+	detectorAngle = ReadVAXReal4Array(runfile, 
+					  header.detectorAngle.size/4);
+	
+	runfile.seek(this.header.flightPath.location);
+	flightPath = ReadVAXReal4Array(runfile, header.flightPath.size/4);
+	
+	runfile.seek(this.header.detectorHeight.location);
+	detectorHeight = ReadVAXReal4Array(runfile, 
+					   header.detectorHeight.size/4);
+	
+	runfile.seek(this.header.detectorType.location);
+	detectorType = ReadShortArray(runfile, header.detectorType.size/2);
+	
+	
+	
+	detectorLength = new float[header.nDet + 1];
+	detectorWidth = new float[header.nDet + 1];
+	detectorDepth = new float[header.nDet + 1];
+	detectorEfficiency = new float[header.nDet + 1];
+	psdOrder = new int[header.nDet + 1];
+	numSegs1 = new int[header.nDet + 1];
+	numSegs2 = new int[header.nDet + 1];
+	crateNum = new int[header.nDet + 1];
+	slotNum = new int[header.nDet + 1];
+	inputNum = new int[header.nDet + 1];
+	dataSource = new int[header.nDet + 1];
+	minID = new int[header.nDet + 1];
+	
+	
+	if ( (this.header.iName).equalsIgnoreCase("scd0") ||
+	     (this.header.iName).equalsIgnoreCase("sad0") ||
+	     (this.header.iName).equalsIgnoreCase("sad1") ||
+	     (this.header.iName).equalsIgnoreCase("sand") || 
+	     (this.header.iName).equalsIgnoreCase("pne0") || 
+	     (this.header.iName).equalsIgnoreCase("posy") ) {
+	    float[] tDetectorAngle = new float[ detectorAngle.length + 1];
+	    float[] tFlightPath = new float[ flightPath.length + 1];
+	    float[] tDetectorHeight = new float[ detectorHeight.length+ 1];
+	    short[] tDetectorType = new short[ detectorType.length + 1];
 	    
-	        
-	    if ( (this.header.iName).equalsIgnoreCase("scd0") ||
-		 (this.header.iName).equalsIgnoreCase("sad0") ||
-		 (this.header.iName).equalsIgnoreCase("sad1") ||
-		 (this.header.iName).equalsIgnoreCase("sand") || 
-		 (this.header.iName).equalsIgnoreCase("pne0") || 
-		 (this.header.iName).equalsIgnoreCase("posy") ) {
-		float[] tDetectorAngle = new float[ detectorAngle.length + 1];
-		float[] tFlightPath = new float[ flightPath.length + 1];
-		float[] tDetectorHeight = new float[ detectorHeight.length+ 1];
-		short[] tDetectorType = new short[ detectorType.length + 1];
-		
-		DetectorMap[] tDetectorMap = new DetectorMap[detectorMap.length + 1];
-
-		System.arraycopy(detectorAngle, 0 , tDetectorAngle, 0, 
-				 detectorAngle.length );
-		System.arraycopy(flightPath, 0 , tFlightPath, 0, 
-				 flightPath.length );
-		System.arraycopy(detectorHeight, 0 , tDetectorHeight, 0, 
-				 detectorHeight.length );
-		System.arraycopy(detectorType, 0 , tDetectorType, 0,				 detectorType.length );
-		System.arraycopy(detectorMap, 0 , tDetectorMap, 0, 
-				 detectorMap.length );
-		detectorAngle = tDetectorAngle;
-		flightPath = tFlightPath;
-	 	detectorHeight = tDetectorHeight;
-		detectorType = tDetectorType;
-		detectorMap = tDetectorMap;
-		detectorAngle[detectorAngle.length - 1] = (float)header.dta;
-		flightPath[flightPath.length - 1] = (float)header.dtd/100.0f;
-		detectorHeight[detectorHeight.length - 1] = 
-		    (float)header.yDisplacement/100.0f;
-		detectorMap[detectorMap.length - 1] = 
-		    new DetectorMap(header.iName, header.versionNumber );
-		if ( (this.header.iName).equalsIgnoreCase("scd0") ){
-		    detectorType[ detectorType.length - 1 ] = 11;
+	    DetectorMap[] tDetectorMap = new DetectorMap[detectorMap.length + 1];
+	    
+	    System.arraycopy(detectorAngle, 0 , tDetectorAngle, 0, 
+			     detectorAngle.length );
+	    System.arraycopy(flightPath, 0 , tFlightPath, 0, 
+			     flightPath.length );
+	    System.arraycopy(detectorHeight, 0 , tDetectorHeight, 0, 
+			     detectorHeight.length );
+	    System.arraycopy(detectorType, 0 , tDetectorType, 0,				 detectorType.length );
+	    System.arraycopy(detectorMap, 0 , tDetectorMap, 0, 
+			     detectorMap.length );
+	    detectorAngle = tDetectorAngle;
+	    flightPath = tFlightPath;
+	    detectorHeight = tDetectorHeight;
+	    detectorType = tDetectorType;
+	    detectorMap = tDetectorMap;
+	    detectorAngle[detectorAngle.length - 1] = (float)header.dta;
+	    flightPath[flightPath.length - 1] = (float)header.dtd/100.0f;
+	    detectorHeight[detectorHeight.length - 1] = 
+		(float)header.yDisplacement/100.0f;
+	    detectorMap[detectorMap.length - 1] = 
+		new DetectorMap(header.iName, header.versionNumber );
+	    if ( (this.header.iName).equalsIgnoreCase("scd0") ){
+		detectorType[ detectorType.length - 1 ] = 11;
+	    }
+	    else if ( (this.header.iName).equalsIgnoreCase("sad0") ||
+		      (this.header.iName).equalsIgnoreCase("sad1")){
+		if ((header.numOfX == 64) && (header.numOfY == 64)) {
+		    detectorType[ detectorType.length - 1 ] = 12;
 		}
-		else if ( (this.header.iName).equalsIgnoreCase("sad0") ||
-			  (this.header.iName).equalsIgnoreCase("sad1")){
+		else if ((header.numOfX == 128) && (header.numOfY == 128)) {
+		    detectorType[ detectorType.length - 1 ] = 13;
+		}
+		else if ((header.numOfX == 1) && (header.numOfY == 1)) {
+		    detectorType[ detectorType.length - 1 ] = 13;
+		}
+		
+	    }
+	    else if ( (this.header.iName).equalsIgnoreCase("sand") ){
+		detectorType[ detectorType.length - 1 ] = 13;
+		
+	    }
+	    else if ( (this.header.iName).equalsIgnoreCase("pne0") ){
+		detectorType[ detectorType.length - 1 ] = 15;
+		
+	    }
+	    else if ( (this.header.iName).equalsIgnoreCase("posy") ){
+		detectorType[ detectorType.length - 1 ] = 16;
+		
+	    }
+	    
+	}
+	
+	lpsdIDMap = new LpsdDetIdMap( runfile, header );
+	segments = new Segment[header.numOfElements + 1];
+	for ( int ii = 1; ii <= header.nDet; ii++ ) {
+	    if ( detectorAngle[ii] == 0.0F &&
+		 flightPath[ii] == 0.0F &&
+		 detectorType[ii] == 0 ) {
+	    }
+	    else if ( header.iName.equalsIgnoreCase( "hrcs" ) || 
+		      header.iName.equalsIgnoreCase( "lrcs" ) ) {
+		if ( header.versionNumber < 4) {
+		    switch (detectorType[ii]){
+		    case 0: {
+			if ( ii < 3 )
+			    detectorType[ii] = 1;
+			break;
+		    }
+		    case 1: {
+			detectorType[ii] = 2;
+			break;
+		    }
+		    case 2: {
+			detectorType[ii] = 3;
+			break;
+		    }
+		    case 5: {
+			detectorType[ii] = 4;
+			break;
+		    }
+		    }
+		}
+	    }
+	    else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
+		switch (detectorType[ii]){
+		case 1: {
+		    detectorType[ii] = 9;
+		    break;
+		}
+		case 2: {
+		    detectorType[ii] = 6;
+		    break;
+		}
+		}
+	    }
+	    else if ( header.iName.equalsIgnoreCase( "sepd" ) ) {
+		switch (detectorType[ii]){
+		case 1: {
+		    detectorType[ii] = 6;
+		    break;
+		}
+		case 2: {
+		    detectorType[ii] = 9;
+		    break;
+		}
+		}
+	    }
+	    else if ( header.iName.equalsIgnoreCase( "qens" ) ) {
+		switch (detectorType[ii]){
+		case 0: {
+		    detectorType[ii] = 8;
+		    break;
+		}
+		case 1: {
+		    detectorType[ii] = 10;
+		    break;
+		}
+		}
+	    }
+	    else if ( header.iName.equalsIgnoreCase( "hipd" ) ) {
+		switch (detectorType[ii]){
+		case 0: {
+		    detectorType[ii] = 9;
+		    break;
+		}
+		case 1: {
+		    detectorType[ii] = 6;
+		    break;
+		}
+		}
+	    }
+	    else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
+		switch (detectorType[ii]){
+		case 0: {
+		    detectorType[ii] = 6;
+		    break;
+		}
+		case 1: {
+		    detectorType[ii] = 10;
+		    break;
+		}
+		}
+	    }
+	    if (header.iName.equalsIgnoreCase( "hrcs" ) ||
+		header.iName.equalsIgnoreCase( "lrcs" )||
+		header.iName.equalsIgnoreCase( "gppd" )||
+		header.iName.equalsIgnoreCase( "sepd" )||
+		header.iName.equalsIgnoreCase( "qens" )||
+		header.iName.equalsIgnoreCase( "hipd" )||
+		header.iName.equalsIgnoreCase( "chex" ) ){
+		psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+		numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+		detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
+		detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
+		detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
+		minID[ii] = ii;
+		segments[ii] = new Segment();
+		segments[ii].detID = ii; 
+		segments[ii].row = 1; 
+		segments[ii].column = 1; 
+		segments[ii].length = DC5.LENGTH[detectorType[ii]]; 
+		segments[ii].width = DC5.WIDTH[detectorType[ii]]; 
+		segments[ii].depth = DC5.DEPTH[detectorType[ii]]; 
+		segments[ii].efficiency = 
+		    DC5.EFFICIENCY[detectorType[ii]]; 
+		segments[ii].segID = ii;
+		if ( header.versionNumber < 4 ) {
+		    crateNum[ii] = (ii-1)/160 + 1;
+		    slotNum[ii] = (ii- (crateNum[ii] - 1) * 160 -1) / 8   
+			+ 1;
+		    inputNum[ii] = ii - (crateNum[ii] -1) * 160 - 
+			(slotNum[ii] -1) * 8;
+		}
+		else {
+		    crateNum[ii] = (ii-1)/176 + 1;
+		    slotNum[ii] = (ii- (crateNum[ii] - 1) * 176 -1) / 16   
+			+ 1;
+		    inputNum[ii] = ii - (crateNum[ii] -1) * 176 - 
+			(slotNum[ii] -1) * 16;
+		}
+	    }
+	    if ( header.iName.equalsIgnoreCase( "scd0") ) {
+		switch (detectorType[ii]){
+		case 0:
+		case 1:{
+		    detectorType[ii] = 1;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 1;
+		    inputNum[ii] = ii;
+		    break;
+		}
+		case 11: {
+		    detectorType[ii] = 11;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 19;
+		    inputNum[ii] = 1;
+		    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+		    break;
+		}
+		}
+	    }
+	    
+	    
+	    if ( header.iName.equalsIgnoreCase( "sad0") ||
+		 header.iName.equalsIgnoreCase( "sad1") ) {
+		switch (detectorType[ii]){
+		case 1: {
+		    detectorType[ii] = 9;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 1;
+		    inputNum[ii] = ii;
+		    break;
+		}
+		case 2: {
+		    detectorType[ii] = 9;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 1;
+		    inputNum[ii] = ii;
+		    break;
+		}
+		case 12: 
+		case 13: {
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 19;
+		    inputNum[ii] = 1;
 		    if ((header.numOfX == 64) && (header.numOfY == 64)) {
-			detectorType[ detectorType.length - 1 ] = 12;
+			detectorType[ii] = 12;
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 		    }
 		    else if ((header.numOfX == 128) && (header.numOfY == 128)) {
-			detectorType[ detectorType.length - 1 ] = 13;
+			detectorType[ii] = 13;
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 		    }
 		    else if ((header.numOfX == 1) && (header.numOfY == 1)) {
-			detectorType[ detectorType.length - 1 ] = 13;
+			detectorType[ii] = 12;
+			psdOrder[ii] = 1;
+			numSegs2[ii] = 1;
 		    }
-
+		    break;
 		}
-		else if ( (this.header.iName).equalsIgnoreCase("sand") ){
-		    detectorType[ detectorType.length - 1 ] = 13;
-
 		}
-		else if ( (this.header.iName).equalsIgnoreCase("pne0") ){
-		    detectorType[ detectorType.length - 1 ] = 15;
-
-		}
-		else if ( (this.header.iName).equalsIgnoreCase("posy") ){
-		    detectorType[ detectorType.length - 1 ] = 16;
-
-		}
-
 	    }
-
-	    lpsdIDMap = new LpsdDetIdMap( runfile, header );
-	    segments = new Segment[header.numOfElements + 1];
-	    for ( int ii = 1; ii <= header.nDet; ii++ ) {
-		if ( detectorAngle[ii] == 0.0F &&
-		     flightPath[ii] == 0.0F &&
-		     detectorType[ii] == 0 ) {
+	    if ( header.iName.equalsIgnoreCase( "sand") ){
+		switch (detectorType[ii]){
+		case 0: 
+		case 1: {
+		    detectorType[ii] = 9;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 1;
+		    inputNum[ii] = ii;
+		    break;
 		}
-		else if ( header.iName.equalsIgnoreCase( "hrcs" ) || 
-			  header.iName.equalsIgnoreCase( "lrcs" ) ) {
-		    if ( header.versionNumber < 4) {
-			switch (detectorType[ii]){
-			case 0: {
-			    if ( ii < 3 )
-				detectorType[ii] = 1;
-			    break;
-			}
-			case 1: {
-			    detectorType[ii] = 2;
-			    break;
-			}
-			case 2: {
-			    detectorType[ii] = 3;
-			    break;
-			}
-			case 5: {
-			    detectorType[ii] = 4;
-			    break;
-			}
-			}
+		case 13: {
+		    detectorType[ii] = 13;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 19;
+		    inputNum[ii] = 1;
+		    if ((header.numOfX == 64) && (header.numOfY == 64)) {
+			detectorType[ii] = 12;
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
 		    }
+		    else if ((header.numOfX == 128) && (header.numOfY == 128)) {
+			detectorType[ii] = 13;
+			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
+			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+		    }
+		    else if ((header.numOfX == 1) && (header.numOfY == 1)) {
+			detectorType[ii] = 13;
+			psdOrder[ii] = 2;
+			numSegs1[ii] = 1;
+			numSegs2[ii] = 1;
+		    }
+		    break;
 		}
-		else if ( header.iName.equalsIgnoreCase( "gppd" ) ) {
-		    switch (detectorType[ii]){
-		    case 1: {
- 			detectorType[ii] = 9;
-			break;
-		    }
-		    case 2: {
-			detectorType[ii] = 6;
-			break;
-		    }
-		    }
 		}
-		else if ( header.iName.equalsIgnoreCase( "sepd" ) ) {
-		    switch (detectorType[ii]){
-		    case 1: {
-			detectorType[ii] = 6;
-			break;
-		    }
-		    case 2: {
-			detectorType[ii] = 9;
-			break;
-		    }
-		    }
+	    }
+	    if ( header.iName.equalsIgnoreCase( "pne0") ){
+		switch (detectorType[ii]){
+		case 0: 
+		case 1: {
+		    detectorType[ii] = 1;
+		    break;
 		}
-		else if ( header.iName.equalsIgnoreCase( "qens" ) ) {
-		    switch (detectorType[ii]){
-		    case 0: {
-			detectorType[ii] = 8;
-			break;
-		    }
-		    case 1: {
-			detectorType[ii] = 10;
-			break;
-		    }
-		    }
+		case 15: {
+		    detectorType[ii] = 15;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 19;
+		    inputNum[ii] = 1;
+		    psdOrder[ii] = 2;
+		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = 2;
+		    break;
 		}
-		else if ( header.iName.equalsIgnoreCase( "hipd" ) ) {
-		    switch (detectorType[ii]){
-		    case 0: {
-			detectorType[ii] = 9;
-			break;
-		    }
-		    case 1: {
-			detectorType[ii] = 6;
-			break;
-		    }
-		    }
 		}
-		else if ( header.iName.equalsIgnoreCase( "chex" ) ) {
-		    switch (detectorType[ii]){
-		    case 0: {
-			detectorType[ii] = 6;
-			break;
-		    }
-		    case 1: {
-			detectorType[ii] = 10;
-			break;
-		    }
-		    }
+	    }
+	    if ( header.iName.equalsIgnoreCase( "posy") ){
+		switch (detectorType[ii]){
+		case 0: 
+		case 1: {
+		    detectorType[ii] = 1;
+		    break;
 		}
-		if (header.iName.equalsIgnoreCase( "hrcs" ) ||
-		    header.iName.equalsIgnoreCase( "lrcs" )||
-		    header.iName.equalsIgnoreCase( "gppd" )||
-		    header.iName.equalsIgnoreCase( "sepd" )||
-		    header.iName.equalsIgnoreCase( "qens" )||
-		    header.iName.equalsIgnoreCase( "hipd" )||
-		    header.iName.equalsIgnoreCase( "chex" ) ){
+		case 16: {
+		    detectorType[ii] = 16;
+		    crateNum[ii] = 1;
+		    slotNum[ii] = 19;
+		    inputNum[ii] = 1;
+		    psdOrder[ii] = 2;
+		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
+		    break;
+		}
+		}
+	    }
+	    if (header.iName.equalsIgnoreCase( "scd0" ) ||
+		header.iName.equalsIgnoreCase( "sad0" )||
+		header.iName.equalsIgnoreCase( "sad1" )||
+		header.iName.equalsIgnoreCase( "posy" )||
+		header.iName.equalsIgnoreCase( "pne0" )||
+		header.iName.equalsIgnoreCase( "sand" ) ){
+		switch (detectorType[ii]) {
+		case 0:
+		case 1:
+		case 9: {
 		    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
 		    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
 		    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
@@ -797,413 +1009,253 @@ public class Runfile implements Cloneable {
 		    segments[ii].efficiency = 
 			DC5.EFFICIENCY[detectorType[ii]]; 
 		    segments[ii].segID = ii;
-		    if ( header.versionNumber < 4 ) {
- 			crateNum[ii] = (ii-1)/160 + 1;
-			slotNum[ii] = (ii- (crateNum[ii] - 1) * 160 -1) / 8   
-			    + 1;
-			inputNum[ii] = ii - (crateNum[ii] -1) * 160 - 
-			    (slotNum[ii] -1) * 8;
-		    }
-		    else {
- 			crateNum[ii] = (ii-1)/176 + 1;
-			slotNum[ii] = (ii- (crateNum[ii] - 1) * 176 -1) / 16   
-			    + 1;
-			inputNum[ii] = ii - (crateNum[ii] -1) * 176 - 
-			    (slotNum[ii] -1) * 16;
-		    }
+		    break;
 		}
-		if ( header.iName.equalsIgnoreCase( "scd0") ) {
-		    switch (detectorType[ii]){
-		    case 0:
-		    case 1:{
-			detectorType[ii] = 1;
-			crateNum[ii] = 1;
-			slotNum[ii] = 1;
-			inputNum[ii] = ii;
-			break;
-		    }
-		    case 11: {
-			detectorType[ii] = 11;
-			crateNum[ii] = 1;
-			slotNum[ii] = 19;
-			inputNum[ii] = 1;
-			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			break;
+		case 11:
+		case 12:
+		case 13:
+		case 15:
+		case 16: {
+		    //			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
+		    detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
+		    detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
+		    detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
+		    minID[ii] = ii;
+		    int index;
+		    for ( int segY = 0; segY < header.numOfY; segY++) {
+			for ( int segX = 0; segX < header.numOfX; segX++) {
+			    index = ii + segX + segY *( header.numOfX);
+			    segments[index] = new Segment();
+			    segments[index].detID = ii; 
+			    segments[index].row = segY + 1; 
+			    segments[index].column = segX + 1; 
+			    segments[index].length = 
+				DC5.LENGTH[detectorType[ii]]/header.numOfY; 
+			    segments[index].width = 
+				DC5.WIDTH[detectorType[ii]]/header.numOfX; 
+			    segments[index].depth = 
+				DC5.DEPTH[detectorType[ii]]; 
+			    segments[index].efficiency = 
+				DC5.EFFICIENCY[detectorType[ii]]; 
+			    segments[index].segID = index;
 			}
 		    }
+		    break;
 		}
-		    
-		
-		if ( header.iName.equalsIgnoreCase( "sad0") ||
-		     header.iName.equalsIgnoreCase( "sad1") ) {
-		    switch (detectorType[ii]){
-		    case 1: {
-			detectorType[ii] = 9;
-			crateNum[ii] = 1;
-			slotNum[ii] = 1;
-			inputNum[ii] = ii;
-			break;
-		    }
-		    case 2: {
-			detectorType[ii] = 9;
-			crateNum[ii] = 1;
-			slotNum[ii] = 1;
-			inputNum[ii] = ii;
-			break;
-		    }
-		    case 12: 
-		    case 13: {
-			crateNum[ii] = 1;
-			slotNum[ii] = 19;
-			inputNum[ii] = 1;
-			if ((header.numOfX == 64) && (header.numOfY == 64)) {
-			    detectorType[ii] = 12;
-			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			}
-			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
-			    detectorType[ii] = 13;
-			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			}
-			else if ((header.numOfX == 1) && (header.numOfY == 1)) {
-			    detectorType[ii] = 12;
-			    psdOrder[ii] = 1;
-			    numSegs2[ii] = 1;
-			}
-			break;
-		    }
-		    }
-		}
-		if ( header.iName.equalsIgnoreCase( "sand") ){
-		    switch (detectorType[ii]){
-		    case 0: 
-		    case 1: {
-			detectorType[ii] = 9;
-			crateNum[ii] = 1;
-			slotNum[ii] = 1;
-			inputNum[ii] = ii;
-			break;
-		    }
-		    case 13: {
-			detectorType[ii] = 13;
-			crateNum[ii] = 1;
-			slotNum[ii] = 19;
-			inputNum[ii] = 1;
-			if ((header.numOfX == 64) && (header.numOfY == 64)) {
-			    detectorType[ii] = 12;
-			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			}
-			else if ((header.numOfX == 128) && (header.numOfY == 128)) {
-			    detectorType[ii] = 13;
-			    psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			    numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			    numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			}
-			else if ((header.numOfX == 1) && (header.numOfY == 1)) {
-			    detectorType[ii] = 13;
-			    psdOrder[ii] = 2;
-			    numSegs1[ii] = 1;
-			    numSegs2[ii] = 1;
-			}
-			break;
-		    }
-		    }
-		}
-		if ( header.iName.equalsIgnoreCase( "pne0") ){
-		    switch (detectorType[ii]){
-		    case 0: 
-		    case 1: {
-			detectorType[ii] = 1;
-			break;
-		    }
-		    case 15: {
-			detectorType[ii] = 15;
-			crateNum[ii] = 1;
-			slotNum[ii] = 19;
-			inputNum[ii] = 1;
-			psdOrder[ii] = 2;
-			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = 2;
-			break;
-		    }
-		    }
-		}
-		if ( header.iName.equalsIgnoreCase( "posy") ){
-		    switch (detectorType[ii]){
-		    case 0: 
-		    case 1: {
-			detectorType[ii] = 1;
-			break;
-		    }
-		    case 16: {
-			detectorType[ii] = 16;
-			crateNum[ii] = 1;
-			slotNum[ii] = 19;
-			inputNum[ii] = 1;
-			psdOrder[ii] = 2;
-			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			break;
-		    }
-		    }
-		}
-		if (header.iName.equalsIgnoreCase( "scd0" ) ||
-		    header.iName.equalsIgnoreCase( "sad0" )||
-		    header.iName.equalsIgnoreCase( "sad1" )||
-		    header.iName.equalsIgnoreCase( "posy" )||
-		    header.iName.equalsIgnoreCase( "pne0" )||
-		    header.iName.equalsIgnoreCase( "sand" ) ){
-		    switch (detectorType[ii]) {
-		    case 0:
-		    case 1:
-		    case 9: {
-			psdOrder[ii] = DC5.PSD_DIMENSION[detectorType[ii]];
-			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			numSegs2[ii] = DC5.NUM_OF_SEGS_2[detectorType[ii]];
-			detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
-			minID[ii] = ii;
-			segments[ii] = new Segment();
-			segments[ii].detID = ii; 
-			segments[ii].row = 1; 
-			segments[ii].column = 1; 
-			segments[ii].length = DC5.LENGTH[detectorType[ii]]; 
-			segments[ii].width = DC5.WIDTH[detectorType[ii]]; 
-			segments[ii].depth = DC5.DEPTH[detectorType[ii]]; 
-			segments[ii].efficiency = 
-			    DC5.EFFICIENCY[detectorType[ii]]; 
-			segments[ii].segID = ii;
-			break;
-		    }
-		    case 11:
-		    case 12:
-		    case 13:
-		    case 15:
-		    case 16: {
-			//			numSegs1[ii] = DC5.NUM_OF_SEGS_1[detectorType[ii]];
-			detectorLength[ii] = DC5.LENGTH[detectorType[ii]];
-			detectorWidth[ii] = DC5.WIDTH[detectorType[ii]];
-			detectorDepth[ii] = DC5.DEPTH[detectorType[ii]];
-			minID[ii] = ii;
-			for ( int segY = 0; segY < header.numOfY; segY++) {
-			    for ( int segX = 0; segX < header.numOfX; segX++) {
-				int index = ii + segX + segY *( header.numOfX);
-				segments[index] = new Segment();
-				segments[index].detID = ii; 
-				segments[index].row = segY + 1; 
-				segments[index].column = segX + 1; 
-				segments[index].length = 
-				    DC5.LENGTH[detectorType[ii]]/header.numOfY; 
-				segments[index].width = 
-				    DC5.WIDTH[detectorType[ii]]/header.numOfX; 
-				segments[index].depth = 
-				    DC5.DEPTH[detectorType[ii]]; 
-				segments[index].efficiency = 
-				    DC5.EFFICIENCY[detectorType[ii]]; 
-				segments[index].segID = index;
-			    }
-			}
-			break;
-		    }
 		}		
 
 	    }
-	    }
-	    if ( header.iName.equalsIgnoreCase( "glad" ) || 
-		 header.iName.equalsIgnoreCase( "lpsd" ) ) {
-		psdOrder = new int[header.numOfElements + 1];
-		numSegs1 = new int[header.numOfElements + 1];
-		numSegs2 = new int[header.numOfElements + 1];
-		crateNum = new int[header.numOfElements + 1];
-		slotNum = new int[header.numOfElements + 1];
-		inputNum = new int[header.numOfElements + 1];
-		dataSource = new int[header.numOfElements + 1];
-		minID = new int[header.numOfElements + 1];
-		gladbank = new int[header.numOfElements + 1];
-		gladdetinbank = new int[header.numOfElements + 1];
-		int detNum = 0;
-		for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
-		    int[] dets= lpsdIDMap.DetsInBank(jj);
-		    for ( int kk = 0; kk < dets.length;
-			  kk++ ) {
-			detNum++;
-			int tminID = lpsdIDMap.MinIdForDet(jj,dets[kk]);
-			int tcrate = lpsdIDMap.CrateForDet(jj,dets[kk]);
-			int tslot = lpsdIDMap.SlotForDet(jj,dets[kk]);	
-			int tinput = lpsdIDMap.InputForDet(jj,dets[kk]);
-			if ( tminID != 0 && tcrate != 0 && tslot != 0 &&
-			     tinput != 0 ) {
-			    if ( jj == 0 ) {
-				psdOrder[tminID] = 1;
-				numSegs1[tminID] = 1;
-				numSegs2[tminID] = 1;
-				crateNum[tminID] = tcrate;
-				slotNum[tminID] = tslot;
-				inputNum[tminID] = tinput;
-				segments[tminID] = new Segment();
-				segments[tminID].detID = tminID; 
-				segments[tminID].row = 1;
- 				segments[tminID].column = 1; 
-				segments[tminID].length = LENGTH[1]; 
-				segments[tminID].width = WIDTH[1]; 
-				segments[tminID].depth = DEPTH[1]; 
-				segments[tminID].efficiency = EFFICIENCY[1]; 
-				segments[tminID].segID = tminID;
-				gladbank[tminID] = 0;
-				gladdetinbank[tminID] = kk;
+	}
+	if ( header.iName.equalsIgnoreCase( "glad" ) || 
+	     header.iName.equalsIgnoreCase( "lpsd" ) ) {
+	    psdOrder = new int[header.numOfElements + 1];
+	    numSegs1 = new int[header.numOfElements + 1];
+	    numSegs2 = new int[header.numOfElements + 1];
+	    crateNum = new int[header.numOfElements + 1];
+	    slotNum = new int[header.numOfElements + 1];
+	    inputNum = new int[header.numOfElements + 1];
+	    dataSource = new int[header.numOfElements + 1];
+	    minID = new int[header.numOfElements + 1];
+	    gladbank = new int[header.numOfElements + 1];
+	    gladdetinbank = new int[header.numOfElements + 1];
+	    int detNum = 0;
+	    int[] dets =new int[0];
+	    for ( int jj = 0; jj < lpsdIDMap.NumOfBanks(); jj++ ) {
+		dets= lpsdIDMap.DetsInBank(jj);
+		int tminID, tcrate, tslot, tinput;
+		for ( int kk = 0; kk < dets.length;
+		      kk++ ) {
+		    detNum++;
+		    tminID = lpsdIDMap.MinIdForDet(jj,dets[kk]);
+		    tcrate = lpsdIDMap.CrateForDet(jj,dets[kk]);
+		    tslot = lpsdIDMap.SlotForDet(jj,dets[kk]);	
+		    tinput = lpsdIDMap.InputForDet(jj,dets[kk]);
+		    if ( tminID != 0 && tcrate != 0 && tslot != 0 &&
+			 tinput != 0 ) {
+			if ( jj == 0 ) {
+			    psdOrder[tminID] = 1;
+			    numSegs1[tminID] = 1;
+			    numSegs2[tminID] = 1;
+			    crateNum[tminID] = tcrate;
+			    slotNum[tminID] = tslot;
+			    inputNum[tminID] = tinput;
+			    segments[tminID] = new Segment();
+			    segments[tminID].detID = tminID; 
+			    segments[tminID].row = 1;
+			    segments[tminID].column = 1; 
+			    segments[tminID].length = LENGTH[1]; 
+			    segments[tminID].width = WIDTH[1]; 
+			    segments[tminID].depth = DEPTH[1]; 
+			    segments[tminID].efficiency = EFFICIENCY[1]; 
+			    segments[tminID].segID = tminID;
+			    gladbank[tminID] = 0;
+			    gladdetinbank[tminID] = kk;
+			}
+			else {
+			    for ( int ll = 0; ll < 64; ll++ ) {
+				psdOrder[tminID + ll] = 1;
+				numSegs1[tminID + ll] = 1;
+				numSegs2[tminID + ll] = 1;
+				crateNum[tminID + ll] = tcrate;
+				slotNum[tminID + ll] = tslot;
+				inputNum[tminID + ll] = tinput;
+				psdOrder[tminID + ll] = 1;
+				numSegs1[tminID + ll] = 1;
+				numSegs2[tminID + ll] = 1;
+				segments[tminID + ll] = new Segment();
+				segments[tminID + ll].detID = tminID + ll; 
+				segments[tminID + ll].row = ll; 
+				segments[tminID + ll].column = 1; 
+				segments[tminID + ll].length = 
+				    LENGTH[7]/ 64; 
+				segments[tminID + ll].width = 
+				    WIDTH[7]; 
+				segments[tminID + ll].depth = 
+				    DEPTH[7]; 
+				segments[tminID + ll].efficiency = 
+				    EFFICIENCY[7]; 
+				segments[tminID + ll].segID = tminID + ll;
+				gladbank[tminID + ll] = jj;
+				gladdetinbank[tminID + ll] = kk;
 			    }
-			    else {
-				for ( int ll = 0; ll < 64; ll++ ) {
-				    psdOrder[tminID + ll] = 1;
-				    numSegs1[tminID + ll] = 1;
-				    numSegs2[tminID + ll] = 1;
-				    crateNum[tminID + ll] = tcrate;
-				    slotNum[tminID + ll] = tslot;
-				    inputNum[tminID + ll] = tinput;
-				    psdOrder[tminID + ll] = 1;
-				    numSegs1[tminID + ll] = 1;
-				    numSegs2[tminID + ll] = 1;
-				    segments[tminID + ll] = new Segment();
-				    segments[tminID + ll].detID = tminID + ll; 
-				    segments[tminID + ll].row = ll; 
-				    segments[tminID + ll].column = 1; 
-				    segments[tminID + ll].length = 
-					LENGTH[7]/ 64; 
-				    segments[tminID + ll].width = 
-					WIDTH[7]; 
-				    segments[tminID + ll].depth = 
-					DEPTH[7]; 
-				    segments[tminID + ll].efficiency = 
-					EFFICIENCY[7]; 
-				    segments[tminID + ll].segID = tminID + ll;
-				    gladbank[tminID + ll] = jj;
-				    gladdetinbank[tminID + ll] = kk;
-				}
-				    }
 			}
 		    }
 		}
 	    }
-	    if (header.versionNumber > 3) {
-		runfile.seek(this.header.discSettings.location);
-		int size = header.nDet*2;
-		short[] tdisc = ReadShortArray(runfile, size );
-		discriminator = new DiscLevel[this.header.nDet + 1];
-		for (i = 1; i <= this.header.nDet; i++) {
-		    discriminator[i] = new DiscLevel();
-		    discriminator[i].lowerLevel = tdisc[(i-1)*2 + 1];
-		    discriminator[i].upperLevel = tdisc[(i-1)*2 + 2];
+	}
+	if (header.versionNumber > 3) {
+	    runfile.seek(this.header.discSettings.location);
+	    int size = header.nDet*2;
+	    short[] tdisc = ReadShortArray(runfile, size );
+	    discriminator = new DiscLevel[this.header.nDet + 1];
+	    for (i = 1; i <= this.header.nDet; i++) {
+		discriminator[i] = new DiscLevel();
+		discriminator[i].lowerLevel = tdisc[(i-1)*2 + 1];
+		discriminator[i].upperLevel = tdisc[(i-1)*2 + 2];
+	    }
+	}
+
+	this.leaveOpen = false;
+	subgroupIDList = 
+	    new int[ header.numOfElements * header.numOfHistograms + 1 ];
+	subgroupMap = new int[1][1];
+	segmentMap = new Segment[1][1];
+	for (i=0; i < subgroupIDList.length; i++ )
+	    subgroupIDList[i] = -1;
+	int group = 0;
+	maxSubgroupID = new int[ header.numOfHistograms + 1 ];
+	minSubgroupID = new int[ header.numOfHistograms + 1 ];
+	for (int nHist = 1; nHist <= header.numOfHistograms; nHist++) {
+	    minSubgroupID[nHist] = group + 1;
+	    if((!(this.header.iName).equalsIgnoreCase("scd0")&&
+		!(this.header.iName).equalsIgnoreCase("sad0")&&
+		!(this.header.iName).equalsIgnoreCase("sad1")&&
+		!(this.header.iName).equalsIgnoreCase("posy")&&
+		!(this.header.iName).equalsIgnoreCase("pne0")&&
+		!(this.header.iName).equalsIgnoreCase("sand")) ){
+		int index, tfType;
+		int index2, tfType2;
+		int[][] tempMap = new int[0][0];
+		int[] idList =new int[0];
+		int[] tempList = new int[0];
+		Segment[] tsegList = new Segment[0];
+		Segment[] segList = new Segment[0];
+		Segment[][] tsegMap = new Segment[0][0];
+		for (int nDet = 1; nDet <= header.numOfElements; nDet++ ) {
+		    index = ( (nHist -1) * header.numOfElements ) + nDet;
+		    tfType = detectorMap[index].tfType;
+		    if ((subgroupIDList[index] == -1) && (tfType != 0)) {
+			group++;
+			subgroupIDList[index] = group;
+			tempMap = new int[group + 1][];
+			System.arraycopy(subgroupMap, 0, tempMap, 0, 
+					 subgroupMap.length);
+			idList = new int[2];
+			idList[1] = nDet;
+			tsegMap = new Segment[group + 1][];
+			System.arraycopy(segmentMap, 0 , tsegMap, 0,
+					 segmentMap.length );
+			segList = new Segment[1];
+			segList[0] = segments[nDet];
+			for (int k = nDet+1; k <= header.numOfElements
+				 ; k++) {
+				
+			    index2 = 
+				( (nHist -1) * header.numOfElements ) + k;
+
+			    tfType2 = detectorMap[index2].tfType;
+			    if ( ( detectorMap[index2].address == 
+				   detectorMap[index].address) &&
+				 (tfType2 != 0) ){
+				subgroupIDList[index2] = group;
+				tempList = new int[ idList.length + 1];
+				System.arraycopy(idList, 0, tempList, 0, 
+						 idList.length);
+				idList = tempList;
+				idList[idList.length - 1] = k;
+				tsegList = 
+				    new Segment[segList.length + 1];
+				System.arraycopy( segList, 0, tsegList,
+						  0, segList.length);
+				segList = tsegList;
+				segList[segList.length - 1] = 
+				    segments[k];
+				    
+			    }
+			}
+			subgroupMap = tempMap;
+			subgroupMap[group] = new int[idList.length - 1];
+			System.arraycopy(idList, 1, subgroupMap[group], 0, 
+					 idList.length-1);
+			segmentMap = tsegMap;
+			segmentMap[group] = segList;
+		    }
 		}
 	    }
-
-	    this.leaveOpen = false;
-	    subgroupIDList = 
-		new int[ header.numOfElements * header.numOfHistograms + 1 ];
-	    subgroupMap = new int[1][1];
-	    segmentMap = new Segment[1][1];
-	    for (i=0; i < subgroupIDList.length; i++ )
-		subgroupIDList[i] = -1;
-	    int group = 0;
-	    maxSubgroupID = new int[ header.numOfHistograms + 1 ];
-	    minSubgroupID = new int[ header.numOfHistograms + 1 ];
-	    for (int nHist = 1; nHist <= header.numOfHistograms; nHist++) {
-		minSubgroupID[nHist] = group + 1;
-		if((!(this.header.iName).equalsIgnoreCase("scd0")&&
-		    !(this.header.iName).equalsIgnoreCase("sad0")&&
-		    !(this.header.iName).equalsIgnoreCase("sad1")&&
-		    !(this.header.iName).equalsIgnoreCase("posy")&&
-		    !(this.header.iName).equalsIgnoreCase("pne0")&&
-		    !(this.header.iName).equalsIgnoreCase("sand")) ){
-		    for (int nDet = 1; nDet <= header.numOfElements; nDet++ ) {
-			int index = ( (nHist -1) * header.numOfElements ) + nDet;
-			int tfType = detectorMap[index].tfType;
+	    else {
+		int index, tfType,aindex;
+		int index2, tfType2;
+		int[][] tempMap = new int[0][0];
+		Segment[][] tsegMap = new Segment[0][0];
+		int[] idList = new int[0];
+		Segment[] segList = new Segment[0];
+		int[] tempList = new int[0];
+		Segment[] tsegList = new Segment[0];
+		for (int nDet = 1; nDet <= header.nDet; nDet++ ) {
+		    if (nDet < header.nDet ) {
+			index = ( (nHist -1) * header.numOfElements ) + nDet;
+			tfType = detectorMap[index].tfType;
 			if ((subgroupIDList[index] == -1) && (tfType != 0)) {
 			    group++;
 			    subgroupIDList[index] = group;
-			    int[][] tempMap = new int[group + 1][];
+
+			    tempMap = new int[group + 1][];
 			    System.arraycopy(subgroupMap, 0, tempMap, 0, 
 					     subgroupMap.length);
-			    int[] idList = {0, nDet};
-			    Segment[][] tsegMap = new Segment[group + 1][];
+
+			    idList = new int[2];
+			    idList[1] = nDet;
+			    tsegMap = new Segment[group + 1][];
 			    System.arraycopy(segmentMap, 0 , tsegMap, 0,
 					     segmentMap.length );
-			    Segment[] segList = {segments[nDet]};
-			    for (int k = nDet+1; k <= header.numOfElements
-				     ; k++) {
-				
-				int index2 = 
-				    ( (nHist -1) * header.numOfElements ) + k;
-
- 				int tfType2 = detectorMap[index2].tfType;
-				if ( ( detectorMap[index2].address == 
-				       detectorMap[index].address) &&
-				     (tfType2 != 0) ){
-				    subgroupIDList[index2] = group;
-				    int[] tempList = new int[ idList.length + 1];
-				    System.arraycopy(idList, 0, tempList, 0, 
-						     idList.length);
-				    idList = tempList;
-				    idList[idList.length - 1] = k;
-				    Segment[] tsegList = 
-					new Segment[segList.length + 1];
-				    System.arraycopy( segList, 0, tsegList,
-						      0, segList.length);
-				    segList = tsegList;
-				    segList[segList.length - 1] = 
-					segments[k];
-				    
-				}
-			    }
-			    subgroupMap = tempMap;
-			    subgroupMap[group] = new int[idList.length - 1];
-			    System.arraycopy(idList, 1, subgroupMap[group], 0, 
-					     idList.length-1);
-			    segmentMap = tsegMap;
-			    segmentMap[group] = segList;
-			}
-		    }
-		}
-		else {
-		    for (int nDet = 1; nDet <= header.nDet; nDet++ ) {
-			if (nDet < header.nDet ) {
-			    int index = ( (nHist -1) * header.numOfElements ) + nDet;
-			    int tfType = detectorMap[index].tfType;
-			    if ((subgroupIDList[index] == -1) && (tfType != 0)) {
-				group++;
-				subgroupIDList[index] = group;
-
-				int[][] tempMap = new int[group + 1][];
-				System.arraycopy(subgroupMap, 0, tempMap, 0, 
-						 subgroupMap.length);
-				int[] idList = {0,nDet};
-				Segment[][] tsegMap = new Segment[group + 1][];
-				System.arraycopy(segmentMap, 0 , tsegMap, 0,
-						 segmentMap.length );
-				Segment[] segList = {segments[nDet]};
-				for (int k = nDet+1; k <= header.nDet; k++) {
-				    if ( k < header.nDet ) {
-				    int index2 = 
+			    segList = new Segment[1];
+			    segList[0] = segments[nDet];
+			    for (int k = nDet+1; k <= header.nDet; k++) {
+				if ( k < header.nDet ) {
+				    index2 = 
 					((nHist -1)*header.numOfElements ) + k;
-				    int tfType2 = detectorMap[index2].tfType;
+				    tfType2 = detectorMap[index2].tfType;
 				    if ( ( detectorMap[index2].address == 
 					   detectorMap[index].address) &&
 					 (tfType2 != 0) ){
 					subgroupIDList[index2] = group;
-					int[] tempList=
-					    new int[idList.length+1];
+					tempList= new int[idList.length+1];
 					System.arraycopy(idList, 0, tempList, 
+
 							 0, idList.length);
 					idList = tempList;
 					idList[idList.length - 1] = k;
-					Segment[] tsegList = 
+					tsegList = 
 					    new Segment[segList.length + 1];
 					System.arraycopy( segList, 0, tsegList,
 							  0, segList.length);
@@ -1212,58 +1264,58 @@ public class Runfile implements Cloneable {
 					    segments[k];
 				    
 				    }
-				    }
 				}
-				subgroupMap = tempMap;
-				subgroupMap[group] = 
-				    new int[idList.length - 1];
-				System.arraycopy(idList, 1, subgroupMap[group],
-						 0, idList.length-1);
-				segmentMap = tsegMap;
-				segmentMap[group] = segList;
+			    }
+			    subgroupMap = tempMap;
+			    subgroupMap[group] = 
+				new int[idList.length - 1];
+			    System.arraycopy(idList, 1, subgroupMap[group],
+					     0, idList.length-1);
+			    segmentMap = tsegMap;
+			    segmentMap[group] = segList;
+			}
+		    }
+		    else { 
+			/*				System .out.println("Adding groups for Area "+
+							"elements " + group + 
+							" already." );*/
+			int segX = numSegs1[nDet];
+			int segY = numSegs2[nDet];
+			tempMap = new int[group + (segX*segY) + 1][];
+			tsegMap = 
+			    new Segment[group + (segX*segY) + 1][1];
+			System.arraycopy( subgroupMap, 0,
+					  tempMap, 0,
+					  subgroupMap.length );
+			System.arraycopy( segmentMap, 0,
+					  tsegMap, 0,
+					  segmentMap.length );
+			subgroupMap = tempMap;
+			segmentMap = tsegMap;
+			//	int[] idList = new int[0];
+			for ( int ny = 0; ny < segY; ny++ ) {
+			    for ( int nx=0; nx < segX; nx++ ) {
+				aindex = nx + ny*(segX);
+				//int[] idList = { nDet,nx, ny};
+				subgroupMap[group + aindex +1] = 
+				    new int[1]; 
+				subgroupMap[group+aindex+1][0] = nDet;
+				segmentMap[group+aindex+1][0] = 
+				    segments[header.nDet + aindex];
 			    }
 			}
-			     else { 
-				 /*				System .out.println("Adding groups for Area "+
-						    "elements " + group + 
-						    " already." );*/
-				int segX = numSegs1[nDet];
-				int segY = numSegs2[nDet];
-				int [][] tempMap = new int[group +
-							   (segX*segY) + 1][];
-				Segment[][] tsegmentMap = 
-				    new Segment[group + (segX*segY) + 1][1];
-				System.arraycopy( subgroupMap, 0,
-						  tempMap, 0,
-						  subgroupMap.length );
-				System.arraycopy( segmentMap, 0,
-						  tsegmentMap, 0,
-						  segmentMap.length );
-				subgroupMap = tempMap;
-				segmentMap = tsegmentMap;
-				 for ( int ny = 0; ny < segY; ny++ ) {
-				    for ( int nx=0; nx < segX; nx++ ) {
-				 	 int aindex = nx + ny*(segX);
-					 int[] idList = { nDet,nx, ny};
-					 subgroupMap[group + aindex +1] = 
-					      new int[1]; 
-					 subgroupMap[group+aindex+1][0] = nDet;
-					 segmentMap[group+aindex+1][0] = 
-					     segments[header.nDet + aindex];
-					 }
-				    }
-				group = group + segX * segY;
-			     }
+			group = group + segX * segY;
 		    }
 		}
- 		maxSubgroupID[nHist] = group;
 	    }
+	    maxSubgroupID[nHist] = group;
+	}
 
 	runfile.seek(this.header.timeScaleTable.location);
 	short[] timeScaleTemp = new short[this.header.timeScaleTable.size/2 + 1];
 	timeScale = new float[this.header.timeScaleTable.size/2 + 1];
 	timeScaleTemp = ReadShortArray(runfile,
-					 header.timeScaleTable.size/2);
+				       header.timeScaleTable.size/2);
 	for (i = 1; i <= this.header.timeScaleTable.size/2; i++) {
 	    timeScale[i] = (float)(1 + timeScaleTemp[i]/ Math.pow( 2, 15));
 	}
@@ -1272,17 +1324,19 @@ public class Runfile implements Cloneable {
 	if ( (this.header.iName).equalsIgnoreCase("glad")) {
 	    double cvdr = Math.PI/ 180.0;
 	    double cvrd = 180.0/Math.PI;
+	    float fp, zdet,ang1;
+	    double xdet, ydetz, ydet, dist;
 	    for ( int ii = 0; ii <= header.numOfElements; ii++ ){
 		if ( flightPath[ii] !=0.00f &&
 		     detectorAngle[ii] != 0.00f && 
 		     detectorHeight[ii] !=0.00f ) {
-		    float fp = flightPath[ii];
-		    float zdet = detectorHeight[ii];
-		    float ang1 = detectorAngle[ii];
-		    double xdet= 0.0;
-		    double ydetz= 0.0;
-		    double ydet = 0.0;
-		    double dist = 0.0;
+		    fp = flightPath[ii];
+		    zdet = detectorHeight[ii];
+		    ang1 = detectorAngle[ii];
+		    xdet= 0.0;
+		    ydetz= 0.0;
+		    ydet = 0.0;
+		    dist = 0.0;
 		    xdet = Math.cos( ang1 * cvdr) * fp;
 		    ydetz = Math.sin(ang1 * cvdr) * fp;
 		    if ( Math.abs(ydetz * ydetz - zdet * zdet) < 0.001 && 
@@ -1309,7 +1363,7 @@ public class Runfile implements Cloneable {
 			detectorAngle[ii] = 0.0f;
 		    }
 		    else {
-	       	detectorAngle[ii] = (float)ang2;
+			detectorAngle[ii] = (float)ang2;
 		    }
  		    if (gladbank[ii] > 6 ) {
 			detectorAngle[ii] = -1.0f * detectorAngle[ii];
@@ -1329,15 +1383,19 @@ public class Runfile implements Cloneable {
 	byte[] messageBytes = new byte[this.header.messageRegion.size];
 
 	runfile.read( messageBytes );
-	String messageText = new String(messageBytes);
+	//	String messageText = new String(messageBytes);
 	int lastStart = 0;
+	String line = new String();
+	int colonIndex;
+	String key =new String();
+	String value = new String();
 	for ( int ii = 0; ii < messageBytes.length - 1; ii++ ) {
 	    if ( messageBytes[ii] == 13 && messageBytes[ii+1] == 10 ) {
-		String line = new String( messageBytes, lastStart, 
+		line = new String( messageBytes, lastStart, 
 					  ii - lastStart );
-		int colonIndex = line.indexOf( ":" );
-		String key = line.substring( 0, colonIndex ).trim();
-		String value = line.substring( colonIndex + 1, 
+		colonIndex = line.indexOf( ":" );
+		key = line.substring( 0, colonIndex ).trim();
+		value = line.substring( colonIndex + 1, 
 					       line.length() ).trim();
 		properties.put( key, value );
 		lastStart = ii + 2;
@@ -1385,15 +1443,27 @@ public class Runfile implements Cloneable {
 
     void LoadV5( RandomAccessFile runfile ) throws IOException {
 	int i;
+	byte[] bArray = new byte[0];
+	ByteArrayInputStream bArrayIS;
+	DataInputStream dataStream;
+
 	detectorMap = new DetectorMap[this.header.detectorMapTable.size/
 				      DetectorMap.mapSize(header.versionNumber)
 				     + 1];
+	runfile.seek(  header.detectorMapTable.location );
+	bArray = new byte[header.detectorMapTable.size];
+	runfile.read(bArray);
+	bArrayIS = new ByteArrayInputStream(bArray);
+	dataStream = new DataInputStream(bArrayIS);
 	for (i=1; 
 	     i <= this.header.detectorMapTable.size
 		 /DetectorMap.mapSize(header.versionNumber); 
 	     i++){
-	    detectorMap[i] = new DetectorMap(runfile, i, header);
+	    detectorMap[i] = new DetectorMap(dataStream, i, header);
 	}
+	dataStream.close();
+	bArrayIS.close();
+	bArray = new byte[0];
 
 	timeField = new TimeField[this.header.timeFieldTable.size/16 + 1];
 	for (i=1; i <= this.header.timeFieldTable.size/16; i++){
@@ -1402,11 +1472,11 @@ public class Runfile implements Cloneable {
 
 	runfile.seek(this.header.detectorAngle.location);
 	detectorAngle = new float[header.detectorAngle.size / 4 + 1];
-	byte[] bArray = new byte[ this.header.detectorAngle.size ];
+	bArray = new byte[ this.header.detectorAngle.size ];
 	runfile.read( bArray );
-	ByteArrayInputStream bArrayIS = 
+	bArrayIS = 
 	    new ByteArrayInputStream( bArray );
-	DataInputStream dataStream = new DataInputStream( bArrayIS );
+	dataStream = new DataInputStream( bArrayIS );
 	for ( i = 1; i <= header.detectorAngle.size / 4; i++ ) {
 	    detectorAngle[i] = dataStream.readFloat();
 	}
@@ -1774,6 +1844,7 @@ public class Runfile implements Cloneable {
 	    new int[maxSubgroupID[this.header.numOfHistograms]+ 1][];
 	segmentMap =
 	    new Segment[maxSubgroupID[this.header.numOfHistograms]+ 1][];
+	//	Segment[] segList = j
 	for ( i = 1 ; i <= maxSubgroupID[this.header.numOfHistograms]; i++ ) {
 	    int[] idList = new int[0];
 	    Segment[] segList = new Segment[0];
@@ -2973,26 +3044,39 @@ public class Runfile implements Cloneable {
 	    int aindex;
 
 	    areaStartAddress = header.histStartAddress;
-	    sliceInterval = (header.totalChannels*2)/(header.numOfWavelengths);
+	    sliceInterval = (header.totalChannels*2)/(numWaves);
 	    aindex = seg.column  + (seg.row -1) * header.numOfX;
 
-	    
-	    data = new float[header.numOfWavelengths];
-	    for ( int ii = 0; ii < header.numOfWavelengths; ii++ ) {
-		runfile.seek( areaStartAddress + ii * sliceInterval + 2 +
-			      (aindex )*2);
-		bdata = new byte[2];
-		int nbytes = runfile.read ( bdata, 0, 2 );
-		for ( int xx = 0; xx < 2; xx++ ) {
-		    if (bdata[xx] < 0 ) {
-			data[ii] += 
-			    (bdata[xx] + 256) * Math.pow(256.0, xx );
-			
-		    }
-		    else {
-			data[ii] += bdata[xx] * Math.pow(256.0, xx);
-		    }
+	    int ioffset = areaStartAddress  + 2 + aindex*2;
+	    data = new float[numWaves];
+	    bdata = new byte[2];
+	    int nbytes;
+	    int xx;
+	    for ( int ii = 0; ii < numWaves; ii++ ) {
+		//		runfile.seek( areaStartAddress + ii * sliceInterval + 2 +
+		//			      (aindex )*2);
+    		runfile.seek( ioffset + ii * sliceInterval );
+		nbytes = runfile.read ( bdata, 0, 2 );
+		//		for ( int xx = 0; xx < 2; xx++ ) {
+		//xx =0;
+		if (bdata[0] < 0 ) {
+		    data[ii] += 
+			(bdata[0] + 256);
+		    
 		}
+		else {
+		    data[ii] += bdata[0];
+		}
+		//xx =1;
+		if (bdata[1] < 0 ) {
+		    data[ii] += 
+       			(bdata[1] + 256) * 256;
+		    
+		}
+		else {
+		    data[ii] += bdata[1] * 256;
+		}
+		//		}
 		//		    data[ii] = ii* stepWave *seg.row *seg.column ;
 	    }
 	if (!leaveOpen ){
@@ -3154,8 +3238,9 @@ public class Runfile implements Cloneable {
 		    bdata = new byte[wordLength];
 		    int nbytes = runfile.read( bdata, 0, 
 					       wordLength);
+		    int byteIndex;
 		    for (int j = 0; j < wordLength; j++) {
-			int byteIndex = j;
+			byteIndex = j;
 			if ( bdata[byteIndex] < 0 ) {
 			    data  += (bdata[byteIndex] + 256) * 
 				Math.pow(256.0, j);

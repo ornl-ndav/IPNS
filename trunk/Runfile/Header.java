@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.23  2002/10/28 22:57:30  hammonds
+ * Speed/memory improvements.  This is from change of code structure.
+ *
  * Revision 5.22  2002/08/05 14:50:52  hammonds
  * Changed SCD detector angle from 90 to -90 in V3 or earlier files
  * Fixed problem loading POSY and PNE0 files
@@ -232,45 +235,85 @@ public class Header implements Cloneable {
 
     // --------------------------- readUnsignedInteger -------------------
 
-    protected int readUnsignedInteger(RandomAccessFile inFile,
+    protected int readUnsignedInteger(DataInputStream inFile,
 				      int length) throws IOException {
 
+	int zero=0;
 	byte b[] = new byte[length];
 	int c[] = new int[length];
-	int nBytesRead = inFile.read(b, 0, length);
-	//	for ( int i = 0; i < length; i++ ){
-	//	    System.out.println ( "b[" + i + "] = " + b[i] );
-	//	}
-	int num = 0;
-	for (int i = 0; i < length; ++i) {
-	    if(b[i] < 0) {
-		c[i] = b[i] + 256;
-	    }
-	    else {
-		c[i] = b[i];
-	    }
-	    num += c[i] * (int)Math.pow(256.0, (double)i);
+	int nBytesRead = inFile.read(b, zero, length);
+	int num = zero;
+	int i;
+	int tfs = 256;
+	c[0] = b[0];
+	c[1] = b[1];
+	if ( c[0] < zero) c[0] += tfs;
+	if ( c[1] < zero) c[1] += tfs;
+	num += c[0];
+	num += (c[1] << 8);
+	if ( length == 4 ) {
+	    c[2] = b[2];
+	    c[3] = b[3];
+	    if ( c[2] < zero) c[2] += tfs;
+	    if ( c[3] < zero) c[3] += tfs;
+	    num += (c[2] << 16);
+	    num += (c[3] << 24);
 	}
 	return num;
     }
 
     // --------------------------- readUnsignedInteger -------------------
-
-    protected long readUnsignedLong(RandomAccessFile inFile,
+    
+    protected int readUnsignedInteger(RandomAccessFile inFile,
 				      int length) throws IOException {
 
+	int zero=0;
+	byte b[] = new byte[length];
+	int c[] = new int[length];
+	int nBytesRead = inFile.read(b, zero, length);
+	int num = zero;
+	int i;
+	int tfs = 256;
+	c[0] = b[0];
+	c[1] = b[1];
+	if ( c[0] < zero) c[0] += tfs;
+	if ( c[1] < zero) c[1] += tfs;
+	num += c[0];
+	num += (c[1] << 8);
+	if ( length == 4 ) {
+	    c[2] = b[2];
+	    c[3] = b[3];
+	    if ( c[2] < zero) c[2] += tfs;
+	    if ( c[3] < zero) c[3] += tfs;
+	    num += (c[2] << 16);
+	    num += (c[3] << 24);
+	}
+	return num;
+		}
+
+    // --------------------------- readUnsignedLong -------------------
+    
+    protected long readUnsignedLong(RandomAccessFile inFile,
+				    int length) throws IOException {
+	
 	byte b[] = new byte[length];
 	int c[] = new int[length];
 	int nBytesRead = inFile.read(b, 0, length);
 	long num = 0;
-	for (int i = 0; i < length; ++i) {
-	    if(b[i] < 0) {
-		c[i] = b[i] + 256;
-	    }
-	    else {
-		c[i] = b[i];
-	    }
-	    num += c[i] * (int)Math.pow(256.0, (double)i);
+	int i;
+	c[0] = b[0];
+	c[1] = b[1];
+	if ( c[0] < 0) c[0]+=256;
+	if ( c[1] < 0) c[1]+=256;
+	num += c[0];
+	num += c[1] << 8;
+	if ( length == 4 ) {
+	    c[2] = b[2];
+	    c[3] = b[3];
+	    if ( c[2] < 0) c[2]+=256;
+	    if ( c[3] < 0) c[3]+=256;
+	    num += c[2] << 16;
+	    num += c[3] << 24;
 	}
 	return num;
     }
@@ -285,7 +328,8 @@ public class Header implements Cloneable {
         double f_val;
         long val = (long )readUnsignedInteger(inFile, length);
         if (val < 0) {
-	    val = val + (long)Math.pow(2.0, (double)32);
+	    val = val + 4294967296L;
+	    /*	    val = val + (long)Math.pow(2.0, 32.0);*/
 	}
 	/* add 128 to put in the implied 1 */
         hi_mant  = (val & 127) + 128;
@@ -300,7 +344,7 @@ public class Header implements Cloneable {
         if ( exp == -128 )
 	    f_val = 0;
         else
-	    f_val = (hi_mant / 256.0 + low_mant / 16777216.0) *
+	    f_val = ((hi_mant /256.0) + (low_mant/16777216.0)) *
 		Math.pow(2.0, (double)exp );
 
         if ( sign == 1 )
@@ -680,7 +724,8 @@ public static void main(String[] args) throws IOException{
 
     void LoadV4(RandomAccessFile runfile) throws IOException {
 	int i;
-
+	int temp;
+	StringBuffer tempStrBuff = new StringBuffer();
 	runfile.seek(0);  
         controlParameter.location = readUnsignedInteger(runfile, 4);
         controlParameter.size = readUnsignedInteger(runfile, 4);
@@ -713,58 +758,59 @@ public static void main(String[] args) throws IOException{
         seqHistWidth.location = readUnsignedInteger(runfile, 4);
         seqHistWidth.size = readUnsignedInteger(runfile, 4);
 	nDet = (short)readUnsignedInteger(runfile, 2);
-	StringBuffer tempUserName = new StringBuffer(20);
+	tempStrBuff = new StringBuffer(20);
 	for (i=0; i < 20; i++){
-		tempUserName.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	userName = tempUserName.toString();
-	StringBuffer tempRunTitle = new StringBuffer(80);
+	userName = tempStrBuff.toString();
+	tempStrBuff = new StringBuffer(80);
 	for (i=0; i < 80; i++){
-		tempRunTitle.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	runTitle = tempRunTitle.toString();
+	runTitle = tempStrBuff.toString();
 	if (versionNumber >= 3)
-	  runNum = readUnsignedInteger(runfile, 4);
+	    runNum = readUnsignedInteger(runfile, 4);
 	else{
-	  StringBuffer tempRunNum = new StringBuffer(4);
-	  for (i=0; i < 4; i++){
-		tempRunNum.append((char)runfile.readByte());
-		}
-	  if ( tempRunNum.toString() != null )
-	  runNum = (int)Integer.parseInt(tempRunNum.toString());
-	  }
-	if (versionNumber >= 2) {
-	  nextRun = readUnsignedInteger(runfile, 4);
+	    tempStrBuff = new StringBuffer(4);
+	    for (i=0; i < 4; i++){
+		tempStrBuff.append((char)runfile.readByte());
+	    }
+	    if ( tempStrBuff.toString() != null )
+		runNum = (int)Integer.parseInt(tempStrBuff.toString());
+	}
+	if (versionNumber >= 2 || iName.equals("glad")) {
+	    nextRun = readUnsignedInteger(runfile, 4);
 	}
 	else{
-	  StringBuffer tempNextRun = new StringBuffer(4);
-	  for (i=0; i < 3; i++){
-		tempNextRun.append((char)runfile.readByte());
-		}
-	  //	  System.out.println( "nextrun"+tempNextRun+"MMMM");
-	  if ( tempNextRun.toString() != null )
-	  nextRun = (int)Integer.parseInt(tempNextRun.toString());
-  	  }
-	StringBuffer tempStartDate = new StringBuffer(9);
+	    tempStrBuff = new StringBuffer(4);
+	    for (i=0; i < 4; i++){
+		tempStrBuff.append((char)runfile.readByte());
+		//	    System.out.println( "nextrun"+tempStrBuff+"MMMM");
+	    }
+	    //	    System.out.println( "nextrun"+tempStrBuff+"MMMM");
+	    if ( tempStrBuff.toString() != null )
+		nextRun = (int)Integer.parseInt(tempStrBuff.toString().trim());
+	}
+	tempStrBuff = new StringBuffer(9);
 	for (i=0; i < 9; i++){
-		tempStartDate.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	startDate = tempStartDate.toString();
-	StringBuffer tempStartTime = new StringBuffer(8);
+	startDate = tempStrBuff.toString();
+	tempStrBuff = new StringBuffer(8);
 	for (i=0; i < 8; i++){
-		tempStartTime.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	startTime = tempStartTime.toString();
-	StringBuffer tempEndDate = new StringBuffer(9);
+	startTime = tempStrBuff.toString();
+	tempStrBuff = new StringBuffer(9);
 	for (i=0; i < 9; i++){
-		tempEndDate.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	endDate = tempEndDate.toString();
-	StringBuffer tempEndTime = new StringBuffer(8);
+	endDate = tempStrBuff.toString();
+	tempStrBuff = new StringBuffer(8);
 	for (i=0; i < 8; i++){
-		tempEndTime.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	endTime = tempEndTime.toString();
+	endTime = tempStrBuff.toString();
 	protStatus = (char)runfile.readByte();
 	varToMonitor = (char)runfile.readByte();
 	
@@ -772,15 +818,15 @@ public static void main(String[] args) throws IOException{
 	elapsedMonitorCounts = readUnsignedInteger(runfile, 4);
 	numOfCyclesPreset = (short)readUnsignedInteger(runfile, 2);
 	numOfCyclesCompleted = (short)readUnsignedInteger(runfile, 2);
-	if (versionNumber >= 2)
+	if (versionNumber >= 2 || iName.equals("glad") )
 	  runAfterFinished = readUnsignedInteger(runfile, 4);
 	else{
-	  StringBuffer tempRunAfter = new StringBuffer(4);
+	  tempStrBuff = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempRunAfter.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	  if ( tempRunAfter.toString() != null )
-	  runAfterFinished = (int)Integer.parseInt(tempRunAfter.toString());
+	  if ( tempStrBuff.toString() != null )
+	  runAfterFinished = (int)Integer.parseInt(tempStrBuff.toString());
 	  }
 
 	totalMonitorCounts = readUnsignedInteger(runfile, 4);
@@ -788,11 +834,11 @@ public static void main(String[] args) throws IOException{
 	if (versionNumber >= 3)
 	  detCalibFile = readUnsignedInteger(runfile, 4);
 	else{
-	  StringBuffer tempdCalib = new StringBuffer(4);
+	  tempStrBuff = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempdCalib.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	  detCalibFile = Integer.parseInt(tempdCalib.toString());
+	  detCalibFile = Integer.parseInt(tempStrBuff.toString());
 	  }
 	detLocUnit = (char)runfile.readByte();
  	pseudoTimeUnit = (char)runfile.readByte();
@@ -802,11 +848,11 @@ public static void main(String[] args) throws IOException{
 	if (versionNumber >= 3)
 	  moderatorCalibFile = readUnsignedInteger(runfile, 4);
 	else{
-	  StringBuffer tempmCalib = new StringBuffer(4);
+	  tempStrBuff = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-		tempmCalib.append((char)runfile.readByte());
+		tempStrBuff.append((char)runfile.readByte());
 		}
-	  moderatorCalibFile = Integer.parseInt(tempmCalib.toString());
+	  moderatorCalibFile = Integer.parseInt(tempStrBuff.toString());
 	  }
 
 	groupToMonitor = (short)readUnsignedInteger(runfile, 2);
@@ -864,63 +910,64 @@ public static void main(String[] args) throws IOException{
 	  defaultRun = readUnsignedInteger(runfile, 4);
 	  }
 	else{
-	  StringBuffer tempExpNum = new StringBuffer(4);
+	  tempStrBuff = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-	      byte temp = runfile.readByte();
+	      temp = runfile.readByte();
 	      if ( temp != 0 ){ 
-		  tempExpNum.append((char)temp);
+		  tempStrBuff.append((char)temp);
 	      }
 	      else {
-		  tempExpNum.append("0");
+		  tempStrBuff.append("0");
 	      }
 	  }
-	  if ( tempExpNum.toString() != null && 
-	       (tempExpNum.toString()).length() != 0 ) {
-	     expNum = Integer.parseInt(tempExpNum.toString().trim());
+	  if ( tempStrBuff.toString() != null && 
+	       (tempStrBuff.toString()).length() != 0 ) {
+	     expNum = Integer.parseInt(tempStrBuff.toString().trim());
 	  }
 	  else {
 	      expNum = 0;
 	  }
-	  StringBuffer tempFirstRun = new StringBuffer(4);
+	  tempStrBuff = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-	      byte temp = runfile.readByte();
+	      temp = runfile.readByte();
 	      if ( temp != 0 ){ 
-		  tempFirstRun.append((char)temp);
+		  tempStrBuff.append((char)temp);
 	      }
 	      else {
-		  tempFirstRun.append("0");
+		  tempStrBuff.append("0");
 	      }
 	      //		tempFirstRun.append((char)runfile.readByte());
 	  }
-	  if ( tempFirstRun.toString() != null )
-	     firstRun = Integer.parseInt(tempFirstRun.toString());
-	  StringBuffer tempLastRun = new StringBuffer(4);
+	  if ( tempStrBuff.toString() != null )
+	     firstRun = Integer.parseInt(tempStrBuff.toString());
+	  tempStrBuff = new StringBuffer(4);
+
 	  for (i=0; i < 4; i++){
-	      byte temp = runfile.readByte();
+	      temp = runfile.readByte();
 	      if ( temp != 0 ){ 
-		  tempLastRun.append((char)temp);
+		  tempStrBuff.append((char)temp);
 	      }
 	      else {
-		  tempLastRun.append("0");
+		  tempStrBuff.append("0");
 	      }
 	      //		tempLastRun.append((char)runfile.readByte());
 	  }
-	  if ( tempLastRun.toString() != null )
-	     lastRun = Integer.parseInt(tempLastRun.toString());
+	  if ( tempStrBuff.toString() != null )
+	     lastRun = Integer.parseInt(tempStrBuff.toString());
 	  samplePos = (short)readUnsignedInteger(runfile, 2);
-	  StringBuffer tempDefaultRun = new StringBuffer(4);
+	  tempStrBuff = new StringBuffer(4);
 	  for (i=0; i < 4; i++){
-	      byte temp = runfile.readByte();
+	      temp = runfile.readByte();
 	      if ( temp != 0 ){ 
-		  tempDefaultRun.append((char)temp);
+		  tempStrBuff.append((char)temp);
 	      }
 	      else {
-		  tempDefaultRun.append("0");
+		  tempStrBuff.append("0");
 	      }
 	      //		tempDefaultRun.append((char)runfile.readByte());
 		}
-	  if ( tempDefaultRun.toString() != null )
-	     defaultRun = Integer.parseInt(tempDefaultRun.toString());
+	  if ( tempStrBuff.toString() != null )
+	     defaultRun = Integer.parseInt(tempStrBuff.toString());
 	  }
 	numOfHeadBlocks = (short)readUnsignedInteger(runfile, 2);
 	overflowSort = (short)readUnsignedInteger(runfile, 2);
