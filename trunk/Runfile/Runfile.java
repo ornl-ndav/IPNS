@@ -24,6 +24,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.30  2003/03/27 22:33:52  pfpeterson
+ * Fixed atan to asin problem (JPH).
+ *
  * Revision 6.29  2003/03/19 16:13:39  hammonds
  * Remove debug print.
  *
@@ -2639,7 +2642,7 @@ public class Runfile implements Cloneable {
 				     (rotX2 * rotX2));
 
 		float psdAngle = 
-		    (float)(Math.atan( (double)(rotX2)/
+		    (float)(Math.asin( (double)(rotX2)/
 				       (double)psdFlightPath ) * 180.0/Math.PI+
 			    detectorAngle[detID]);
 
@@ -2652,7 +2655,7 @@ public class Runfile implements Cloneable {
 		/ header.numOfX;
 	    double fromCenter = fromLeft 
 		 - ( header.xDisplacement + header.xLeft )/100.0f;
-	    double offsetAngle = Math.atan(fromCenter / (header.dtd/100)) 
+	    double offsetAngle = Math.asin(fromCenter / (header.dtd/100)) 
 		* ( 180 / Math.PI );
 	    return header.dta + offsetAngle;
 	    
