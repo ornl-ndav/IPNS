@@ -12,6 +12,9 @@ a logical separation for information in the two block run file header.
 /*
  *
  * $Log$
+ * Revision 5.21  2002/07/02 14:25:19  hammonds
+ * Took out a  diagnostic print line.
+ *
  * Revision 5.20  2002/01/08 19:57:00  hammonds
  * Added code to support the following parameters:
  * 	filterType
@@ -1087,7 +1090,7 @@ public static void main(String[] args) throws IOException{
 		lpsdClock = (double)runfile.readFloat();
        		numOfElements = runfile.readInt();
 		if( numOfElements == 0 ) {
-		    System.out.println("no numOfElements");
+		    //		    System.out.println("no numOfElements");
 		    numOfElements = nDet;
 		}
 		runfile.seek(700);
