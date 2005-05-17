@@ -52,7 +52,7 @@ class DetectorMap{
 	RunfileInputStream dataStream = new RunfileInputStream( bArrayIS, header.versionNumber );
         for (i=1; i <= numEntries; i++) {
 	    detectorMap[i]  = new DetectorMap(dataStream, i, header);
-	    System.out.println( detectorMap[i].address + " " +
+	    System.out.println( i + "   " + detectorMap[i].address + " " +
 				detectorMap[i].tfType + " " + 
 				detectorMap[i].moreHistBit);
 	}
