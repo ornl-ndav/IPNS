@@ -25,6 +25,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.48  2005/05/17 19:00:30  hammonds
+ * Fix overflow read.
+ * Add Overflows for 1D detector.
+ *
  * Revision 6.47  2004/04/19 15:33:50  hammonds
  * Make efficiency change suggested by Dennis for loading subroup/segment map table.
  * Change to reading older SAD runfiles to place beam monitor at 180 degrees.
@@ -1517,9 +1521,9 @@ public class Runfile implements Cloneable {
 	}
 	// Read Overflow Table
 	if ( header.numOfOverflows > 0 ) {
-	  int nchall =  header.channels1D;
+	  int nchall =  header.totalChannels;
 	  if ( (header.numOfWavelengths > 0) &&
-	       (header.totalChannels > 0 )) {
+	       (header.channels1D > 0 )) {
 	    nchall = header.channels1D + header.totalChannels;
 	  }
 	  int nover = (header.endOfOverflow - nchall)/2;
@@ -1527,6 +1531,9 @@ public class Runfile implements Cloneable {
 	  int offset = nchall*2 + header.histStartAddress;
 	  runfile.seek( offset );
 	  overflows = runfile.readRunIntArray(header.numOfOverflows);
+	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
+	  }
 	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
 	    if (overflows[ii] > header.addressOf2DData && 
 		header.numOfWavelengths>0) {
@@ -1542,9 +1549,9 @@ public class Runfile implements Cloneable {
 	  }
 	}
 	  Arrays.sort(overflows);
-//	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
-//	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
-//	  }
+	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
+	  }
     }
 
     void LoadV5( RandomAccessRunfile runfile ) throws IOException {
@@ -3074,6 +3081,30 @@ public class Runfile implements Cloneable {
 			    data[i] += bdata[byteIndex] * Math.pow(256.0, j);
 			}
 		    }
+		}
+		int minSearchChan=1;
+		int maxSearchChan=header.numOfOverflows;
+		if (header.numOfOverflows > 0) {
+		  for (int ii=0; ii< numOfTimeChannels; ii++){
+		    int ovOffset = 0;
+		    if ( header.numOfWavelengths == 0) {
+		      ovOffset = offset + ii * 2 -header.histStartAddress;
+		    }
+		    else {
+		      ovOffset = offset + ii * 2 - header.histStartAddress;
+		    }
+		    boolean sdone = false;
+		    for(int jj = minSearchChan; jj<=maxSearchChan&&!sdone; jj++) {
+		      if ( ovOffset == overflows[jj] ) {
+			
+			data[ii] = data[ii] + 65536;
+		      }
+		      else if( ovOffset < overflows[jj] ) {
+			sdone = true;
+			minSearchChan = jj;
+		      }
+		    }
+		  }
 		}
 		}
 	    else {
