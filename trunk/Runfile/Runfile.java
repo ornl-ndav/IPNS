@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.50  2005/05/18 14:29:50  hammonds
+ * Remove more diagnostic messages.
+ *
  * Revision 6.49  2005/05/18 14:21:27  hammonds
  * Remove diagnostic messages.
  *
@@ -1534,9 +1537,9 @@ public class Runfile implements Cloneable {
 	  int offset = nchall*2 + header.histStartAddress;
 	  runfile.seek( offset );
 	  overflows = runfile.readRunIntArray(header.numOfOverflows);
-	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
-	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
-	  }
+	  //	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+	  //	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
+	  //	  }
 	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
 	    if (overflows[ii] > header.addressOf2DData && 
 		header.numOfWavelengths>0) {
@@ -3039,7 +3042,7 @@ public class Runfile implements Cloneable {
 	int wordLength;
 
 	if ( leaveOpen == false){
-	    System.out.println("GetSpectrum1D opening file");
+	  //	    System.out.println("GetSpectrum1D opening file");
 	    runfile = new RandomAccessRunfile(runfileName, "r");
 	}
 	int detID = seg.detID;
