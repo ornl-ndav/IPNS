@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.49  2005/05/18 14:21:27  hammonds
+ * Remove diagnostic messages.
+ *
  * Revision 6.48  2005/05/17 19:00:30  hammonds
  * Fix overflow read.
  * Add Overflows for 1D detector.
@@ -1549,11 +1552,15 @@ public class Runfile implements Cloneable {
 	  }
 	}
 	  Arrays.sort(overflows);
-	  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
-	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
-	  }
+	  //  for (int ii = 1; ii <= header.numOfOverflows; ii++ ) {
+	  //	    System.out.println("Overflow " + ii + ": " + overflows[ii]);
+	  //	  }
     }
 
+
+  /**
+   *
+   */
     void LoadV5( RandomAccessRunfile runfile ) throws IOException {
 	int i;
 	byte[] bArray = new byte[0];
