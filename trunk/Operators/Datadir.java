@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.6  2005/05/25 18:39:18  dennis
+ *  Removed unused imports.
+ *
  *  Revision 1.5  2003/09/17 14:42:25  hammonds
  *  Added bell and extra formatting to point out messages from caught exceptions
  *
@@ -61,7 +64,6 @@ import  java.io.Serializable;
 import  java.util.Properties;
 import  java.util.Vector;
 import  DataSetTools.operator.Generic.Batch.GenericBatch;
-import  DataSetTools.operator.Parameter;
 import  DataSetTools.parameter.StringPG;
 //import  IPNS.Runfile.*;
 

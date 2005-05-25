@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2005/05/25 18:39:19  dennis
+ *  Removed unused imports.
+ *
  *  Revision 1.1  2005/04/21 02:13:10  hammonds
  *  New Class to modify elements of the runfile header.
  *
@@ -47,7 +50,6 @@ import  java.io.Serializable;
 import  java.util.Vector;
 import  DataSetTools.operator.Parameter;
 import  DataSetTools.operator.Generic.GenericOperator;
-import  IPNS.Runfile.RunfileBuilder;
 import  DataSetTools.parameter.ChoiceListPG;
 import  DataSetTools.parameter.LoadFilePG;
 import gov.anl.ipns.Util.SpecialStrings.*;
