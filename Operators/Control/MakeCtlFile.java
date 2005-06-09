@@ -33,6 +33,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2005/06/09 16:05:30  hammonds
+ *  Fix up call of CtlFile object.  Remove old code.  Add CtlWrite call
+ *
  *  Revision 1.1  2005/06/08 11:45:19  hammonds
  *  Files added to automatically generate Ctl Files.
  *
@@ -138,32 +141,10 @@ public class MakeCtlFile extends  GenericOperator
     for (int ii = 0; ii < pFiles.size(); ii++) {
       pFileNames[ii] = new String(ancDir + "/" +(String)pFiles.elementAt(ii));
     }
-    CtlFile( numRuns, userName, runTitle, pFileNames, "transmission", 
-	     numCycles, numPulses, 0)
+    CtlFile ctl = new CtlFile( numRuns, userName, runTitle, pFileNames, 
+	     "transmission", numCycles, numPulses, 0);
       
-    /**    try {
-      FileOutputStream outfile = new FileOutputStream( filename );
-      PrintWriter outWriter = new PrintWriter(outfile, true);
-      outWriter.print( numRuns );
-      outWriter.println( "   RUNS");
-      
-      for (int ii=1; ii<=numRuns; ii++) {
-	CtlSeq myCtls = new CtlSeq(ii, userName, runTitle, pFileNames, 
-				   new String("transmission"), numCycles,
-				   numPulses, (int)0);
-      
-	myCtls.WriteCtl(outWriter);
-	}
-      }
-    
-    catch (FileNotFoundException fnfEx ) {
-      System.out.println("trouble opening: " + filename + "for writing");
-      return new ErrorString("MakeCtlFile: Troublem opening file");
-    }
-    catch (IOException ioEx) {
-      System.out.println("Trouble Opening ParameterFile");
-    }
-    */
+    ctl.WriteCtl(filename);
     return new Integer(rval);
     
   }
