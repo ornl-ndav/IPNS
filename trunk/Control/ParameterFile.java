@@ -360,6 +360,16 @@ public class ParameterFile {
   }
 
   /**
+     Returns file name (without directory) for the ParameterFile if one is 
+     available.
+  */
+  public String getShortFileName() {
+    int lastSlash = fileName.lastIndexOf("/");
+    
+    return fileName.substring(lastSlash+1);
+  }
+
+  /**
      Write contents of the class to a binary file such as a Runfile
   */
   public void Write(RandomAccessFile ancFile) throws IOException {
