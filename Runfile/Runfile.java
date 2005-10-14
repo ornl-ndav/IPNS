@@ -25,6 +25,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.51  2005/10/14 14:55:46  hammonds
+ * Make change to TimeChannelBoundaries to match what is in the DAS.
+ * Add some code to read very old files which are missing detector location info.
+ *
  * Revision 6.50  2005/05/18 14:29:50  hammonds
  * Remove more diagnostic messages.
  *
@@ -654,18 +658,44 @@ public class Runfile implements Cloneable {
 	}
 	
 
-	runfile.seek(this.header.detectorAngle.location);
-	detectorAngle= 
-	  runfile.readRunFloatArray( header.detectorAngle.size/4 );
-	runfile.seek(this.header.flightPath.location);
-	flightPath = 
-	  runfile.readRunFloatArray(header.flightPath.size/4 );
-	runfile.seek(this.header.detectorHeight.location);
-	detectorHeight = 
-	  runfile.readRunFloatArray(header.detectorHeight.size/4);
+	if (this.header.detectorAngle.size > 0) {
+	  runfile.seek(this.header.detectorAngle.location);
+	  detectorAngle= 
+	    runfile.readRunFloatArray( header.detectorAngle.size/4 );
+	}
+	else {
+	  detectorAngle = new float[header.nDet + 1];
+	  for (int iid = 1; iid <= header.nDet; iid++) {
+	    detectorAngle[iid] = 90.0f;
+	  }
+	}
+	if (this.header.flightPath.size > 0) {
+	  runfile.seek(this.header.flightPath.location);
+	  flightPath = 
+	    runfile.readRunFloatArray(header.flightPath.size/4 );
+	}
+	else {
+	  flightPath = new float[header.nDet + 1];
+	  for (int iid = 1; iid <= header.nDet; iid++) {
+	    flightPath[iid] = 1.5f;
+	  }
+	}
+	if (this.header.detectorHeight.size > 0) {
+	  runfile.seek(this.header.detectorHeight.location);
+	  detectorHeight = 
+	    runfile.readRunFloatArray(header.detectorHeight.size/4);
+	}
+	else {
+	  detectorHeight = new float[header.nDet + 1];
+	}
 	runfile.seek(this.header.detectorType.location);
-	detectorType = 
-	  runfile.readRunShortArray( header.detectorType.size/2);
+	if (this.header.detectorType.size > 0) {
+	  detectorType = 
+	    runfile.readRunShortArray( header.detectorType.size/2);
+	}
+	else {
+	  detectorType = new short[header.nDet + 1];
+	}
 	if ( header.versionNumber > 4 ) {
 	    if ( System.getProperty("Runfile_Debug", "no" )
 		 .equalsIgnoreCase("yes") ) {
@@ -3759,13 +3789,29 @@ public class Runfile implements Cloneable {
 		}
 	    }
 	    else {       // assume dt/t binning
-		channel[0] = min;
+	      float clock = (float)header.standardClock; 
+		channel[0] = min/clock;
 		for ( int chan = 1; chan <= numberOfChannels; chan++ ) {
-		    float clock = (float)header.standardClock; 
-		    channel[chan] = (float)channel[chan-1] * (1.0f + step);
+		  float dt = channel[chan-1] * step;
+		  float nextT = channel[chan-1] + dt;
+		  float fract = nextT - (float)Math.floor(nextT);
+		  if (fract > 0.5f) {
+		    channel[chan] = (float)(Math.floor(nextT)) + 1;
+		  }
+		  else {
+		    channel[chan] = (float)(Math.floor(nextT));
+		  }
+
+		  
+		    /*
+		      channel[chan] = (float)channel[chan-1] * (1.0f + step);
+
 		    float fjunk = channel[chan] / clock;
-		    channel[chan] = Math.round( fjunk ) * clock;
-		    
+     		    channel[chan] = Math.round( fjunk ) * clock;
+		    */	    
+		}
+		for (int chan = 0; chan <=numberOfChannels; chan++) {
+		  channel[chan]=channel[chan]*clock;
 		}
 	    }
 	    return channel;
@@ -3775,7 +3821,6 @@ public class Runfile implements Cloneable {
 	    float maxWave = header.maxWavelength;
 	    int numWaves = header.numOfWavelengths;
 	    float stepWave = (maxWave - minWave)/numWaves;
-
 	    float[] channel = new float[header.numOfWavelengths + 1];
 		for ( int ii = 0; ii <= header.numOfWavelengths; ii++ ) {
 		    channel[ii] = minWave + ii* stepWave;
