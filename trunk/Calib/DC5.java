@@ -1,7 +1,7 @@
 package IPNS.Calib;
 
 import java.io.*;
-import java.lang.*;
+
 /**
 This class is manages data from an IPNS DC5 detector calibration file.  This 
 version of the detector calibration file is the first version used on the 
@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.15  2005/12/22 03:09:11  hammonds
+ * Remove unused import.
+ *
  * Revision 1.14  2004/02/10 03:21:48  hammonds
  * Remove Comment.
  *

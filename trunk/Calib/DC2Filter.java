@@ -1,12 +1,14 @@
 package IPNS.Calib;
 
 import java.io.File;
-import javax.swing.*;
 import javax.swing.filechooser.*;
 
 /*
  *
  * $Log$
+ * Revision 1.2  2005/12/22 03:07:39  hammonds
+ * Remove unused import.
+ *
  * Revision 1.1  2001/07/23 21:37:55  hammonds
  * Moved from iCame.dcalib.
  *
