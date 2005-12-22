@@ -14,6 +14,9 @@ geometry information length, width and depth to the DC2 format.
 /*
  *
  * $Log$
+ * Revision 1.16  2005/12/22 03:14:17  hammonds
+ * Add prints into main method.  Remove unused member.
+ *
  * Revision 1.15  2005/12/22 03:09:11  hammonds
  * Remove unused import.
  *
@@ -175,7 +178,12 @@ public static void main (String[] args) throws IOException{
   for(int i = 0; i < cfile.NDet(); i++) {
      System.out.println(angles[i] + "  " + height[i] + "  " + flightPath[i] +
                "  " + type[i] + "  " + efficiency[i] );
-     }
+     System.out.println(rot1[i] + "  " + rot2[i]);
+     System.out.println(crate[i] + "  " + slot[i] + "  " +
+    		 input[i]);
+     System.out.println( psdOrder[i] + "  " + numSegs1[i] +
+    		 "   " + numSegs2[i]);
+  	}
   }
 
 public DC5() {
@@ -204,7 +212,6 @@ public DC5() {
 
 public DC5(String filename) throws IOException {
   calibFileName = filename;
-  boolean dontStop = true;
   try {
     RandomAccessFile calibFile = new RandomAccessFile(filename,"r");
 
