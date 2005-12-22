@@ -29,6 +29,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2005/12/22 03:29:24  hammonds
+ *  Remove unused import.
+ *
  *  Revision 1.2  2004/03/28 22:28:36  hammonds
  *  Changes for operators moved to gov from ISAW
  *
@@ -44,7 +47,6 @@ import  java.util.*;
 import  DataSetTools.operator.*;
 import  gov.anl.ipns.Util.File.*;
 import  DataSetTools.operator.Generic.Batch.*;
-import  IPNS.Runfile.*;
 /**
  *   This class supports reading of Strings, floats, ints etc. from an
  *   ordinary text file.  In addition to methods to read each of the 

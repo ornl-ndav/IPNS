@@ -1,7 +1,6 @@
 package IPNS.Calib;
 
 import java.io.File;
-import javax.swing.*;
 import javax.swing.filechooser.*;
 
 /*

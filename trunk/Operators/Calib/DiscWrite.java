@@ -32,6 +32,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2005/12/22 03:26:28  hammonds
+ *  Remove unused import.
+ *
  *  Revision 1.1  2004/02/16 00:32:53  hammonds
  *  First In
  *
@@ -46,7 +49,6 @@ import java.util.Vector;
 import DataSetTools.dataset.DataSet;
 import DataSetTools.dataset.Data;
 import DataSetTools.dataset.IntListAttribute;
-import DataSetTools.operator.Parameter;
 import DataSetTools.operator.Generic.GenericOperator;
 import DataSetTools.parameter.DataSetPG;
 import DataSetTools.parameter.SaveFilePG;
