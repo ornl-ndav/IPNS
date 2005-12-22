@@ -42,7 +42,6 @@ public DS5() {
 
 public DS5(String filename) throws IOException {
   discFileName = filename;
-  boolean dontStop = true;
   try {
     RandomAccessFile discFile = new RandomAccessFile(filename,"r");
 
