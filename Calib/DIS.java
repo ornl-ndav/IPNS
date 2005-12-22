@@ -39,6 +39,9 @@ public static void main (String[] args) throws IOException{
     byte b[] = new byte[length];
     int c[] = new int[length];
     int nBytesRead = inFile.read(b, 0, length);
+    if (nBytesRead != length ) {
+    	throw new EOFException("DIS not enough data in ReadInt");
+    }
     int num = 0;
     for (int i = 0; i < length; ++i) {
        if(b[i] < 0) {
@@ -88,7 +91,6 @@ public static void main (String[] args) throws IOException{
 
 public DIS(String filename) throws IOException {
   discFileName = filename;
-  boolean dontStop = true;
     RandomAccessFile discFile = new RandomAccessFile(filename,"r");
 
     //
