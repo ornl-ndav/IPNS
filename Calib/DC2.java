@@ -12,6 +12,9 @@ based version of the data acquisition system.
 /*
  *
  * $Log$
+ * Revision 1.2  2005/12/22 03:05:53  hammonds
+ * Update unused bits of code.
+ *
  * Revision 1.1  2001/07/23 21:19:32  hammonds
  * Added to support newrun type scripts without iCame
  *
@@ -52,6 +55,9 @@ public class DC2 {
 	byte b[] = new byte[length];
 	int c[] = new int[length];
 	int nBytesRead = inFile.read(b, 0, length);
+	if (nBytesRead != length ) {
+		throw new EOFException("DC2 Not enough data for ReadInt");
+	}
 	int num = 0;
 	for (int i = 0; i < length; ++i) {
 	    if(b[i] < 0) {
@@ -101,7 +107,6 @@ public class DC2 {
 
     public DC2(String filename) throws IOException {
 	calibFileName = filename;
-	boolean dontStop = true;
 	RandomAccessFile calibFile = new RandomAccessFile(filename,"r");
 
 	nDet = ReadInt ( calibFile, 4 );
