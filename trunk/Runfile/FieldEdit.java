@@ -14,7 +14,6 @@ import java.awt.event.FocusEvent;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 
 /** This Class is intended to provide a prompted input box.  The main 
@@ -54,7 +53,6 @@ public class FieldEdit extends JPanel implements ActionListener, FocusListener{
   }
  
   public void actionPerformed ( ActionEvent e ) {
-    String command = e.getActionCommand();
     checkInput();
   }
 
