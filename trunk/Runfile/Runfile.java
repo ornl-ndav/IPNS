@@ -25,6 +25,10 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.52  2006/01/01 03:22:03  hammonds
+ * Fix bogus NaN comparison.
+ * Get rid of some unused variable references.
+ *
  * Revision 6.51  2005/10/14 14:55:46  hammonds
  * Make change to TimeChannelBoundaries to match what is in the DAS.
  * Add some code to read very old files which are missing detector location info.
@@ -447,8 +451,7 @@ public class Runfile implements Cloneable {
 
 	int nbytes = inFile.read(bdata, 0, numWords * wordSize);
 	int byteIndex;
-	int i, j;
-	int tInt;
+	int i;
 	for (i=0; i<numWords; i++){
 	    byteIndex = i*wordSize;
 	    cdata[0] = bdata[byteIndex + 0];
@@ -1475,7 +1478,7 @@ public class Runfile implements Cloneable {
 			ang2 = 
 			    (Math.asin(ydet/dist) * cvrd );
 		    }
-		    if ( ang2 == Double.NaN ) {
+		    if ( Double.isNaN(ang2) ) {
 			System.out.println ( ii + "detAngle set to 0 ");
 			detectorAngle[ii] = 0.0f;
 		    }
