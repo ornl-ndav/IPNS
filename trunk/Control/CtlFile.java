@@ -66,11 +66,8 @@ public class CtlFile {
       }
 
     }
-    catch (FileNotFoundException fnfEx ) {
+   catch (FileNotFoundException fnfEx ) {
       System.out.println("trouble opening: " + ctlFileName + "for writing");
-    }
-    catch (IOException ioEx) {
-      System.out.println("Trouble Opening ParameterFile");
     }
   }
 
