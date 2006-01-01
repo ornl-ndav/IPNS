@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.7  2006/01/01 04:49:10  hammonds
+ *  Remove unused variables
+ *
  *  Revision 1.6  2005/05/25 18:39:18  dennis
  *  Removed unused imports.
  *
@@ -125,10 +128,8 @@ public Datadir()
 
   public Object getResult()
   {
-      int runNum = 0;
       FileInputStream datFile;
       Properties iDat = new Properties();
-      String instDir = new String();
       String dataDir = new String();
       String iName = (String) (getParameter(0).getValue());
 	  if (iName != null)
@@ -141,7 +142,6 @@ public Datadir()
 		  try {
 		      datFile = new FileInputStream(datFileName);
 		      iDat.load(datFile);
-		      instDir = iDat.getProperty("instDir");
 		      dataDir = iDat.getProperty("dataDir");
 		  }
 		  catch (IOException e) {
