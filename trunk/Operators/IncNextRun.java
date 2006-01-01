@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.7  2006/01/01 04:52:13  hammonds
+ *  Remove unused variables.
+ *
  *  Revision 1.6  2003/09/17 14:42:27  hammonds
  *  Added bell and extra formatting to point out messages from caught exceptions
  *
@@ -126,9 +129,7 @@ public IncNextRun()
       Properties params = new Properties();
       String paramFileName = new String();
       String instDir = new String();
-      String dataDir = new String();
       String iName = (String) (getParameter(0).getValue());
-      String sRunNum = new String("0000"); 
 	  if (iName != null)
 	      {
 		  String home = System.getProperty("user.home");
@@ -140,7 +141,6 @@ public IncNextRun()
 		      datFile = new FileInputStream(datFileName);
 		      iDat.load(datFile);
 		      instDir = iDat.getProperty("instDir");
-		      dataDir = iDat.getProperty("dataDir");
 		      datFile.close();
 		  }
 		  catch (IOException e) {
