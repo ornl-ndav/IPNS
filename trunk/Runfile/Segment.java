@@ -1,7 +1,6 @@
 package IPNS.Runfile;
 
 
-import java.io.*;
 
 
 /** This class is designed to store/feedback information on a segment of a
@@ -12,6 +11,9 @@ element tubes, LPSDs and Area detectors.
 /*
  *
  * $Log$
+ * Revision 1.3  2006/01/01 04:05:50  hammonds
+ * Remove unused import.
+ *
  * Revision 1.2  2001/08/03 19:02:53  hammonds
  * Added a segment ID to uniquely identify each element.
  *
@@ -36,7 +38,7 @@ public class Segment {
     }
 
     public Segment( int detID, int row, int column, float length, float width,
-		   float depth, float Efficiency, int segID ) {
+		   float depth, float efficiency, int segID ) {
 	this.detID = detID;
 	this.row = row;
 	this.column = column;
