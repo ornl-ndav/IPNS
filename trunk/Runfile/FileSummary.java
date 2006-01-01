@@ -2,7 +2,6 @@ package IPNS.Runfile;
 
 
 import java.io.*;
-import IPNS.Runfile.*;
 
 
 /** This class is intended to provide a means for searching run files inside of
@@ -15,6 +14,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.9  2006/01/01 03:29:22  hammonds
+ * Remove unused imports.
+ *
  * Revision 1.8  2003/03/30 04:07:59  hammonds
  * Switch reading to use the new RunfileInputStream and RandomAccessRunfile so that changes can be made to offload the differences in data types.
  *
