@@ -1,7 +1,6 @@
 package IPNS.Control;
 
 import java.io.*;
-import IPNS.Control.*;
 
 public class CtlSeq {
   int runNum = 0;
