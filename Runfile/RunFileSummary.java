@@ -1,7 +1,6 @@
 package IPNS.Runfile;
 
 import java.io.*;
-import IPNS.Runfile.*;
 
 /** This class is intended to provide a means for obtaining a short (80 character)
    file summary from a run file.
@@ -12,6 +11,9 @@ import IPNS.Runfile.*;
 /*
  *
  * $Log$
+ * Revision 1.2  2006/01/01 04:04:38  hammonds
+ * Remove unused imports.
+ *
  * Revision 1.1  2003/05/07 16:58:40  hammonds
  * Tom version of file summary. FileSummary and RunFileSummary will be merged
  * into RunFileSummary.
