@@ -83,7 +83,7 @@ class TimeField{
     protected  TimeField(RandomAccessRunfile runfile, int iType,
 			 Header header ) throws IOException{
 	long startingPosition;
-        long maskChanWord, minWord, rangeWord, widthWord, doubleWord;
+        long maskChanWord, minWord, rangeWord, widthWord;
 
 	startingPosition = runfile.getFilePointer();
 	runfile.seek(header.timeFieldTable.location + 
@@ -156,7 +156,6 @@ class TimeField{
     protected void Write ( RandomAccessRunfile runfile ) throws IOException {
 
 	int flagword;
-	int chwword;
 		
 	flagword = ( (timeFocusBit << 31) & 0x80000000 ) |
 	    ( (emissionDelayBit << 30)    & 0x40000000 ) |
