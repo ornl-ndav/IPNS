@@ -1,7 +1,6 @@
 
 package IPNS.Runfile;
 
-import java.io.*;
 
 /**
 This class is inteded to construct the time fields to be written to a runfile.
@@ -9,6 +8,9 @@ This class is inteded to construct the time fields to be written to a runfile.
 /*
  *
  *  $Log$
+ *  Revision 5.3  2006/01/01 04:09:12  hammonds
+ *  Remove unused import.
+ *
  *  Revision 5.2  2002/09/18 18:05:05  hammonds
  *  check mail log
  *
