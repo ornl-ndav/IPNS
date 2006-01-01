@@ -1,8 +1,6 @@
 package IPNS.Runfile;
 
-//import java.io.DataInputStream;
 import java.io.ByteArrayInputStream;
-//import java.io.RandomAccessRunfile;
 import java.io.IOException;
 
 /**
@@ -63,20 +61,10 @@ class DetectorMap{
 
     protected  DetectorMap(RandomAccessRunfile runfile, int id, 
 			   Header header ) throws IOException{
-	long startingPosition;
 	int temp = 0;
 	iName = header.iName;
 	versionNumber= header.versionNumber;
 
-	//startingPosition = runfile.getFilePointer();
-	//runfile.seek( header.detectorMapTable.location + (id - 1) 
-	//	      * DetectorMap.mapSize(versionNumber));
-		      
-	/*	if ( header.versionNumber <= 4 ) {
-	    temp = runfile.readRunInt();
-	}
-	else 
-	  */
 	if ( header.versionNumber < 6 ){
 	    temp = runfile.readRunInt();
 	}
@@ -109,19 +97,10 @@ class DetectorMap{
 
     protected  DetectorMap(RunfileInputStream runfile, int id, 
 			   Header header ) throws IOException{
-	long startingPosition;
 	int temp = 0;
 	iName = header.iName;
 	versionNumber= header.versionNumber;
 
-	//startingPosition = runfile.getFilePointer();
-	//runfile.seek( header.detectorMapTable.location + (id - 1) 
-	//	      * DetectorMap.mapSize(versionNumber));
-		      
-	/*	if ( header.versionNumber <= 4 ) {
-	    temp = header.readUnsignedInteger(runfile, 4);
-	}
-	else */
 	if ( header.versionNumber < 6 ){
 	    temp = runfile.readRunInt();
 	}
