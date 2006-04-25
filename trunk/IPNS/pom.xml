@@ -14,6 +14,19 @@
   <version>1.0-SNAPSHOT</version>
   <name>IPNS Core</name>
   <description>IPNS Core Libraries</description>
+  <dependencies>
+	<!-- Temporary dependency...! -->
+    <dependency>
+      <groupId>sns.dependency.isaw</groupId>
+      <artifactId>isaw-gov</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>ISAW</groupId>
+      <artifactId>isaw-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>
