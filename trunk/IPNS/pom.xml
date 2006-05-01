@@ -16,11 +16,11 @@
   <description>IPNS Core Libraries</description>
   <dependencies>
 	<!-- Temporary dependency...! -->
-    <dependency>
+    <!-- dependency>
       <groupId>sns.dependency.isaw</groupId>
       <artifactId>isaw-gov</artifactId>
       <version>1.0</version>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>ISAW</groupId>
       <artifactId>isaw-core</artifactId>
