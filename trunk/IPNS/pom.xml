@@ -26,6 +26,11 @@
       <artifactId>isaw-core</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>ISAW</groupId>
+      <artifactId>ipns-gov</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
