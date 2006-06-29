@@ -25,6 +25,7 @@
       <groupId>ISAW</groupId>
       <artifactId>isaw-core</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>ISAW</groupId>
