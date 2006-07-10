@@ -32,6 +32,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.2  2006/07/10 16:26:04  dennis
+ *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
+ *
  *  Revision 1.1  2005/04/21 02:10:54  hammonds
  *  New Class to update angles from DCalib file.
  *
@@ -49,9 +52,10 @@ import DataSetTools.dataset.Data;
 import DataSetTools.dataset.IntListAttribute;
 import DataSetTools.operator.Parameter;
 import DataSetTools.operator.Generic.GenericOperator;
-import DataSetTools.parameter.LoadFilePG;
 import IPNS.Calib.DC5;
 import java.io.RandomAccessFile;
+
+import gov.anl.ipns.Parameters.LoadFilePG;
 import gov.anl.ipns.Util.SpecialStrings.*;
 /** 
 */

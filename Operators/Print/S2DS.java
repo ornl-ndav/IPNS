@@ -32,6 +32,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2006/07/10 16:26:05  dennis
+ *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
+ *
  *  Revision 1.2  2004/03/28 22:28:53  hammonds
  *  Changes for operators moved to gov from ISAW
  *
@@ -47,8 +50,8 @@ import java.io.IOException;
 import java.util.Vector;
 import DataSetTools.operator.Parameter;
 import DataSetTools.operator.Generic.Batch.GenericBatch;
-import DataSetTools.parameter.IntegerPG;
-import DataSetTools.parameter.LoadFilePG;
+import gov.anl.ipns.Parameters.IntegerPG;
+import gov.anl.ipns.Parameters.LoadFilePG;
 import gov.anl.ipns.Util.SpecialStrings.LoadFileString;
 import IPNS.Runfile.Runfile;
 
