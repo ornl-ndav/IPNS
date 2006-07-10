@@ -32,6 +32,10 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2006/07/10 22:28:36  dennis
+ *  Removed unused imports after refactoring to use new Parameter GUIs
+ *  in gov.anl.ipns.Parameters.
+ *
  *  Revision 1.3  2006/07/10 16:26:05  dennis
  *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
  *
@@ -48,9 +52,7 @@ package IPNS.Operators.Print;
 import java.io.Serializable;
 import java.io.IOException;
 import java.util.Vector;
-import DataSetTools.operator.Parameter;
 import DataSetTools.operator.Generic.Batch.GenericBatch;
-import gov.anl.ipns.Parameters.IntegerPG;
 import gov.anl.ipns.Parameters.LoadFilePG;
 import gov.anl.ipns.Util.SpecialStrings.LoadFileString;
 import IPNS.Runfile.Runfile;
