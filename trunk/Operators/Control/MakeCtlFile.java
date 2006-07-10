@@ -33,6 +33,10 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.4  2006/07/10 21:48:01  dennis
+ *  Removed unused imports after refactoring to use New Parameter
+ *  GUIs in gov.anl.ipns.Parameters
+ *
  *  Revision 1.3  2006/07/10 16:26:04  dennis
  *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
  *
@@ -52,18 +56,14 @@ package IPNS.Operators.Control;
 
 import  java.io.*;
 import  java.util.Vector;
-import  DataSetTools.operator.Parameter;
 import  DataSetTools.operator.Generic.GenericOperator;
-import  DataSetTools.parameter.*;
 import gov.anl.ipns.Parameters.IntegerPG;
 import gov.anl.ipns.Parameters.SaveFilePG;
 import gov.anl.ipns.Parameters.StringArrayPG;
 import gov.anl.ipns.Parameters.StringPG;
-import gov.anl.ipns.Util.SpecialStrings.*;
 import IPNS.Operators.Instdir;
 import IPNS.Control.*;
-import java.lang.reflect.Array;
-import gov.anl.ipns.Util.Sys.*;
+
 /**
  * This operator instantiates.
  * 
