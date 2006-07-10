@@ -33,6 +33,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2006/07/10 16:26:04  dennis
+ *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
+ *
  *  Revision 1.2  2005/06/09 16:05:30  hammonds
  *  Fix up call of CtlFile object.  Remove old code.  Add CtlWrite call
  *
@@ -48,11 +51,14 @@
 package IPNS.Operators.Control;
 
 import  java.io.*;
-import  java.io.Serializable;
 import  java.util.Vector;
 import  DataSetTools.operator.Parameter;
 import  DataSetTools.operator.Generic.GenericOperator;
 import  DataSetTools.parameter.*;
+import gov.anl.ipns.Parameters.IntegerPG;
+import gov.anl.ipns.Parameters.SaveFilePG;
+import gov.anl.ipns.Parameters.StringArrayPG;
+import gov.anl.ipns.Parameters.StringPG;
 import gov.anl.ipns.Util.SpecialStrings.*;
 import IPNS.Operators.Instdir;
 import IPNS.Control.*;

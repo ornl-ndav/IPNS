@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.3  2006/07/10 16:26:04  dennis
+ *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
+ *
  *  Revision 1.2  2005/05/25 18:39:19  dennis
  *  Removed unused imports.
  *
@@ -46,12 +49,11 @@
 package IPNS.Operators.Modify;
 
 import  java.io.*;
-import  java.io.Serializable;
 import  java.util.Vector;
 import  DataSetTools.operator.Parameter;
 import  DataSetTools.operator.Generic.GenericOperator;
-import  DataSetTools.parameter.ChoiceListPG;
-import  DataSetTools.parameter.LoadFilePG;
+import gov.anl.ipns.Parameters.ChoiceListPG;
+import gov.anl.ipns.Parameters.LoadFilePG;
 import gov.anl.ipns.Util.SpecialStrings.*;
 
 /**

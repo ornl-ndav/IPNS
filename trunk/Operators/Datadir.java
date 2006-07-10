@@ -34,6 +34,9 @@
  * Modified:
  *
  *  $Log$
+ *  Revision 1.8  2006/07/10 16:26:04  dennis
+ *  Change to new Parameter GUIs in gov.anl.ipns.Parameters
+ *
  *  Revision 1.7  2006/01/01 04:49:10  hammonds
  *  Remove unused variables
  *
@@ -61,14 +64,14 @@
 
 package IPNS.Operators;
 
+import gov.anl.ipns.Parameters.StringPG;
+
 import  java.io.FileInputStream;
 import  java.io.IOException;
 import  java.io.Serializable;
 import  java.util.Properties;
 import  java.util.Vector;
 import  DataSetTools.operator.Generic.Batch.GenericBatch;
-import  DataSetTools.parameter.StringPG;
-//import  IPNS.Runfile.*;
 
 /**
  * This operator instantiates .
