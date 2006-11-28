@@ -7,6 +7,9 @@
 # Argonne IL, 60439
 #
 # $Log$
+# Revision 1.4  2006/11/28 22:50:16  hammonds
+# Fix problem with scroll bars for large # of runs.
+#
 # Revision 1.3  2004/01/29 17:55:29  hammonds
 # Override default category
 #
@@ -75,8 +78,10 @@ class Schedule(GenericOperator):
 
         scrollPane = JScrollPane()
         mainPanel =  JPanel()
-        mainPanel.setPreferredSize(Dimension(500,300))
-        mainPanel.setSize(Dimension(500,300))
+#        mainPanel.setPreferredSize(Dimension(500,300))
+#        mainPanel.setSize(Dimension(500,300))
+        scrollPane.setPreferredSize(Dimension(500,300))
+        scrollPane.setSize(Dimension(500,300))
         mainPanel.layout = GridBagLayout()
         mainWindow = JOptionPane(scrollPane)
         scrollPane.setViewportView(mainPanel)
