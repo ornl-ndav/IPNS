@@ -25,6 +25,9 @@ indexed starting at zero.
 /*
  *
  * $Log$
+ * Revision 6.53  2007/04/05 18:58:51  hammonds
+ * Remove forcing omega=45.0.  This is settable by the user in configuration of the instrument.  Read the value loaded to the header instead.
+ *
  * Revision 6.52  2006/01/01 03:22:03  hammonds
  * Fix bogus NaN comparison.
  * Get rid of some unused variable references.
@@ -1762,7 +1765,7 @@ public class Runfile implements Cloneable {
 	    Parameter[] upar = params[0].getUserParameters();
 	    header.chi = upar[0].Value();
 	    header.phi = upar[1].Value();
-	    header.omega = 45.0f;
+	    //header.omega = 45.0f;
 	}
 
 
